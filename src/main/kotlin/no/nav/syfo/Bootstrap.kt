@@ -31,7 +31,7 @@ fun main(args: Array<String>) {
             launch {
                 val consumerProperties = readConsumerConfig(env, valueDeserializer = StringDeserializer::class)
                 val consumer = KafkaConsumer<String, String>(consumerProperties)
-                consumer.subscribe(listOf(env.kafkaSM2013OppgaveGsakTopic))
+                consumer.subscribe(listOf(env.kafkaSM2013OppgaveGsakTopic, env.kafkaSM2013OppgaveGsakITTopic))
 
                 blockingApplicationLogic(applicationState, consumer)
             }
