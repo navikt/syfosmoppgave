@@ -31,7 +31,7 @@ fun main(args: Array<String>) {
             launch {
                 val consumerProperties = readConsumerConfig(env, valueDeserializer = StringDeserializer::class)
                 val consumer = KafkaConsumer<String, String>(consumerProperties)
-                consumer.subscribe(listOf(env.kafkaSM2013OppgaveGsakTopic, env.kafkaSM2013OppgaveGsakITTopic))
+                consumer.subscribe(listOf(env.kafkaSM2013OppgaveGsakTopic, env.kafkaSM2013OppgaveGsakITTopic, env.kafkaSM2013OppgaveGsakPMTopic))
 
                 blockingApplicationLogic(applicationState, consumer)
             }
@@ -53,6 +53,7 @@ fun main(args: Array<String>) {
 suspend fun blockingApplicationLogic(applicationState: ApplicationState, consumer: KafkaConsumer<String, String>) {
     while (!applicationState.running) {
         consumer.poll(Duration.ofMillis(0)).forEach {
+            log.info("I recived av kafka message:D")
             println(it.value())
         }
         delay(100)

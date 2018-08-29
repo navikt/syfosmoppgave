@@ -15,6 +15,14 @@
         {"member":"srvsyfosminfotrygd", "role":"PRODUCER"}
       ],
       "numPartitions": 3
+    },
+    {
+      "topicName": "privat-syfomottak-sm2013-oppgaveGsakPapirmottak",
+      "members": [
+        {"member":"srvsyfooppgavegsak", "role":"CONSUMER"},
+        {"member":"srvsyfosmpapirmottak", "role":"PRODUCER"}
+      ],
+      "numPartitions": 3
     }
   ]
 }
