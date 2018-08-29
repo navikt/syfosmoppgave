@@ -16,7 +16,7 @@ import java.util.concurrent.TimeUnit
 
 data class ApplicationState(var running: Boolean = true, var initialized: Boolean = false)
 
-private val log = LoggerFactory.getLogger("nav.syfooppgavegsak-application")
+private val log = LoggerFactory.getLogger("nav.syfo.gsak")
 
 fun main(args: Array<String>) {
     val env = Environment()
@@ -37,12 +37,12 @@ fun main(args: Array<String>) {
             }
         }.toList()
 
+        applicationState.initialized = true
+
         runBlocking {
             Runtime.getRuntime().addShutdownHook(Thread {
                 applicationServer.stop(10, 10, TimeUnit.SECONDS)
             })
-
-            applicationState.initialized = true
             listeners.forEach { it.join() }
         }
     } finally {
@@ -52,9 +52,9 @@ fun main(args: Array<String>) {
 
 suspend fun blockingApplicationLogic(applicationState: ApplicationState, consumer: KafkaConsumer<String, String>) {
     while (!applicationState.running) {
-            consumer.poll(Duration.ofMillis(0)).forEach {
-                println(it.value())
-            }
+        consumer.poll(Duration.ofMillis(0)).forEach {
+            println(it.value())
+        }
         delay(100)
     }
 }
