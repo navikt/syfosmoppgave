@@ -1,0 +1,12 @@
+{
+  "topics": [
+    {
+      "topicName": "privat-syfomottak-sm2013-oppgaveGsak",
+      "members": [
+        {"member":"srvsyfooppgavegsak", "role":"CONSUMER"},
+        {"member":"srvsyfomottak", "role":"PRODUCER"}
+      ],
+      "numPartitions": 3
+    }
+  ]
+}
