@@ -39,19 +39,17 @@ fun main(args: Array<String>) {
 
         applicationState.initialized = true
 
-        runBlocking {
-            Runtime.getRuntime().addShutdownHook(Thread {
-                applicationServer.stop(10, 10, TimeUnit.SECONDS)
-            })
-            listeners.forEach { it.join() }
-        }
+        Runtime.getRuntime().addShutdownHook(Thread {
+            applicationServer.stop(10, 10, TimeUnit.SECONDS)
+        })
+        runBlocking { listeners.forEach { it.join() } }
     } finally {
         applicationState.running = false
     }
 }
 
 suspend fun blockingApplicationLogic(applicationState: ApplicationState, consumer: KafkaConsumer<String, String>) {
-    while (!applicationState.running) {
+    while (applicationState.running) {
         consumer.poll(Duration.ofMillis(0)).forEach {
             log.info("Recived a kafka message:")
             log.info(it.value())
