@@ -1,5 +1,5 @@
-name: "syfooppgavegsak"
-image: "repo.adeo.no:5443/syfo/syfooppgavegsak"
+name: "syfosmgsak"
+image: "repo.adeo.no:5443/syfo/syfosmgsak"
 replicas:
   min: 1
   max: 4
@@ -31,7 +31,7 @@ resources:
     memory: 128Mi
 fasitResources:
   used:
-    - alias: srvsyfooppgavegsak
+    - alias: srvsyfosmgsak
       resourceType: Credential
     - alias: kafka_bootstrap_servers
       resourceType: baseurl
