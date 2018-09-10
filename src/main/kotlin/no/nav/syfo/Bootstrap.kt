@@ -7,14 +7,27 @@ import io.ktor.server.netty.Netty
 import kotlinx.coroutines.experimental.delay
 import kotlinx.coroutines.experimental.launch
 import kotlinx.coroutines.experimental.runBlocking
+import net.logstash.logback.argument.StructuredArgument
+import net.logstash.logback.argument.StructuredArguments
+import no.kith.xmlstds.msghead._2006_05_24.XMLIdent
+import no.kith.xmlstds.msghead._2006_05_24.XMLMsgHead
+import no.nav.model.sykemelding2013.HelseOpplysningerArbeidsuforhet
 import no.nav.syfo.api.registerNaisApi
+import no.trygdeetaten.xml.eiff._1.XMLEIFellesformat
+import no.trygdeetaten.xml.eiff._1.XMLMottakenhetBlokk
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.apache.kafka.common.serialization.StringDeserializer
 import org.slf4j.LoggerFactory
+import java.io.StringReader
 import java.time.Duration
 import java.util.concurrent.TimeUnit
+import javax.xml.bind.JAXBContext
+import javax.xml.bind.Unmarshaller
 
 data class ApplicationState(var running: Boolean = true, var initialized: Boolean = false)
+
+val fellesformatJaxBContext: JAXBContext = JAXBContext.newInstance(XMLEIFellesformat::class.java, XMLMsgHead::class.java, HelseOpplysningerArbeidsuforhet::class.java)
+val fellesformatUnmarshaller: Unmarshaller = fellesformatJaxBContext.createUnmarshaller()
 
 private val log = LoggerFactory.getLogger("nav.syfo.gsak")
 
@@ -30,10 +43,10 @@ fun main(args: Array<String>) {
         val listeners = (1..env.applicationThreads).map {
             launch {
                 val consumerProperties = readConsumerConfig(env, valueDeserializer = StringDeserializer::class)
-                val consumer = KafkaConsumer<String, String>(consumerProperties)
-                consumer.subscribe(listOf(env.kafkaSM2013OppgaveGsakTopic, env.kafkaSM2013OppgaveGsakITTopic, env.kafkaSM2013OppgaveGsakPMTopic))
+                val kafkaConsumer = KafkaConsumer<String, String>(consumerProperties)
+                kafkaConsumer.subscribe(listOf(env.kafkaSM2013OppgaveGsakTopic, env.kafkaSM2013OppgaveGsakITTopic, env.kafkaSM2013OppgaveGsakPMTopic))
 
-                blockingApplicationLogic(applicationState, consumer)
+                blockingApplicationLogic(applicationState, kafkaConsumer)
             }
         }.toList()
 
@@ -48,11 +61,24 @@ fun main(args: Array<String>) {
     }
 }
 
-suspend fun blockingApplicationLogic(applicationState: ApplicationState, consumer: KafkaConsumer<String, String>) {
+suspend fun blockingApplicationLogic(applicationState: ApplicationState, kafkaConsumer: KafkaConsumer<String, String>) {
     while (applicationState.running) {
-        consumer.poll(Duration.ofMillis(0)).forEach {
+        var defaultKeyValues = arrayOf(StructuredArguments.keyValue("noMessageIdentifier", true))
+        var defaultKeyFormat = defaultLogInfo(defaultKeyValues)
+
+        kafkaConsumer.poll(Duration.ofMillis(0)).forEach {
             log.info("Recived a kafka message:")
-            log.info(it.value())
+            val fellesformat = fellesformatUnmarshaller.unmarshal(StringReader(it.value())) as XMLEIFellesformat
+            defaultKeyValues = arrayOf(
+                    StructuredArguments.keyValue("organisationNumber", extractOrganisationNumberFromSender(fellesformat)?.id),
+                    StructuredArguments.keyValue("ediLoggId", fellesformat.get<XMLMottakenhetBlokk>().ediLoggId),
+                    StructuredArguments.keyValue("msgId", fellesformat.get<XMLMsgHead>().msgInfo.msgId)
+            )
+            defaultKeyFormat = defaultLogInfo(defaultKeyValues)
+
+            log.info("Received message from {}, $defaultKeyFormat",
+                    StructuredArguments.keyValue("size", it.value().length),
+                    *defaultKeyValues)
         }
         delay(100)
     }
@@ -70,3 +96,14 @@ fun Application.initRouting(applicationState: ApplicationState) {
         )
     }
 }
+
+inline fun <reified T> XMLEIFellesformat.get() = this.any.find { it is T } as T
+
+fun defaultLogInfo(keyValues: Array<StructuredArgument>): String =
+        (0..(keyValues.size - 1)).joinToString(", ", "(", ")") { "{}" }
+
+fun extractOrganisationNumberFromSender(fellesformat: XMLEIFellesformat): XMLIdent? =
+        fellesformat.get<XMLMsgHead>().msgInfo.sender.organisation.ident.find {
+            it.typeId.v == "ENH"
+        }
+
