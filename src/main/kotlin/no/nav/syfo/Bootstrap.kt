@@ -43,8 +43,9 @@ fun main(args: Array<String>) {
         val listeners = (1..env.applicationThreads).map {
             launch {
                 val consumerProperties = readConsumerConfig(env, valueDeserializer = StringDeserializer::class)
+
                 val kafkaConsumer = KafkaConsumer<String, String>(consumerProperties)
-                kafkaConsumer.subscribe(listOf(env.kafkaSM2013OppgaveGsakTopic, env.kafkaSM2013OppgaveGsakITTopic, env.kafkaSM2013OppgaveGsakPMTopic))
+                kafkaConsumer.subscribe(listOf(env.sm2013ManualHandlingTopic, env.smInfotrygdManualHandlingTopic, env.smPaperManualHandlingTopic))
 
                 blockingApplicationLogic(applicationState, kafkaConsumer)
             }

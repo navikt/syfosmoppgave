@@ -4,7 +4,7 @@ pipeline {
     agent any
 
     environment {
-        APPLICATION_NAME = 'syfooppgavegsak'
+        APPLICATION_NAME = 'syfosmgsak'
         APPLICATION_SERVICE = 'TODO'
         APPLICATION_COMPONENT = 'TODO'
         FASIT_ENVIRONMENT = 'q1'
