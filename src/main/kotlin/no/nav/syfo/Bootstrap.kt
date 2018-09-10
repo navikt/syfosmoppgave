@@ -72,7 +72,7 @@ suspend fun blockingApplicationLogic(applicationState: ApplicationState, kafkaCo
             val fellesformat = fellesformatUnmarshaller.unmarshal(StringReader(it.value())) as XMLEIFellesformat
             defaultKeyValues = arrayOf(
                     StructuredArguments.keyValue("organisationNumber", extractOrganisationNumberFromSender(fellesformat)?.id),
-                    StructuredArguments.keyValue("ediLoggId", fellesformat.get<XMLMottakenhetBlokk>().ediLoggId),
+                    StructuredArguments.keyValue("smId", fellesformat.get<XMLMottakenhetBlokk>().ediLoggId),
                     StructuredArguments.keyValue("msgId", fellesformat.get<XMLMsgHead>().msgInfo.msgId)
             )
             defaultKeyFormat = defaultLogInfo(defaultKeyValues)
