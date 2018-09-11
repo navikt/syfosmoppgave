@@ -7,7 +7,7 @@ import io.ktor.server.netty.Netty
 import kotlinx.coroutines.experimental.delay
 import kotlinx.coroutines.experimental.launch
 import kotlinx.coroutines.experimental.runBlocking
-import net.logstash.logback.argument.StructuredArguments
+import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.kith.xmlstds.msghead._2006_05_24.XMLIdent
 import no.kith.xmlstds.msghead._2006_05_24.XMLMsgHead
 import no.nav.syfo.api.registerNaisApi
@@ -63,9 +63,9 @@ fun main(args: Array<String>) {
 suspend fun blockingApplicationLogic(applicationState: ApplicationState, kafkaConsumer: KafkaConsumer<String, String>) {
     while (applicationState.running) {
         var logValues = arrayOf(
-                StructuredArguments.keyValue("smId", "missing"),
-                StructuredArguments.keyValue("organizationNumber", "missing"),
-                StructuredArguments.keyValue("msgId", "missing")
+                keyValue("smId", "missing"),
+                keyValue("orgNr", "missing"),
+                keyValue("msgId", "missing")
         )
 
         val logKeys = logValues.joinToString(prefix = "(", postfix = ")", separator = ",") {
@@ -76,9 +76,9 @@ suspend fun blockingApplicationLogic(applicationState: ApplicationState, kafkaCo
             log.info("Recived a kafka message:")
             val fellesformat = fellesformatUnmarshaller.unmarshal(StringReader(it.value())) as XMLEIFellesformat
             logValues = arrayOf(
-                    StructuredArguments.keyValue("smId", fellesformat.get<XMLMottakenhetBlokk>().ediLoggId),
-                    StructuredArguments.keyValue("organizationNumber", extractOrganisationNumberFromSender(fellesformat)?.id),
-                    StructuredArguments.keyValue("msgId", fellesformat.get<XMLMsgHead>().msgInfo.msgId)
+                    keyValue("smId", fellesformat.get<XMLMottakenhetBlokk>().ediLoggId),
+                    keyValue("orgNr", extractOrganisationNumberFromSender(fellesformat)?.id),
+                    keyValue("msgId", fellesformat.get<XMLMsgHead>().msgInfo.msgId)
             )
             log.info("Received a SM2013, going to create task in GSAK, $logKeys", *logValues)
         }
