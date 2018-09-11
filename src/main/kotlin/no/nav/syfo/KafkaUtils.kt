@@ -31,6 +31,3 @@ fun readProducerConfig(
     this["value.serializer"] = valueSerializer.qualifiedName
     this["bootstrap.servers"] = env.kafkaBootstrapServers
 }
-
-
-

@@ -7,11 +7,9 @@ import io.ktor.server.netty.Netty
 import kotlinx.coroutines.experimental.delay
 import kotlinx.coroutines.experimental.launch
 import kotlinx.coroutines.experimental.runBlocking
-import net.logstash.logback.argument.StructuredArgument
 import net.logstash.logback.argument.StructuredArguments
 import no.kith.xmlstds.msghead._2006_05_24.XMLIdent
 import no.kith.xmlstds.msghead._2006_05_24.XMLMsgHead
-import no.nav.model.sykemelding2013.HelseOpplysningerArbeidsuforhet
 import no.nav.syfo.api.registerNaisApi
 import no.trygdeetaten.xml.eiff._1.XMLEIFellesformat
 import no.trygdeetaten.xml.eiff._1.XMLMottakenhetBlokk
@@ -26,7 +24,7 @@ import javax.xml.bind.Unmarshaller
 
 data class ApplicationState(var running: Boolean = true, var initialized: Boolean = false)
 
-val fellesformatJaxBContext: JAXBContext = JAXBContext.newInstance(XMLEIFellesformat::class.java, XMLMsgHead::class.java, HelseOpplysningerArbeidsuforhet::class.java)
+val fellesformatJaxBContext: JAXBContext = JAXBContext.newInstance(XMLEIFellesformat::class.java, XMLMsgHead::class.java)
 val fellesformatUnmarshaller: Unmarshaller = fellesformatJaxBContext.createUnmarshaller()
 
 private val log = LoggerFactory.getLogger("nav.syfo.gsak")
@@ -64,22 +62,25 @@ fun main(args: Array<String>) {
 
 suspend fun blockingApplicationLogic(applicationState: ApplicationState, kafkaConsumer: KafkaConsumer<String, String>) {
     while (applicationState.running) {
-        var defaultKeyValues = arrayOf(StructuredArguments.keyValue("noMessageIdentifier", true))
-        var defaultKeyFormat = defaultLogInfo(defaultKeyValues)
+        var logValues = arrayOf(
+                StructuredArguments.keyValue("smId", "missing"),
+                StructuredArguments.keyValue("organizationNumber", "missing"),
+                StructuredArguments.keyValue("msgId", "missing")
+        )
+
+        val logKeys = logValues.joinToString(prefix = "(", postfix = ")", separator = ",") {
+            "{}"
+        }
 
         kafkaConsumer.poll(Duration.ofMillis(0)).forEach {
             log.info("Recived a kafka message:")
             val fellesformat = fellesformatUnmarshaller.unmarshal(StringReader(it.value())) as XMLEIFellesformat
-            defaultKeyValues = arrayOf(
-                    StructuredArguments.keyValue("organisationNumber", extractOrganisationNumberFromSender(fellesformat)?.id),
+            logValues = arrayOf(
                     StructuredArguments.keyValue("smId", fellesformat.get<XMLMottakenhetBlokk>().ediLoggId),
+                    StructuredArguments.keyValue("organizationNumber", extractOrganisationNumberFromSender(fellesformat)?.id),
                     StructuredArguments.keyValue("msgId", fellesformat.get<XMLMsgHead>().msgInfo.msgId)
             )
-            defaultKeyFormat = defaultLogInfo(defaultKeyValues)
-
-            log.info("Received message from {}, $defaultKeyFormat",
-                    StructuredArguments.keyValue("size", it.value().length),
-                    *defaultKeyValues)
+            log.info("Received a SM2013, going to create task in GSAK, $logKeys", *logValues)
         }
         delay(100)
     }
@@ -100,11 +101,7 @@ fun Application.initRouting(applicationState: ApplicationState) {
 
 inline fun <reified T> XMLEIFellesformat.get() = this.any.find { it is T } as T
 
-fun defaultLogInfo(keyValues: Array<StructuredArgument>): String =
-        (0..(keyValues.size - 1)).joinToString(", ", "(", ")") { "{}" }
-
 fun extractOrganisationNumberFromSender(fellesformat: XMLEIFellesformat): XMLIdent? =
         fellesformat.get<XMLMsgHead>().msgInfo.sender.organisation.ident.find {
             it.typeId.v == "ENH"
         }
-

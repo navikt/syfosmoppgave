@@ -7,19 +7,16 @@ buildscript {
     ext.logback_version = '1.2.3'
     ext.prometheus_version = '0.5.0'
     ext.spek_version = "2.0.0-alpha.1"
-    ext.jackson_version = '2.9.6'
     ext.logstash_encoder_version = '5.1'
-    ext.jaxb_api_version = '2.1'
     ext.javax_activation_version = '1.1.1'
-    ext.jaxb_basic_ant_version = '1.11.1'
     ext.jaxb_version = '2.3.0.1'
     ext.fellesformat_version = '1.0'
     ext.kith_hodemelding_version = '1.1'
 
-    ext.jaxb2SourceDir = file("$buildDir/generated-sources/jaxb2")
 }
 
 plugins {
+    id 'org.jmailen.kotlinter' version '1.14.0'
     id 'org.jetbrains.kotlin.jvm' version '1.2.51'
     id("com.diffplug.gradle.spotless") version "3.14.0"
     id 'application'
@@ -60,67 +57,8 @@ test {
         showStandardStreams = true
     }
 }
-configurations {
-    generateJaxb2
-}
-
-class Jaxb2Task extends DefaultTask {
-    @OutputDirectory
-    File outputDir
-    @InputDirectory
-    File sourceDir
-
-    @TaskAction
-    def generateFiles() {
-        outputDir.deleteDir()
-        outputDir.mkdirs()
-        ant.taskdef(
-                'classpath': project.configurations.generateJaxb2.asPath,
-                'name': 'xjc',
-                'classname': 'org.jvnet.jaxb2_commons.xjc.XJC2Task'
-        )
-
-        ant.xjc(
-                'destdir': outputDir,
-                'package': 'no.nav.model.sykemelding2013',
-                'schema': "$sourceDir/HelseOpplysningerArbeidsuforhet_2013-10-01.xsd",
-                'encoding': 'UTF-8',
-                'fork': 'true'
-        )
-        ant.xjc(
-                'destdir': outputDir,
-                'package': 'no.nav.model.kith',
-                'schema': "$sourceDir/kith.xsd",
-                'encoding': 'UTF-8',
-                'fork': 'true'
-        )
-        ant.xjc(
-                'destdir': outputDir,
-                'package': 'no.nav.model.felleskomponent1',
-                'schema': "$sourceDir/felleskomponent1.xsd",
-                'encoding': 'UTF-8',
-                'fork': 'true'
-        )
-
-    }
-}
-
-task generateJaxb2(type: Jaxb2Task) {
-    outputDir = jaxb2SourceDir
-    sourceDir = file("$projectDir/src/main/resources/xsd")
-}
-
-sourceSets {
-    main {
-        java {
-            srcDir jaxb2SourceDir
-        }
-    }
-}
-
 
 compileKotlin {
-    dependsOn generateJaxb2
     kotlinOptions.jvmTarget = "1.8"
 }
 
@@ -134,6 +72,8 @@ task printVersion() {
     }
 }
 
+// suppress warning for experimental coroutines
+kotlin { experimental { coroutines "enable"} }
 
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
@@ -155,12 +95,6 @@ dependencies {
 
     testRuntimeOnly "org.spekframework.spek2:spek-runtime-jvm:$spek_version"
     testRuntimeOnly "org.spekframework.spek2:spek-runner-junit5:$spek_version"
-
-    generateJaxb2 "com.sun.xml.bind:jaxb-xjc:$jaxb_version"
-    generateJaxb2 "org.glassfish.jaxb:jaxb-runtime:$jaxb_version"
-    generateJaxb2 "javax.xml.bind:jaxb-api:$jaxb_api_version"
-    generateJaxb2 "org.jvnet.jaxb2_commons:jaxb2-basics-ant:$jaxb_basic_ant_version"
-    generateJaxb2 "javax.activation:activation:$javax_activation_version"
 
     implementation "org.glassfish.jaxb:jaxb-runtime:$jaxb_version"
     implementation "javax.activation:activation:$javax_activation_version"
