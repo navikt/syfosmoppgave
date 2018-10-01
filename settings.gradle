@@ -1,1 +1,3 @@
 rootProject.name = 'syfosmgsak'
+include 'syfooppgave-schemas'
+

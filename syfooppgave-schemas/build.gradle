@@ -1,0 +1,28 @@
+buildscript {
+    ext.avro_version = '1.8.2'
+
+    repositories {
+        jcenter()
+    }
+
+    dependencies {
+        classpath "com.commercehub.gradle.plugin:gradle-avro-plugin:0.15.1"
+    }
+}
+
+plugins {
+    id 'java'
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation "org.apache.avro:avro:$avro_version"
+}
+
+apply plugin: 'com.commercehub.gradle.plugin.avro'
+
+group 'no.nav.syfo'
+version '1.0-SNAPSHOT'

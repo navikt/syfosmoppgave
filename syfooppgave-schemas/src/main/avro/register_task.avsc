@@ -1,0 +1,9 @@
+{
+  "namespace": "no.nav.syfo.sak.avro",
+  "type": "record",
+  "name": "RegisterTask",
+  "fields": [
+    { "name": "produce_task", "type": "no.nav.syfo.sak.avro.ProduceTask" },
+    { "name": "register_journal", "type": "no.nav.syfo.sak.avro.RegisterJournal" }
+  ]
+}

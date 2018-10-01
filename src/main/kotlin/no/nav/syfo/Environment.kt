@@ -6,6 +6,8 @@ data class Environment(
     val srvsyfosmgsakUsername: String = getEnvVar("SRVSYFOSMGSAK_USERNAME"),
     val srvsyfosmgsakPassword: String = getEnvVar("SRVSYFOSMGSAK_PASSWORD"),
     val kafkaBootstrapServers: String = getEnvVar("KAFKA_BOOTSTRAP_SERVERS_URL"),
+    val securityTokenServiceUrl: String = getEnvVar("SECURITYTOKENSERVICE_URL"),
+    val virksomhetOppgavebehandlingV3Endpointurl: String = getEnvVar("VIRKSOMHET_OPPGAVEBEHANDLING_V3_ENDPOINTURL"),
     val sm2013ManualHandlingTopic: String = getEnvVar("KAFKA_SM2013_OPPGAVE_TOPIC", "privat-syfo-sm2013-manuellBehandling"),
     val smInfotrygdManualHandlingTopic: String = getEnvVar("KAFKA_SM2013_OPPGAVE_IT_TOPIC", "privat-syfo-sminfotrygd-manuellBehandling"),
     val smPaperManualHandlingTopic: String = getEnvVar("KAFKA_SM2013_OPPGAVE_PM_TOPIC", "privat-syfo-smpapir-manuellBehandling")
