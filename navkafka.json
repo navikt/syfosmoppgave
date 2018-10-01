@@ -1,0 +1,28 @@
+{
+  "topics": [
+    {
+      "topicName": "aapen-syfo-oppgave-journalOpprettet",
+      "members": [
+        {"member":"srvsyfosmoppgave", "role":"CONSUMER"},
+        {"member":"srvsyfosmjoark", "role":"PRODUCER"}
+      ],
+      "numPartitions": 3
+    },
+    {
+      "topicName": "aapen-syfo-oppgave-manuellBehandling",
+      "members": [
+        {"member":"srvsyfosmoppgave", "role":"CONSUMER"},
+        {"member":"srvsyfosmjoark", "role":"PRODUCER"}
+      ],
+      "numPartitions": 3
+    },
+    {
+      "topicName": "privat-syfo-oppgave-registrerOppgave",
+      "members": [
+        {"member":"srvsyfosmoppgave", "role":"CONSUMER"},
+        {"member":"srvsyfosmoppgave", "role":"PRODUCER"}
+      ],
+      "numPartitions": 3
+    }
+  ]
+}

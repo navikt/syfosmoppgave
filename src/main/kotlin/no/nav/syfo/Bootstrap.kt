@@ -39,7 +39,7 @@ data class ApplicationState(var running: Boolean = true, var initialized: Boolea
 val fellesformatJaxBContext: JAXBContext = JAXBContext.newInstance(XMLEIFellesformat::class.java, XMLMsgHead::class.java)
 val fellesformatUnmarshaller: Unmarshaller = fellesformatJaxBContext.createUnmarshaller()
 
-private val log = LoggerFactory.getLogger("nav.syfo.gsak")
+private val log = LoggerFactory.getLogger("nav.syfo.oppgave")
 
 fun main(args: Array<String>) {
     val env = Environment()
@@ -58,8 +58,8 @@ fun main(args: Array<String>) {
                     features.add(WSAddressingFeature())
                     serviceClass = OppgavebehandlingV3::class.java
                 }.create() as OppgavebehandlingV3
-                configureSTSFor(oppgavebehandlingV3, env.srvsyfosmgsakUsername,
-                        env.srvsyfosmgsakPassword, env.securityTokenServiceUrl)
+                configureSTSFor(oppgavebehandlingV3, env.srvsyfosmoppgaveUsername,
+                        env.srvsyfosmoppgavePassword, env.securityTokenServiceUrl)
 
                 val consumerProperties = readConsumerConfig(env, valueDeserializer = KafkaAvroDeserializer::class)
 
@@ -67,7 +67,7 @@ fun main(args: Array<String>) {
 
                 val streamsBuilder = StreamsBuilder()
 
-                val journalCreatedTaskStream = streamsBuilder.stream<String, RegisterJournal>("aapen-syfo-oppgave-journalCreated")
+                val journalCreatedTaskStream = streamsBuilder.stream<String, RegisterJournal>("aapen-syfo-oppgave-journalOpprettet")
                 val createTaskStream = streamsBuilder.stream<String, ProduceTask>("aapen-syfo-oppgave-produserOppgave")
 
                 createTaskStream

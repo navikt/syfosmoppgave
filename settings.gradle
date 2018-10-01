@@ -1,3 +1,2 @@
-rootProject.name = 'syfosmgsak'
+rootProject.name = 'syfosmoppgave'
 include 'syfooppgave-schemas'
-
