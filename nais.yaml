@@ -37,3 +37,5 @@ fasitResources:
       resourceType: baseurl
     - alias: securityTokenService
       resourceType: baseurl
+    - alias: virksomhet:Oppgavebehandling_v3
+      resourceType: Webserviceendpoint
