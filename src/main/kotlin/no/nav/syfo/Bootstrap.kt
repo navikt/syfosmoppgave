@@ -82,7 +82,7 @@ fun main(args: Array<String>) {
                 val streams = KafkaStreams(streamsBuilder.build(), consumerProperties)
                 streams.start()
 
-                kafkaConsumer.subscribe(listOf(env.sm2013ManualHandlingTopic, env.smInfotrygdManualHandlingTopic, env.smPaperManualHandlingTopic))
+                kafkaConsumer.subscribe(listOf("privat-syfo-oppgave-registrerOppgave"))
 
                 blockingApplicationLogic(applicationState, oppgavebehandlingV3, kafkaConsumer)
             }
