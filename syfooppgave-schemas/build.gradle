@@ -10,9 +10,11 @@ buildscript {
     }
 }
 
-plugins {
-    id 'java'
-}
+apply plugin: 'com.commercehub.gradle.plugin.avro'
+apply plugin: 'maven-publish'
+
+group 'no.nav.syfo'
+version '1.0-SNAPSHOT'
 
 repositories {
     mavenCentral()
@@ -22,7 +24,17 @@ dependencies {
     implementation "org.apache.avro:avro:$avro_version"
 }
 
-apply plugin: 'com.commercehub.gradle.plugin.avro'
 
-group 'no.nav.syfo'
-version '1.0-SNAPSHOT'
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+        }
+    }
+
+    repositories {
+        maven {
+            url = "https://repo.adeo.no/repository/maven-${project.version.endsWith('-SNAPSHOT') ? 'snapshots' : 'releases'}/"
+        }
+    }
+}
