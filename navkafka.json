@@ -12,7 +12,7 @@
       "topicName": "aapen-syfo-oppgave-produserOppgave",
       "members": [
         {"member":"srvsyfosmoppgave", "role":"CONSUMER"},
-        {"member":"syfosminfotrygd", "role":"PRODUCER"}
+        {"member":"srvsyfosminfotrygd", "role":"PRODUCER"}
       ],
       "numPartitions": 3
     },
