@@ -9,10 +9,10 @@
       "numPartitions": 3
     },
     {
-      "topicName": "aapen-syfo-oppgave-manuellBehandling",
+      "topicName": "aapen-syfo-oppgave-produserOppgave",
       "members": [
         {"member":"srvsyfosmoppgave", "role":"CONSUMER"},
-        {"member":"srvsyfosmjoark", "role":"PRODUCER"}
+        {"member":"syfosminfotrygd", "role":"PRODUCER"}
       ],
       "numPartitions": 3
     },
