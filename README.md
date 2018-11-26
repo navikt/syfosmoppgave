@@ -11,8 +11,8 @@ This project contains creating task to Gsak for the sykmelding2013 message
 ## Running locally
 
 #### Compile and package application
-To build locally and run the integration tests you can simply run `./gradlew installDist` or  on windows 
-`gradlew.bat installDist`
+To build locally and run the integration tests you can simply run `./gradlew shadowJar` or  on windows 
+`gradlew.bat shadowJar`
 
 #### Creating a docker image
 Creating a docker image should be as simple as `docker build -t syfosmoppgave .`

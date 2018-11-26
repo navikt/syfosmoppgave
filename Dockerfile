@@ -1,4 +1,3 @@
 FROM navikt/java:10
-COPY build/install/* /app
+COPY build/libs/syfosmoppgave-*-all.jar app.jar
 ENV JAVA_OPTS="'-Dlogback.configurationFile=logback-remote.xml'"
-ENTRYPOINT ["/app/bin/syfosmoppgave"]
