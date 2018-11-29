@@ -5,9 +5,10 @@ import io.ktor.application.Application
 import io.ktor.routing.routing
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
-import kotlinx.coroutines.experimental.delay
-import kotlinx.coroutines.experimental.launch
-import kotlinx.coroutines.experimental.runBlocking
+import kotlinx.coroutines.asCoroutineDispatcher
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.kith.xmlstds.msghead._2006_05_24.XMLIdent
 import no.kith.xmlstds.msghead._2006_05_24.XMLMsgHead
@@ -30,6 +31,7 @@ import org.apache.kafka.streams.kstream.JoinWindows
 import org.slf4j.LoggerFactory
 import java.time.Duration
 import java.time.LocalDate
+import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import javax.xml.bind.JAXBContext
 import javax.xml.bind.Unmarshaller
@@ -41,7 +43,7 @@ val fellesformatUnmarshaller: Unmarshaller = fellesformatJaxBContext.createUnmar
 
 private val log = LoggerFactory.getLogger("nav.syfo.oppgave")
 
-fun main(args: Array<String>) {
+fun main(args: Array<String>) = runBlocking(Executors.newFixedThreadPool(2).asCoroutineDispatcher()) {
     val env = Environment()
     val applicationState = ApplicationState()
 
