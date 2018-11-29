@@ -33,6 +33,10 @@ version '1.0-SNAPSHOT'
 
 jar.manifest.attributes("Main-Class" : "no.nav.syfo.BootstrapKt")
 
+shadowJar {
+    mergeServiceFiles("META-INF/cxf")
+}
+
 repositories {
     mavenCentral()
     jcenter()
