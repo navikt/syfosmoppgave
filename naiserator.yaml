@@ -1,0 +1,40 @@
+apiVersion: 'nais.io/v1alpha1'
+kind: Application
+metadata:
+  name: syfosmoppgave
+  namespace: default
+  labels:
+    team: "teamsykefravr"
+spec:
+  name: "syfosmoppgave"
+  image: "repo.adeo.no:5443/syfo/syfosmoppgave"
+  replicas:
+    min: 1
+    max: 4
+    cpuThresholdPercentage: 90
+  port: 8080
+  liveness:
+    path: /is_alive
+    initialDelay: 5
+    periodSeconds: 5
+    failureThreshold: 30
+  readiness:
+    path: /is_ready
+    initialDelay: 30
+    periodSeconds: 5
+    timeout: 5
+  prometheus:
+    enabled: true
+    path: /prometheus
+  resources:
+    limits:
+      cpu: 250m
+      memory: 1Gi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+  env:
+    - name: KAFKA_BOOTSTRAP_SERVERS
+      value: {{KAFKA_BOOTSTRAP_SERVERS}}
+    - name: OPPGAVEBEHANDLING_URL
+      value: {{OPPGAVEBEHANDLING_URL}}

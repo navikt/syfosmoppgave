@@ -1,5 +1,7 @@
 package no.nav.syfo
 
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
 import io.confluent.kafka.serializers.KafkaAvroDeserializer
 import io.ktor.application.Application
 import io.ktor.routing.routing
@@ -10,41 +12,32 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import net.logstash.logback.argument.StructuredArguments.keyValue
-import no.kith.xmlstds.msghead._2006_05_24.XMLIdent
-import no.kith.xmlstds.msghead._2006_05_24.XMLMsgHead
 import no.nav.syfo.api.registerNaisApi
+import no.nav.syfo.model.OpprettOppgave
 import no.nav.syfo.sak.avro.ProduceTask
 import no.nav.syfo.sak.avro.RegisterJournal
 import no.nav.syfo.sak.avro.RegisterTask
-import no.nav.syfo.ws.configureSTSFor
-import no.nav.tjeneste.virksomhet.oppgavebehandling.v3.OppgavebehandlingV3
-import no.nav.tjeneste.virksomhet.oppgavebehandling.v3.meldinger.WSOpprettOppgave
-import no.nav.tjeneste.virksomhet.oppgavebehandling.v3.meldinger.WSOpprettOppgaveRequest
-import no.trygdeetaten.xml.eiff._1.XMLEIFellesformat
-import org.apache.cxf.ext.logging.LoggingFeature
-import org.apache.cxf.jaxws.JaxWsProxyFactoryBean
-import org.apache.cxf.ws.addressing.WSAddressingFeature
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.apache.kafka.streams.KafkaStreams
 import org.apache.kafka.streams.StreamsBuilder
 import org.apache.kafka.streams.kstream.JoinWindows
 import org.slf4j.LoggerFactory
+import java.nio.file.Files
+import java.nio.file.Paths
 import java.time.Duration
 import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
-import javax.xml.bind.JAXBContext
-import javax.xml.bind.Unmarshaller
 
 data class ApplicationState(var running: Boolean = true, var initialized: Boolean = false)
 
-val fellesformatJaxBContext: JAXBContext = JAXBContext.newInstance(XMLEIFellesformat::class.java, XMLMsgHead::class.java)
-val fellesformatUnmarshaller: Unmarshaller = fellesformatJaxBContext.createUnmarshaller()
-
 private val log = LoggerFactory.getLogger("nav.syfo.oppgave")
+val objectMapper: ObjectMapper = ObjectMapper()
 
-fun main(args: Array<String>) = runBlocking(Executors.newFixedThreadPool(2).asCoroutineDispatcher()) {
+fun main() = runBlocking(Executors.newFixedThreadPool(2).asCoroutineDispatcher()) {
     val env = Environment()
+    val credentials = objectMapper.readValue<Credentials>(Files.newInputStream(Paths.get("/")))
     val applicationState = ApplicationState()
 
     val applicationServer = embeddedServer(Netty, env.applicationPort) {
@@ -54,16 +47,7 @@ fun main(args: Array<String>) = runBlocking(Executors.newFixedThreadPool(2).asCo
     try {
         val listeners = (1..env.applicationThreads).map {
             launch {
-                val oppgavebehandlingV3 = JaxWsProxyFactoryBean().apply {
-                    address = env.virksomhetOppgavebehandlingV3Endpointurl
-                    features.add(LoggingFeature())
-                    features.add(WSAddressingFeature())
-                    serviceClass = OppgavebehandlingV3::class.java
-                }.create() as OppgavebehandlingV3
-                configureSTSFor(oppgavebehandlingV3, env.srvsyfosmoppgaveUsername,
-                        env.srvsyfosmoppgavePassword, env.securityTokenServiceUrl)
-
-                val consumerProperties = readConsumerConfig(env, valueDeserializer = KafkaAvroDeserializer::class)
+                val consumerProperties = readConsumerConfig(env, credentials, valueDeserializer = KafkaAvroDeserializer::class)
 
                 val kafkaConsumer = KafkaConsumer<String, RegisterTask>(consumerProperties)
 
@@ -86,7 +70,7 @@ fun main(args: Array<String>) = runBlocking(Executors.newFixedThreadPool(2).asCo
 
                 kafkaConsumer.subscribe(listOf("privat-syfo-oppgave-registrerOppgave"))
 
-                blockingApplicationLogic(applicationState, oppgavebehandlingV3, kafkaConsumer)
+                blockingApplicationLogic(applicationState, kafkaConsumer)
             }
         }.toList()
 
@@ -103,7 +87,6 @@ fun main(args: Array<String>) = runBlocking(Executors.newFixedThreadPool(2).asCo
 
 suspend fun blockingApplicationLogic(
     applicationState: ApplicationState,
-    oppgavebehandlingV3: OppgavebehandlingV3,
     kafkaConsumer: KafkaConsumer<String, RegisterTask>
 ) {
     while (applicationState.running) {
@@ -127,24 +110,28 @@ suspend fun blockingApplicationLogic(
             )
             log.info("Received a SM2013, going to create task, $logKeys", *logValues)
             log.info("Creating task")
-            oppgavebehandlingV3.opprettOppgave(WSOpprettOppgaveRequest()
-                    .withOpprettetAvEnhetId(9999)
-                    .withOpprettOppgave(WSOpprettOppgave()
-                            .withBrukerId(produceTask.getUserIdent())
-                            .withBrukertypeKode(produceTask.getUserTypeCode())
-                            .withOppgavetypeKode(produceTask.getTaskType())
-                            .withFagomradeKode(produceTask.getFieldCode())
-                            .withUnderkategoriKode(produceTask.getSubcategoryType())
-                            .withPrioritetKode(produceTask.getPriorityCode())
-                            .withBeskrivelse(produceTask.getDescription())
-                            .withAktivFra(LocalDate.now().plusDays(produceTask.getStartsInDays().toLong()))
-                            .withAktivTil(LocalDate.now().plusDays(produceTask.getEndsInDays().toLong()))
-                            .withAnsvarligEnhetId(produceTask.getResponsibleUnit())
-                            .withDokumentId(registerJournal.getDocumentId())
-                            .withMottattDato(LocalDate.now())
-                            .withSaksnummer(registerJournal.getCaseId())
-                            // TODO: .withOppfolging()
-                    ))
+            val opprettOppgave = OpprettOppgave(
+                    tildeltEnhetsnr = "9999", // TODO
+                    aktoerId = produceTask.aktoerId,
+                    opprettetAvEnhetsnr = produceTask.opprettetAvEnhetsnr,
+                    journalpostId = registerJournal.journalpostId,
+                    journalpostkilde = registerJournal.journalpostKilde,
+                    behandlesAvApplikasjon = produceTask.behandlesAvApplikasjon,
+                    saksreferanse = produceTask.behandlesAvApplikasjon,
+                    orgnr = produceTask.orgnr,
+                    beskrivelse = produceTask.beskrivelse,
+                    temagruppe = produceTask.temagruppe,
+                    tema = produceTask.tema,
+                    behandlingstema = produceTask.behandlingstema,
+                    oppgavetype = produceTask.oppgavetype,
+                    behandlingstype = produceTask.behandlingstype,
+                    mappeId = produceTask.mappeId,
+                    aktivDato = LocalDate.parse(produceTask.aktivDato, DateTimeFormatter.ISO_DATE),
+                    fristFerdigstillelse = LocalDate.parse(produceTask.fristFerdigstillelse, DateTimeFormatter.ISO_DATE),
+                    prioritet = produceTask.prioritet.name,
+                    metadata = produceTask.metadata
+            )
+            log.info(opprettOppgave.toString())
         }
         delay(100)
     }
@@ -162,10 +149,3 @@ fun Application.initRouting(applicationState: ApplicationState) {
         )
     }
 }
-
-inline fun <reified T> XMLEIFellesformat.get() = this.any.find { it is T } as T
-
-fun extractOrganisationNumberFromSender(fellesformat: XMLEIFellesformat): XMLIdent? =
-        fellesformat.get<XMLMsgHead>().msgInfo.sender.organisation.ident.find {
-            it.typeId.v == "ENH"
-        }

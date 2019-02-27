@@ -4,8 +4,8 @@
   "name": "RegisterJournal",
   "fields": [
     { "name": "messageId", "type": "string", "description": "Used to correlate the joark journaling request with the request for creating a task" },
-    { "name": "caseId", "type": "string" },
-    { "name": "documentId", "type": "string" },
-    { "name": "userIdent", "type": "string" }
+    { "name": "sakId", "type": "string" },
+    { "name": "journalpostId", "type": "string" },
+    { "name": "journalpostKilde", "type": "string" }
   ]
 }
