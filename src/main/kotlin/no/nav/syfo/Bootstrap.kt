@@ -58,6 +58,9 @@ fun main() = runBlocking(Executors.newFixedThreadPool(2).asCoroutineDispatcher()
     val consumerProperties = kafkaBaseConfig.toConsumerConfig("${env.applicationName}-consumer", valueDeserializer = KafkaAvroDeserializer::class)
     val streamProperties = kafkaBaseConfig.toStreamsConfig(env.applicationName, valueSerde = GenericAvroSerde::class)
     val kafkaStream = createKafkaStream(streamProperties)
+
+    kafkaStream.start()
+
     val oidcClient = StsOidcClient(credentials.serviceuserUsername, credentials.serviceuserPassword)
     val oppgaveClient = OppgaveClient(env.oppgavebehandlingUrl, oidcClient)
 
