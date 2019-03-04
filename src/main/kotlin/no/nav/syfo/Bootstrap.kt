@@ -45,7 +45,7 @@ val objectMapper: ObjectMapper = ObjectMapper()
 @KtorExperimentalAPI
 fun main() = runBlocking(Executors.newFixedThreadPool(2).asCoroutineDispatcher()) {
     val env = Environment()
-    val credentials = objectMapper.readValue<Credentials>(Files.newInputStream(Paths.get("/")))
+    val credentials = objectMapper.readValue<Credentials>(Files.newInputStream(Paths.get("/var/run/secrets/nais.io/vault/credentials.json")))
     val applicationState = ApplicationState()
 
     val applicationServer = embeddedServer(Netty, env.applicationPort) {
