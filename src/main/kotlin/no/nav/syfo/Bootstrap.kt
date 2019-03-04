@@ -79,12 +79,15 @@ fun createKafkaStream(streamProperties: Properties): KafkaStreams {
     val createTaskStream = streamsBuilder.stream<String, ProduceTask>("aapen-syfo-oppgave-produserOppgave")
     KafkaConfig.LogRetentionTimeMillisProp()
 
+    val joinWindow = JoinWindows.of(TimeUnit.DAYS.toMillis(14))
+            .until(TimeUnit.DAYS.toMillis(31))
+
     createTaskStream.join(journalCreatedTaskStream, { produceTask, registerJournal ->
         RegisterTask.newBuilder().apply {
             this.produceTask = produceTask
             this.registerJournal = registerJournal
         }.build()
-    }, JoinWindows.of(TimeUnit.HOURS.toMillis(11))).to("privat-syfo-oppgave-registrerOppgave")
+    }, joinWindow).to("privat-syfo-oppgave-registrerOppgave")
 
     return KafkaStreams(streamsBuilder.build(), streamProperties)
 }

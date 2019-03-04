@@ -84,11 +84,14 @@ object CreateOppgaveITSpek : Spek({
         }.start(wait = false)
 
         val embeddedEnvironment = KafkaEnvironment(
-                topics = listOf(
+                topicNames = listOf(
                         journalOpprettetTopic,
                         produserOppgaveTopic,
                         registrerOppgaveTopic
                 ),
+                brokerConfigOverrides = Properties().apply {
+                    this["log.retention.ms"] = Duration.ofDays(14).toMillis()
+                },
                 withSchemaRegistry = true
         )
 
