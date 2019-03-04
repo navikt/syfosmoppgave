@@ -19,14 +19,14 @@ plugins {
     //id("org.jmailen.kotlinter") version "1.14.0"
     id("org.jetbrains.kotlin.jvm") version "1.3.20"
     id("com.diffplug.gradle.spotless") version "3.18.0"
-    id("com.github.johnrengelman.shadow") version "4.0.3"
+    id("com.github.johnrengelman.shadow") version "4.0.4"
 }
 
 group = "no.nav.syfo"
 version = "1.0-SNAPSHOT"
 
 tasks.withType<Jar> {
-    manifest.attributes["MainClass"] = "no.nav.syfo.BootstrapKt"
+    manifest.attributes["Main-Class"] = "no.nav.syfo.BootstrapKt"
 }
 
 repositories {
