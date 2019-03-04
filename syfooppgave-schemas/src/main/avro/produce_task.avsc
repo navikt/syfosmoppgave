@@ -8,7 +8,6 @@
     { "name": "tildeltEnhetsnr", "type": "string" },
     { "name": "opprettetAvEnhetsnr", "type": "string" },
     { "name": "behandlesAvApplikasjon", "type": "string" },
-    { "name": "saksreferanse", "type": "string" },
     { "name": "orgnr", "type": "string" },
     { "name": "beskrivelse", "type": "string" },
     { "name": "temagruppe", "type": "string" },
