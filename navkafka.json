@@ -4,6 +4,7 @@
       "topicName": "aapen-syfo-oppgave-journalOpprettet",
       "members": [
         {"member":"srvsyfosmoppgave", "role":"CONSUMER"},
+        {"member":"srvsyfosmarena", "role":"CONSUMER"},
         {"member":"srvsyfosmjoark", "role":"PRODUCER"}
       ],
       "numPartitions": 3
