@@ -3,18 +3,20 @@
 pipeline {
     agent any
 
+     tools {
+                jdk 'openjdk11'
+            }
+
     environment {
         APPLICATION_NAME = 'syfosmoppgave'
         ZONE = 'fss'
         DOCKER_SLUG = 'syfo'
-        DISABLE_SLACK_MESSAGES = true
     }
 
     stages {
         stage('initialize') {
             steps {
                 init action: 'default'
-
                 script {
                     sh(script: './gradlew clean')
                     def applicationVersionGradle = sh(script: './gradlew -q printVersion', returnStdout: true).trim()

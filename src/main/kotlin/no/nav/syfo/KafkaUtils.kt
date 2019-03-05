@@ -20,7 +20,6 @@ fun loadBaseConfig(env: Environment, credentials: Credentials): Properties = Pro
     it[KafkaAvroDeserializerConfig.SPECIFIC_AVRO_READER_CONFIG] = true
 }
 
-
 fun Properties.toConsumerConfig(
     groupId: String,
     valueDeserializer: KClass<out Deserializer<out Any>>,

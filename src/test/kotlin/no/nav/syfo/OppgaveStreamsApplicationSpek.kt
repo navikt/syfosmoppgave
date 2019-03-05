@@ -4,22 +4,16 @@ import io.confluent.kafka.serializers.KafkaAvroDeserializer
 import io.confluent.kafka.serializers.KafkaAvroSerializer
 import io.confluent.kafka.streams.serdes.avro.GenericAvroSerde
 import no.nav.common.KafkaEnvironment
-import no.nav.syfo.model.OpprettOppgaveResponse
-import no.nav.syfo.sak.avro.PrioritetType
 import no.nav.syfo.sak.avro.ProduceTask
 import no.nav.syfo.sak.avro.RegisterJournal
 import no.nav.syfo.sak.avro.RegisterTask
-import org.amshove.kluent.mock
 import org.amshove.kluent.shouldEqual
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe
-import java.net.ServerSocket
 import java.time.Duration
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
 import java.util.Properties
 
 object OppgaveStreamsApplicationSpek : Spek({

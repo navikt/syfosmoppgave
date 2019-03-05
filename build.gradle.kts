@@ -16,14 +16,14 @@ val prometheusVersion = "0.5.0"
 val spekVersion = "2.0.0"
 
 plugins {
-    //id("org.jmailen.kotlinter") version "1.14.0"
-    id("org.jetbrains.kotlin.jvm") version "1.3.20"
+    id("org.jmailen.kotlinter") version "1.21.0"
+    kotlin("jvm") version "1.3.21"
     id("com.diffplug.gradle.spotless") version "3.18.0"
     id("com.github.johnrengelman.shadow") version "4.0.4"
 }
 
 group = "no.nav.syfo"
-version = "1.0"
+version = "1.0.0"
 
 tasks.withType<Jar> {
     manifest.attributes["Main-Class"] = "no.nav.syfo.BootstrapKt"
@@ -32,11 +32,11 @@ tasks.withType<Jar> {
 repositories {
     mavenCentral()
     jcenter()
-    maven { url = uri("https://dl.bintray.com/kotlin/ktor") }
-    maven { url = uri("http://packages.confluent.io/maven/") }
-    maven { url = uri("https://repo.adeo.no/repository/maven-releases/") }
-    maven { url = uri("https://dl.bintray.com/spekframework/spek-dev") }
-    maven { url = uri("https://kotlin.bintray.com/kotlinx") }
+    maven ( url = "https://dl.bintray.com/kotlin/ktor")
+    maven ( url = "http://packages.confluent.io/maven/")
+    maven ( url = "https://repo.adeo.no/repository/maven-releases/")
+    maven ( url =  "https://dl.bintray.com/spekframework/spek-dev")
+    maven ( url = "https://kotlin.bintray.com/kotlinx")
 }
 
 tasks.withType<Test> {

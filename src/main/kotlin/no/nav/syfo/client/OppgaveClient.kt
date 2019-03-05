@@ -28,7 +28,7 @@ class OppgaveClient constructor(val url: String, val oidcClient: StsOidcClient) 
         }
     }
 
-    fun createOppgave(createOppgave: OpprettOppgave) : Deferred<OpprettOppgaveResponse> = client.async {
+    fun createOppgave(createOppgave: OpprettOppgave): Deferred<OpprettOppgaveResponse> = client.async {
         client.post<OpprettOppgaveResponse>(url) {
             this.header("Authorization", "Bearer ${oidcClient.oidcToken()}")
             contentType(ContentType.Application.Json)
