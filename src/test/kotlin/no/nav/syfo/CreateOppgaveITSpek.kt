@@ -38,7 +38,6 @@ import org.apache.kafka.clients.producer.ProducerRecord
 import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe
 import java.net.ServerSocket
-import java.time.Duration
 import java.util.Properties
 import java.util.concurrent.TimeUnit
 
