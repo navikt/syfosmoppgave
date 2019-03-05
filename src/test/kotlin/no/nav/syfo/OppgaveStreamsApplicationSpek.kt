@@ -23,14 +23,11 @@ object OppgaveStreamsApplicationSpek : Spek({
         val registrerOppgaveTopic = "privat-syfo-oppgave-registrerOppgave"
 
         val embeddedEnvironment = KafkaEnvironment(
-                topicNames = listOf(
+                topics = listOf(
                         journalOpprettetTopic,
                         produserOppgaveTopic,
                         registrerOppgaveTopic
                 ),
-                brokerConfigOverrides = Properties().apply {
-                    this["log.retention.ms"] = Duration.ofDays(14).toMillis()
-                },
                 withSchemaRegistry = true
         )
 
