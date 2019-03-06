@@ -9,7 +9,6 @@ pipeline {
 
     environment {
         APPLICATION_NAME = 'syfosmoppgave'
-        ZONE = 'fss'
         DOCKER_SLUG = 'syfo'
     }
 

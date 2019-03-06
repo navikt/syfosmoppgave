@@ -43,9 +43,7 @@ tasks.withType<Test> {
     useJUnitPlatform {
         includeEngines("spek2")
     }
-    testLogging {
-        showStandardStreams = true
-    }
+    testLogging.events("passed", "skipped", "failed")
 }
 
 tasks.create("printVersion") {
