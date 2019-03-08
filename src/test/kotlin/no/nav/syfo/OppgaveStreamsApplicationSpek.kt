@@ -60,7 +60,6 @@ object OppgaveStreamsApplicationSpek : Spek({
 
         beforeGroup {
             embeddedEnvironment.start()
-
             stream.start()
         }
 
@@ -81,7 +80,7 @@ object OppgaveStreamsApplicationSpek : Spek({
 
             journalOpprettet.send(ProducerRecord(journalOpprettetTopic, msgId, registerJournal))
             produserOppgave.send(ProducerRecord(produserOppgaveTopic, msgId, produceTask))
-            val result = registrerOppgaveConsumer.poll(Duration.ofMillis(20000)).first().value()
+            val result = registrerOppgaveConsumer.poll(Duration.ofMillis(5000)).first().value()
 
             result.produceTask shouldEqual produceTask
             result.registerJournal shouldEqual registerJournal
