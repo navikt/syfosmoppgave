@@ -35,6 +35,7 @@ import org.amshove.kluent.mock
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
+import org.apache.kafka.streams.StreamsConfig
 import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe
 import java.net.ServerSocket
@@ -44,6 +45,7 @@ import java.util.concurrent.TimeUnit
 @KtorExperimentalAPI
 object CreateOppgaveITSpek : Spek({
     describe("A full bootstrapped environment") {
+        val streamsApplicationName = "spek.integration"
         val oppgaveMock = mock<() -> OpprettOppgaveResponse>()
 
         val mockPort = ServerSocket(0).use {
@@ -79,7 +81,7 @@ object CreateOppgaveITSpek : Spek({
         }.start(wait = false)
 
         val embeddedEnvironment = KafkaEnvironment(
-                topics = listOf(
+                topicNames = listOf(
                         journalOpprettetTopic,
                         produserOppgaveTopic,
                         registrerOppgaveTopic
@@ -91,6 +93,7 @@ object CreateOppgaveITSpek : Spek({
             remove("security.protocol")
             remove("sasl.mechanism")
             put("schema.registry.url", embeddedEnvironment.schemaRegistry!!.url)
+            put(StreamsConfig.STATE_DIR_CONFIG, kafkaStreamsStateDir.toAbsolutePath().toString())
         }
 
         val applicationState = ApplicationState()
@@ -112,7 +115,7 @@ object CreateOppgaveITSpek : Spek({
                 .toProducerConfig("spek.integration", valueSerializer = KafkaAvroSerializer::class)
 
         val streamProperties = baseConfig
-                .toStreamsConfig("spek.integration", valueSerde = GenericAvroSerde::class)
+                .toStreamsConfig(streamsApplicationName, valueSerde = GenericAvroSerde::class)
 
         val stream = createKafkaStream(streamProperties)
 
@@ -125,6 +128,7 @@ object CreateOppgaveITSpek : Spek({
         val oppgaveClient = OppgaveClient(env.oppgavebehandlingUrl, stsClient)
 
         beforeGroup {
+            cleanupDir(kafkaStreamsStateDir, streamsApplicationName)
             embeddedEnvironment.start()
 
             stream.start()
@@ -139,6 +143,7 @@ object CreateOppgaveITSpek : Spek({
             stream.close()
             mockWebServer.stop(10, 10, TimeUnit.SECONDS)
             embeddedEnvironment.tearDown()
+            deleteDir(kafkaStreamsStateDir)
         }
 
         it("Producing a RegisterJournal and ProduceTask message should result in a call to the oppgave rest endpoint") {

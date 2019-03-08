@@ -1,5 +1,5 @@
 group = "no.nav.syfo"
-version = "1.1-SNAPSHOT"
+version = "1.2-SNAPSHOT"
 
 val avroVersion = "1.8.2"
 

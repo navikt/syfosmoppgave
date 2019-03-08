@@ -4,9 +4,27 @@ import no.nav.syfo.model.OpprettOppgaveResponse
 import no.nav.syfo.sak.avro.PrioritetType
 import no.nav.syfo.sak.avro.ProduceTask
 import no.nav.syfo.sak.avro.RegisterJournal
+import java.nio.file.Files
+import java.nio.file.Path
+import java.nio.file.Paths
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+
+fun deleteDir(dir: Path) {
+    if (Files.exists(dir)) {
+        Files.walk(dir).sorted(Comparator.reverseOrder()).forEach { Files.delete(it) }
+    }
+}
+
+fun cleanupDir(dir: Path, streamApplicationName: String) {
+    deleteDir(dir)
+    Files.createDirectories(dir)
+    Files.createDirectories(dir.resolve(streamApplicationName))
+}
+
+val kafkaStreamsStateDir: Path = Paths.get(System.getProperty("java.io.tmpdir"))
+        .resolve("kafka-stream-integration-tests")
 
 fun createProduceTask(msgId: String) = ProduceTask().apply {
     messageId = msgId

@@ -11,6 +11,7 @@ import org.amshove.kluent.shouldEqual
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.clients.producer.ProducerRecord
+import org.apache.kafka.streams.StreamsConfig
 import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe
 import java.time.Duration
@@ -18,12 +19,13 @@ import java.util.Properties
 
 object OppgaveStreamsApplicationSpek : Spek({
     describe("A full bootstrapped environment") {
+        val streamsApplicationName = "spek.integration"
         val journalOpprettetTopic = "aapen-syfo-oppgave-journalOpprettet"
         val produserOppgaveTopic = "aapen-syfo-oppgave-produserOppgave"
         val registrerOppgaveTopic = "privat-syfo-oppgave-registrerOppgave"
 
         val embeddedEnvironment = KafkaEnvironment(
-                topics = listOf(
+                topicNames = listOf(
                         journalOpprettetTopic,
                         produserOppgaveTopic,
                         registrerOppgaveTopic
@@ -35,6 +37,7 @@ object OppgaveStreamsApplicationSpek : Spek({
             remove("security.protocol")
             remove("sasl.mechanism")
             put("schema.registry.url", embeddedEnvironment.schemaRegistry!!.url)
+            put(StreamsConfig.STATE_DIR_CONFIG, kafkaStreamsStateDir.toAbsolutePath().toString())
         }
 
         val env = Environment(
@@ -54,11 +57,12 @@ object OppgaveStreamsApplicationSpek : Spek({
                 .toProducerConfig("spek.integration", valueSerializer = KafkaAvroSerializer::class)
 
         val streamProperties = baseConfig
-                .toStreamsConfig("spek.integration", valueSerde = GenericAvroSerde::class)
+                .toStreamsConfig(streamsApplicationName, valueSerde = GenericAvroSerde::class)
 
         val stream = createKafkaStream(streamProperties)
 
         beforeGroup {
+            cleanupDir(kafkaStreamsStateDir, streamsApplicationName)
             embeddedEnvironment.start()
             stream.start()
         }
@@ -66,6 +70,7 @@ object OppgaveStreamsApplicationSpek : Spek({
         afterGroup {
             stream.close()
             embeddedEnvironment.tearDown()
+            deleteDir(kafkaStreamsStateDir)
         }
 
         val journalOpprettet = KafkaProducer<String, RegisterJournal>(producerProperties)
