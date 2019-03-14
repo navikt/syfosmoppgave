@@ -1,4 +1,4 @@
-package no.nav.syfo.model
+package no.nav.syfo.restmock.model
 
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -56,7 +56,7 @@ data class OpprettOppgaveResponse(
     val opprettetTidspunkt: LocalDateTime,
     val opprettetAv: String,
     val endretAv: String,
-    val ferdigstiltTidspunkt: LocalDateTime,
-    val endretTidspunkt: String,
+    val ferdigstiltTidspunkt: LocalDateTime?,
+    val endretTidspunkt: LocalDateTime?,
     val status: String
 )
