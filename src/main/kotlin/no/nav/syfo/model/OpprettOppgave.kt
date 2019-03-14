@@ -1,4 +1,4 @@
-package no.nav.syfo.restmock.model
+package no.nav.syfo.model
 
 import java.time.LocalDate
 import java.time.LocalDateTime

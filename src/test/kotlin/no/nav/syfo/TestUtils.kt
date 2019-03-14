@@ -70,7 +70,7 @@ fun createOppgaveResponse(): OpprettOppgaveResponse = OpprettOppgaveResponse(
         opprettetAv = "TODO",
         endretAv = "TODO",
         ferdigstiltTidspunkt = LocalDateTime.now(),
-        endretTidspunkt = "TODO",
+        endretTidspunkt = LocalDateTime.now(),
         status = "UNDER_BEHANDLING",
         id = "oppgave-12837u12"
 )
