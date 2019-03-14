@@ -7,6 +7,8 @@ import org.apache.kafka.common.serialization.Deserializer
 import org.apache.kafka.common.serialization.Serde
 import org.apache.kafka.common.serialization.Serdes
 import org.apache.kafka.common.serialization.Serializer
+import org.apache.kafka.common.serialization.StringDeserializer
+import org.apache.kafka.common.serialization.StringSerializer
 import org.apache.kafka.streams.StreamsConfig
 
 import java.util.Properties
@@ -23,7 +25,7 @@ fun loadBaseConfig(env: Environment, credentials: Credentials): Properties = Pro
 fun Properties.toConsumerConfig(
     groupId: String,
     valueDeserializer: KClass<out Deserializer<out Any>>,
-    keyDeserializer: KClass<out Deserializer<out Any>> = valueDeserializer
+    keyDeserializer: KClass<out Deserializer<out Any>> = StringDeserializer::class
 ): Properties = Properties().also {
     it.putAll(this)
     it[ConsumerConfig.GROUP_ID_CONFIG] = groupId
@@ -45,7 +47,7 @@ fun Properties.toStreamsConfig(
 fun Properties.toProducerConfig(
     groupId: String,
     valueSerializer: KClass<out Serializer<out Any>>,
-    keySerializer: KClass<out Serializer<out Any>> = valueSerializer
+    keySerializer: KClass<out Serializer<out Any>> = StringSerializer::class
 ): Properties = Properties().also {
     it.putAll(this)
     it[ConsumerConfig.GROUP_ID_CONFIG] = groupId
