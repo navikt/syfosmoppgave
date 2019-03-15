@@ -129,7 +129,8 @@ suspend fun blockingApplicationLogic(
             var logValues = arrayOf(
                     keyValue("smId", "missing"),
                     keyValue("orgNr", "missing"),
-                    keyValue("msgId", "missing")
+                    keyValue("msgId", "missing"),
+                    keyValue("sykmeldingId", "missing")
             )
 
             val logKeys = logValues.joinToString(prefix = "(", postfix = ")", separator = ",") {
@@ -142,7 +143,7 @@ suspend fun blockingApplicationLogic(
                 val registerJournal = it.value().registerJournal
                 logValues = arrayOf(
                         keyValue("smId", it.key()),
-                        keyValue("msgId", it.key())
+                        keyValue("sykmeldingId", it.key())
                 )
                 log.info("Received a SM2013, going to create task, $logKeys", *logValues)
                 log.info("Creating task")

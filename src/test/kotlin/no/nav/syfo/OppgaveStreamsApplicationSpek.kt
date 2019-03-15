@@ -79,12 +79,12 @@ object OppgaveStreamsApplicationSpek : Spek({
         registrerOppgaveConsumer.subscribe(listOf(registrerOppgaveTopic))
 
         it("Producing a RegisterJournal and ProduceTask message should result in a RegisterTask") {
-            val msgId = "id123"
-            val registerJournal = createRegisterJournal(msgId)
-            val produceTask = createProduceTask(msgId)
+            val sykmeldingId = "id123"
+            val registerJournal = createRegisterJournal(sykmeldingId)
+            val produceTask = createProduceTask(sykmeldingId)
 
-            journalOpprettet.send(ProducerRecord(journalOpprettetTopic, msgId, registerJournal))
-            produserOppgave.send(ProducerRecord(produserOppgaveTopic, msgId, produceTask))
+            journalOpprettet.send(ProducerRecord(journalOpprettetTopic, sykmeldingId, registerJournal))
+            produserOppgave.send(ProducerRecord(produserOppgaveTopic, sykmeldingId, produceTask))
             val result = registrerOppgaveConsumer.poll(Duration.ofMillis(30000)).first().value()
 
             result.produceTask shouldEqual produceTask
