@@ -117,7 +117,7 @@ object CreateOppgaveITSpek : Spek({
         val streamProperties = baseConfig
                 .toStreamsConfig(streamsApplicationName, valueSerde = GenericAvroSerde::class)
 
-        val stream = createKafkaStream(streamProperties)
+        val stream = createKafkaStream(streamProperties, env)
 
         val journalOpprettet = KafkaProducer<String, RegisterJournal>(producerProperties)
         val produserOppgave = KafkaProducer<String, ProduceTask>(producerProperties)

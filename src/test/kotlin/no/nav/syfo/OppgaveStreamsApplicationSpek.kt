@@ -59,7 +59,7 @@ object OppgaveStreamsApplicationSpek : Spek({
         val streamProperties = baseConfig
                 .toStreamsConfig(streamsApplicationName, valueSerde = GenericAvroSerde::class)
 
-        val stream = createKafkaStream(streamProperties)
+        val stream = createKafkaStream(streamProperties, env)
 
         beforeGroup {
             cleanupDir(kafkaStreamsStateDir, streamsApplicationName)

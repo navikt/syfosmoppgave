@@ -58,7 +58,7 @@ fun main() = runBlocking(Executors.newFixedThreadPool(2).asCoroutineDispatcher()
     val kafkaBaseConfig = loadBaseConfig(env, credentials)
     val consumerProperties = kafkaBaseConfig.toConsumerConfig("${env.applicationName}-consumer", valueDeserializer = KafkaAvroDeserializer::class)
     val streamProperties = kafkaBaseConfig.toStreamsConfig(env.applicationName, valueSerde = GenericAvroSerde::class)
-    val kafkaStream = createKafkaStream(streamProperties)
+    val kafkaStream = createKafkaStream(streamProperties, env)
 
     kafkaStream.start()
 
@@ -73,11 +73,11 @@ fun main() = runBlocking(Executors.newFixedThreadPool(2).asCoroutineDispatcher()
     })
 }
 
-fun createKafkaStream(streamProperties: Properties): KafkaStreams {
+fun createKafkaStream(streamProperties: Properties, env: Environment): KafkaStreams {
     val streamsBuilder = StreamsBuilder()
 
-    val journalCreatedTaskStream = streamsBuilder.stream<String, RegisterJournal>("aapen-syfo-oppgave-journalOpprettet")
-    val createTaskStream = streamsBuilder.stream<String, ProduceTask>("aapen-syfo-oppgave-produserOppgave")
+    val journalCreatedTaskStream = streamsBuilder.stream<String, RegisterJournal>(env.journalCreatedTopic)
+    val createTaskStream = streamsBuilder.stream<String, ProduceTask>(env.oppgaveTopic)
     KafkaConfig.LogRetentionTimeMillisProp()
 
     val joinWindow = JoinWindows.of(TimeUnit.DAYS.toMillis(14))

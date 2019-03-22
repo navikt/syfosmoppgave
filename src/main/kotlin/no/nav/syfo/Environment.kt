@@ -6,7 +6,9 @@ data class Environment(
     val applicationThreads: Int = getEnvVar("APPLICATION_THREADS", "4").toInt(),
     val kafkaBootstrapServers: String = getEnvVar("KAFKA_BOOTSTRAP_SERVERS"),
     val securityTokenServiceUrl: String = getEnvVar("SECURITYTOKENSERVICE_URL", "http://security-token-service/rest/v1/sts/token"),
-    val oppgavebehandlingUrl: String = getEnvVar("OPPGAVEBEHANDLING_URL")
+    val oppgavebehandlingUrl: String = getEnvVar("OPPGAVEBEHANDLING_URL"),
+    val journalCreatedTopic: String = getEnvVar("KAFKA_JOURNAL_CREATED_TOPIC", "aapen-syfo-oppgave-journalOpprettet"),
+    val oppgaveTopic: String = getEnvVar("KAFKA_OPPGAVE_TOPIC", "aapen-syfo-oppgave-produserOppgave")
 )
 
 data class Credentials(
