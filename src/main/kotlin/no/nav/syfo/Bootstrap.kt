@@ -20,6 +20,7 @@ import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.syfo.api.registerNaisApi
 import no.nav.syfo.client.OppgaveClient
 import no.nav.syfo.client.StsOidcClient
+import no.nav.syfo.metrics.OPPRETT_OPPGAVE_COUNTER
 import no.nav.syfo.model.OpprettOppgave
 import no.nav.syfo.sak.avro.ProduceTask
 import no.nav.syfo.sak.avro.RegisterJournal
@@ -124,20 +125,20 @@ suspend fun blockingApplicationLogic(
     kafkaConsumer: KafkaConsumer<String, RegisterTask>,
     oppgaveClient: OppgaveClient
 ) {
-    try {
-        while (applicationState.running) {
-            var logValues = arrayOf(
-                    keyValue("smId", "missing"),
-                    keyValue("orgNr", "missing"),
-                    keyValue("msgId", "missing"),
-                    keyValue("sykmeldingId", "missing")
-            )
+    while (applicationState.running) {
+        var logValues = arrayOf(
+                keyValue("smId", "missing"),
+                keyValue("orgNr", "missing"),
+                keyValue("msgId", "missing"),
+                keyValue("sykmeldingId", "missing")
+        )
 
-            val logKeys = logValues.joinToString(prefix = "(", postfix = ")", separator = ",") {
-                "{}"
-            }
+        val logKeys = logValues.joinToString(prefix = "(", postfix = ")", separator = ",") {
+            "{}"
+        }
 
-            kafkaConsumer.poll(Duration.ofMillis(0)).forEach {
+        kafkaConsumer.poll(Duration.ofMillis(0)).forEach {
+            try {
                 log.info("Recived a kafka message:")
                 val produceTask = it.value().produceTask
                 val registerJournal = it.value().registerJournal
@@ -170,12 +171,13 @@ suspend fun blockingApplicationLogic(
                 )
 
                 val response = oppgaveClient.createOppgave(opprettOppgave).await()
+                OPPRETT_OPPGAVE_COUNTER.inc()
                 log.info("Task created with {}", keyValue("oppgaveId", response.id))
+            } catch (e: Exception) {
+                log.error("Caught exception", e)
             }
-            delay(100)
         }
-    } catch (e: Exception) {
-        log.error("Caught exception", e)
+        delay(100)
     }
 }
 
