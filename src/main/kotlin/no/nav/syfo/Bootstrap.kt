@@ -139,7 +139,6 @@ suspend fun blockingApplicationLogic(
 
         kafkaConsumer.poll(Duration.ofMillis(0)).forEach {
             try {
-                log.info("Recived a kafka message:")
                 val produceTask = it.value().produceTask
                 val registerJournal = it.value().registerJournal
                 logValues = arrayOf(
@@ -148,7 +147,7 @@ suspend fun blockingApplicationLogic(
                         keyValue("msgId", registerJournal.messageId)
                 )
                 log.info("Received a SM2013, going to create task, $logKeys", *logValues)
-                log.info("Creating task")
+                log.info("Creating task, $logKeys", *logValues)
                 val opprettOppgave = OpprettOppgave(
                         tildeltEnhetsnr = "9999", // TODO
                         aktoerId = produceTask.aktoerId,
@@ -173,9 +172,9 @@ suspend fun blockingApplicationLogic(
 
                 val response = oppgaveClient.createOppgave(opprettOppgave).await()
                 OPPRETT_OPPGAVE_COUNTER.inc()
-                log.info("Task created with {}", keyValue("oppgaveId", response.id))
+                log.info("Task created with {} $logKeys", keyValue("oppgaveId", response.id), *logValues)
             } catch (e: Exception) {
-                log.error("Caught exception", e)
+                log.error("Caught exception $logKeys", *logValues, e)
             }
         }
         delay(100)
