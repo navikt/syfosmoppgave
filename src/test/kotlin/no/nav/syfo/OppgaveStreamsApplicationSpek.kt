@@ -30,7 +30,8 @@ object OppgaveStreamsApplicationSpek : Spek({
                         produserOppgaveTopic,
                         registrerOppgaveTopic
                 ),
-                withSchemaRegistry = true
+                withSchemaRegistry = true,
+                noOfBrokers = 1
         )
 
         fun Properties.overrideForTest(): Properties = apply {
