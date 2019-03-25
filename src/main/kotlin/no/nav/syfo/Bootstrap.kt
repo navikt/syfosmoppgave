@@ -127,7 +127,7 @@ suspend fun blockingApplicationLogic(
 ) {
     while (applicationState.running) {
         var logValues = arrayOf(
-                keyValue("smId", "missing"),
+                keyValue("mottakId", "missing"),
                 keyValue("orgNr", "missing"),
                 keyValue("msgId", "missing"),
                 keyValue("sykmeldingId", "missing")
@@ -143,8 +143,9 @@ suspend fun blockingApplicationLogic(
                 val produceTask = it.value().produceTask
                 val registerJournal = it.value().registerJournal
                 logValues = arrayOf(
-                        keyValue("smId", it.key()),
-                        keyValue("sykmeldingId", it.key())
+                        keyValue("sykmeldingId", it.key()),
+                        keyValue("orgNr", produceTask.orgnr),
+                        keyValue("msgId", registerJournal.messageId)
                 )
                 log.info("Received a SM2013, going to create task, $logKeys", *logValues)
                 log.info("Creating task")
