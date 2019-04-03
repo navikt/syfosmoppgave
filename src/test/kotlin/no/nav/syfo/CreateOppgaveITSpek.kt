@@ -26,6 +26,10 @@ import kotlinx.coroutines.launch
 import no.nav.common.KafkaEnvironment
 import no.nav.syfo.client.OppgaveClient
 import no.nav.syfo.client.StsOidcClient
+import no.nav.syfo.kafka.loadBaseConfig
+import no.nav.syfo.kafka.toConsumerConfig
+import no.nav.syfo.kafka.toProducerConfig
+import no.nav.syfo.kafka.toStreamsConfig
 import no.nav.syfo.model.OidcToken
 import no.nav.syfo.model.OpprettOppgaveResponse
 import no.nav.syfo.sak.avro.ProduceTask

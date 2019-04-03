@@ -20,6 +20,9 @@ import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.syfo.api.registerNaisApi
 import no.nav.syfo.client.OppgaveClient
 import no.nav.syfo.client.StsOidcClient
+import no.nav.syfo.kafka.loadBaseConfig
+import no.nav.syfo.kafka.toConsumerConfig
+import no.nav.syfo.kafka.toStreamsConfig
 import no.nav.syfo.metrics.OPPRETT_OPPGAVE_COUNTER
 import no.nav.syfo.model.OpprettOppgave
 import no.nav.syfo.sak.avro.ProduceTask

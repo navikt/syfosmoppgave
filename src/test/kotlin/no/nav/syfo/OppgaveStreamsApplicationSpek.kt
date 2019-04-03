@@ -4,6 +4,10 @@ import io.confluent.kafka.serializers.KafkaAvroDeserializer
 import io.confluent.kafka.serializers.KafkaAvroSerializer
 import io.confluent.kafka.streams.serdes.avro.GenericAvroSerde
 import no.nav.common.KafkaEnvironment
+import no.nav.syfo.kafka.loadBaseConfig
+import no.nav.syfo.kafka.toConsumerConfig
+import no.nav.syfo.kafka.toProducerConfig
+import no.nav.syfo.kafka.toStreamsConfig
 import no.nav.syfo.sak.avro.ProduceTask
 import no.nav.syfo.sak.avro.RegisterJournal
 import no.nav.syfo.sak.avro.RegisterTask

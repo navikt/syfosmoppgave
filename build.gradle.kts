@@ -12,8 +12,9 @@ val ktorVersion = "1.1.3"
 val logstashEncoderVersion = "5.2"
 val logbackVersion = "1.2.3"
 val mockitoKotlinVersion = "2.0.0-RC1"
-val prometheusVersion = "0.5.0"
+val prometheusVersion = "0.6.0"
 val spekVersion = "2.0.0"
+val smCommonVersion = "1.0.5"
 
 plugins {
     id("org.jmailen.kotlinter") version "1.21.0"
@@ -75,6 +76,9 @@ dependencies {
     implementation("io.confluent:kafka-avro-serializer:$confluentVersion")
     implementation("io.confluent:kafka-streams-avro-serde:$confluentVersion")
     implementation("org.apache.avro:avro:$avroVersion")
+
+    implementation("no.nav.syfo.sm:syfosm-common-kafka:$smCommonVersion")
+    implementation("no.nav.syfo.sm:syfosm-common-rest-sts:$smCommonVersion")
 
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVersion")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonVersion")
