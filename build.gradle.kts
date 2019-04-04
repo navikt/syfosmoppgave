@@ -14,7 +14,7 @@ val logbackVersion = "1.2.3"
 val mockitoKotlinVersion = "2.0.0-RC1"
 val prometheusVersion = "0.6.0"
 val spekVersion = "2.0.0"
-val smCommonVersion = "1.0.5"
+val smCommonVersion = "1.0.7"
 
 plugins {
     id("org.jmailen.kotlinter") version "1.21.0"
