@@ -5,7 +5,7 @@ import java.time.LocalDateTime
 
 data class OpprettOppgave(
     val id: Long? = null,
-    var tildeltEnhetsnr: String? = null,
+    val tildeltEnhetsnr: String? = null,
     val opprettetAvEnhetsnr: String,
     val endretAvEnhetsnr: String,
     val journalpostId: String,
@@ -28,7 +28,7 @@ data class OpprettOppgave(
     val ferdigstiltTidspunkt: LocalDateTime,
     val opprettetAv: String,
     val endretAv: String,
-    val prioritet: String,
+    val prioritet: Prioritet,
     val status: Oppgavestatus,
     val statuskategori: Oppgavestatuskategori,
     val metadata: Map<String, String>,
@@ -91,4 +91,20 @@ enum class Oppgavestatus {
     UNDER_BEHANDLING,
     FERDIGSTILT,
     FEILREGISTRERT
+}
+
+enum class Prioritet {
+    HOY,
+    NORM,
+    LAV
+}
+
+enum class MetadataKey {
+    NORM_DATO,
+    REVURDERINGSTYPE,
+    SOKNAD_ID,
+    KRAV_ID,
+    MOTTATT_DATO,
+    EKSTERN_HENVENDELSE_ID,
+    SKANNET_DATO
 }

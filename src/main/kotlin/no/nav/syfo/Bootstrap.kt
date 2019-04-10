@@ -29,6 +29,7 @@ import no.nav.syfo.model.IdentType
 import no.nav.syfo.model.Oppgavestatus
 import no.nav.syfo.model.Oppgavestatuskategori
 import no.nav.syfo.model.OpprettOppgave
+import no.nav.syfo.model.Prioritet
 import no.nav.syfo.sak.avro.ProduceTask
 import no.nav.syfo.sak.avro.RegisterJournal
 import no.nav.syfo.sak.avro.RegisterTask
@@ -183,7 +184,7 @@ suspend fun blockingApplicationLogic(
                         status = Oppgavestatus.AAPNET,
                         statuskategori = Oppgavestatuskategori.AAPEN,
                         ferdigstiltTidspunkt = LocalDateTime.now().plusDays(14),
-                        prioritet = produceTask.prioritet.name,
+                        prioritet = Prioritet.NORM,
                         metadata = produceTask.metadata
                 )
 
