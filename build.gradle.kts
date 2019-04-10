@@ -24,7 +24,7 @@ plugins {
 }
 
 group = "no.nav.syfo"
-version = "1.0.0"
+version = "1.0.1-SNAPSHOT"
 
 tasks.withType<Jar> {
     manifest.attributes["Main-Class"] = "no.nav.syfo.BootstrapKt"
@@ -72,6 +72,8 @@ dependencies {
     implementation("io.ktor:ktor-client-apache:$ktorVersion")
     implementation("io.ktor:ktor-client-auth-basic:$ktorVersion")
     implementation("io.ktor:ktor-client-jackson:$ktorVersion")
+    implementation("io.ktor:ktor-client-logging:$ktorVersion")
+    implementation("io.ktor:ktor-client-logging-jvm:$ktorVersion")
 
     implementation("io.confluent:kafka-avro-serializer:$confluentVersion")
     implementation("io.confluent:kafka-streams-avro-serde:$confluentVersion")
