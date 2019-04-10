@@ -1,6 +1,11 @@
 package no.nav.syfo
 
-import no.nav.syfo.model.OpprettOppgaveResponse
+import no.nav.syfo.model.Ident
+import no.nav.syfo.model.IdentType
+import no.nav.syfo.model.Oppgave
+import no.nav.syfo.model.Oppgavestatus
+import no.nav.syfo.model.Oppgavestatuskategori
+import no.nav.syfo.model.Prioritet
 import no.nav.syfo.sak.avro.PrioritetType
 import no.nav.syfo.sak.avro.ProduceTask
 import no.nav.syfo.sak.avro.RegisterJournal
@@ -46,15 +51,13 @@ fun createProduceTask(msgId: String) = ProduceTask().apply {
     metadata = mapOf()
 }
 
-fun createOppgaveResponse(): OpprettOppgaveResponse = OpprettOppgaveResponse(
+fun createOppgaveResponse(): Oppgave = Oppgave(
         tildeltEnhetsnr = "9999",
         opprettetAvEnhetsnr = "TODO",
-        aktoerId = "TODO",
         journalpostId = "TODO",
         journalpostkilde = "TODO",
         behandlesAvApplikasjon = "TODO",
         saksreferanse = "TODO",
-        orgnr = "TODO",
         beskrivelse = "TODO",
         temagruppe = "TODO",
         tema = "TODO",
@@ -64,15 +67,18 @@ fun createOppgaveResponse(): OpprettOppgaveResponse = OpprettOppgaveResponse(
         mappeId = 123,
         aktivDato = LocalDate.now(),
         fristFerdigstillelse = LocalDate.now(),
-        prioritet = "TODO",
+        prioritet = Prioritet.HOY,
         metadata = mapOf(),
         opprettetTidspunkt = LocalDateTime.now(),
         opprettetAv = "TODO",
         endretAv = "TODO",
         ferdigstiltTidspunkt = LocalDateTime.now(),
         endretTidspunkt = LocalDateTime.now(),
-        status = "UNDER_BEHANDLING",
-        id = "oppgave-12837u12"
+        status = Oppgavestatus.OPPRETTET,
+        id = 1283712L,
+        ident = Ident(IdentType.AKTOERID, "asdasda"),
+        statuskategori = Oppgavestatuskategori.AAPEN,
+        versjon = 1
 )
 
 fun createRegisterJournal(msgId: String) = RegisterJournal().apply {

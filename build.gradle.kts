@@ -13,7 +13,7 @@ val logstashEncoderVersion = "5.2"
 val logbackVersion = "1.2.3"
 val mockitoKotlinVersion = "2.0.0-RC1"
 val prometheusVersion = "0.6.0"
-val spekVersion = "2.0.0"
+val spekVersion = "2.0.2"
 val smCommonVersion = "1.0.7"
 
 plugins {
