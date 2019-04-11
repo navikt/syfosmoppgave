@@ -80,8 +80,7 @@ fun createOppgaveResponse(): OpprettOppgaveResult = OpprettOppgaveResult(
         statuskategori = Oppgavestatuskategori.AAPEN,
         versjon = 1,
         endretAvEnhetsnr = "",
-        tilordnetRessurs = "",
-        feilmelding = ""
+        tilordnetRessurs = ""
 )
 
 fun createRegisterJournal(msgId: String) = RegisterJournal().apply {
