@@ -4,7 +4,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 
 data class OpprettOppgave(
-    val id: Long?,
+    val id: Long? = null,
     val tildeltEnhetsnr: String,
     val opprettetAvEnhetsnr: String,
     val endretAvEnhetsnr: String? = null,

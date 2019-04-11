@@ -158,7 +158,6 @@ suspend fun blockingApplicationLogic(
                 log.info("Received a SM2013, going to create task, $logKeys", *logValues)
                 log.info("Creating task, $logKeys", *logValues)
                 val opprettOppgave = OpprettOppgave(
-                        id = produceTask.messageId.toLong(),
                         tildeltEnhetsnr = produceTask.tildeltEnhetsnr,
                         ident = Ident(IdentType.AKTOERID, produceTask.aktoerId),
                         opprettetAvEnhetsnr = produceTask.opprettetAvEnhetsnr,
