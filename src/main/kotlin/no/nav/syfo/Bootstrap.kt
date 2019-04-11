@@ -136,7 +136,6 @@ suspend fun blockingApplicationLogic(
 ) {
     while (applicationState.running) {
         var logValues = arrayOf(
-                keyValue("mottakId", "missing"),
                 keyValue("orgNr", "missing"),
                 keyValue("msgId", "missing"),
                 keyValue("sykmeldingId", "missing")
@@ -177,14 +176,14 @@ suspend fun blockingApplicationLogic(
                         opprettetTidspunkt = LocalDateTime.now(),
                         endretTidspunkt = LocalDateTime.now(),
                         fristFerdigstillelse = LocalDate.parse(produceTask.fristFerdigstillelse, DateTimeFormatter.ISO_DATE),
-                        opprettetAv = "Sykmeldings mottaket",
-                        endretAv = "",
+                        opprettetAv = "srvsyfosmoppgave",
                         status = Oppgavestatus.OPPRETTET,
                         statuskategori = Oppgavestatuskategori.AAPEN,
                         ferdigstiltTidspunkt = LocalDateTime.now().plusDays(14),
                         prioritet = Prioritet.NORM,
                         metadata = mapOf()
                 )
+                log.info("opprettOppgave request: ${objectMapper.writeValueAsString(opprettOppgave)}")
 
                 val response = oppgaveClient.createOppgave(opprettOppgave).await()
                 OPPRETT_OPPGAVE_COUNTER.inc()
