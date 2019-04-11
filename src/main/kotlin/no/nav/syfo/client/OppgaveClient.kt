@@ -20,7 +20,8 @@ import io.ktor.http.contentType
 import io.ktor.util.KtorExperimentalAPI
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
-import no.nav.syfo.model.Oppgave
+import no.nav.syfo.model.OpprettOppgave
+import no.nav.syfo.model.OpprettOppgaveResponse
 
 @KtorExperimentalAPI
 class OppgaveClient constructor(val url: String, val oidcClient: StsOidcClient) {
@@ -37,13 +38,13 @@ class OppgaveClient constructor(val url: String, val oidcClient: StsOidcClient) 
         }
     }
 
-    fun createOppgave(createOppgave: Oppgave): Deferred<Oppgave> = client.async {
+    fun createOppgave(createOppgave: OpprettOppgave): Deferred<OpprettOppgaveResponse> = client.async {
         // TODO: Remove this workaround whenever ktor issue #1009 is fixed
         client.post<HttpResponse>(url) {
             this.header("Authorization", "Bearer ${oidcClient.oidcToken()}")
             contentType(ContentType.Application.Json)
             accept(ContentType.Application.Json)
             body = createOppgave
-        }.use { it.call.response.receive<Oppgave>() }
+        }.use { it.call.response.receive<OpprettOppgaveResponse>() }
     }
 }

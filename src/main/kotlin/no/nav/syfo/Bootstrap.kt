@@ -26,9 +26,9 @@ import no.nav.syfo.kafka.toStreamsConfig
 import no.nav.syfo.metrics.OPPRETT_OPPGAVE_COUNTER
 import no.nav.syfo.model.Ident
 import no.nav.syfo.model.IdentType
-import no.nav.syfo.model.Oppgave
 import no.nav.syfo.model.Oppgavestatus
 import no.nav.syfo.model.Oppgavestatuskategori
+import no.nav.syfo.model.OpprettOppgave
 import no.nav.syfo.model.Prioritet
 import no.nav.syfo.sak.avro.ProduceTask
 import no.nav.syfo.sak.avro.RegisterJournal
@@ -157,7 +157,7 @@ suspend fun blockingApplicationLogic(
                 )
                 log.info("Received a SM2013, going to create task, $logKeys", *logValues)
                 log.info("Creating task, $logKeys", *logValues)
-                val opprettOppgave = Oppgave(
+                val opprettOppgave = OpprettOppgave(
                         id = produceTask.messageId.toLong(),
                         tildeltEnhetsnr = produceTask.tildeltEnhetsnr,
                         ident = Ident(IdentType.AKTOERID, produceTask.aktoerId),
@@ -183,7 +183,8 @@ suspend fun blockingApplicationLogic(
                         status = Oppgavestatus.OPPRETTET,
                         statuskategori = Oppgavestatuskategori.AAPEN,
                         ferdigstiltTidspunkt = LocalDateTime.now().plusDays(14),
-                        prioritet = Prioritet.NORM
+                        prioritet = Prioritet.NORM,
+                        metadata = mapOf()
                 )
 
                 val response = oppgaveClient.createOppgave(opprettOppgave).await()
