@@ -20,8 +20,7 @@ import io.ktor.client.response.HttpResponse
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import io.ktor.util.KtorExperimentalAPI
-import kotlinx.coroutines.Deferred
-import kotlinx.coroutines.async
+import no.nav.syfo.helpers.retry
 import no.nav.syfo.model.OpprettOppgave
 import no.nav.syfo.model.OpprettOppgaveResult
 
@@ -42,7 +41,7 @@ class OppgaveClient constructor(val url: String, val oidcClient: StsOidcClient) 
         }
     }
 
-    fun createOppgave(createOppgave: OpprettOppgave): Deferred<OpprettOppgaveResult> = client.async {
+    suspend fun createOppgave(createOppgave: OpprettOppgave): OpprettOppgaveResult = retry("create_oppgave") {
         // TODO: Remove this workaround whenever ktor issue #1009 is fixed
         client.post<HttpResponse>(url) {
             accept(ContentType.Application.Json)

@@ -14,7 +14,7 @@ val logbackVersion = "1.2.3"
 val mockitoKotlinVersion = "2.0.0-RC1"
 val prometheusVersion = "0.6.0"
 val spekVersion = "2.0.2"
-val smCommonVersion = "1.0.7"
+val smCommonVersion = "1.0.8"
 
 plugins {
     id("org.jmailen.kotlinter") version "1.21.0"
@@ -81,6 +81,7 @@ dependencies {
 
     implementation("no.nav.syfo.sm:syfosm-common-kafka:$smCommonVersion")
     implementation("no.nav.syfo.sm:syfosm-common-rest-sts:$smCommonVersion")
+    implementation("no.nav.syfo.sm:syfosm-common-networking:$smCommonVersion")
 
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVersion")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonVersion")

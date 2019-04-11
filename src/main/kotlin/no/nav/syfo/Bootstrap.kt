@@ -175,7 +175,7 @@ suspend fun blockingApplicationLogic(
                 )
                 log.info("opprettOppgave request: ${objectMapper.writeValueAsString(opprettOppgave)}")
 
-                val response = oppgaveClient.createOppgave(opprettOppgave).await()
+                val response = oppgaveClient.createOppgave(opprettOppgave)
                 OPPRETT_OPPGAVE_COUNTER.inc()
                 log.info("Task created with {} $logKeys", keyValue("oppgaveId", response.id), *logValues)
             } catch (e: Exception) {
