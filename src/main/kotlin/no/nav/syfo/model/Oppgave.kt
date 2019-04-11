@@ -19,14 +19,12 @@ data class OpprettOppgave(
     val temagruppe: String? = null,
     val tema: String? = null,
     val behandlingstema: String? = null,
-    val oppgavetype: String? = null,
+    val oppgavetype: String,
     val behandlingstype: String? = null,
-    val versjon: Int,
     val mappeId: Long? = null,
     val aktivDato: LocalDate,
     val fristFerdigstillelse: LocalDate? = null,
     val prioritet: String,
-    val status: String,
     val metadata: Map<MetadataKey, String>? = null
 )
 

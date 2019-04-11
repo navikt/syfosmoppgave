@@ -168,13 +168,11 @@ suspend fun blockingApplicationLogic(
                         behandlingstema = produceTask.behandlingstema,
                         oppgavetype = produceTask.oppgavetype,
                         behandlingstype = produceTask.behandlingstype,
-                        versjon = 1,
                         mappeId = produceTask.mappeId.toLong(),
                         aktivDato = LocalDate.parse(produceTask.aktivDato, DateTimeFormatter.ISO_DATE),
                         fristFerdigstillelse = LocalDate.parse(produceTask.fristFerdigstillelse, DateTimeFormatter.ISO_DATE),
                         prioritet = produceTask.prioritet.name,
-                        metadata = mapOf(),
-                        status = "OPPRETTET"
+                        metadata = mapOf()
                 )
                 log.info("opprettOppgave request: ${objectMapper.writeValueAsString(opprettOppgave)}")
 
