@@ -18,6 +18,7 @@ import io.ktor.client.request.header
 import io.ktor.client.request.post
 import io.ktor.client.response.HttpResponse
 import io.ktor.http.ContentType
+import io.ktor.http.contentType
 import io.ktor.util.KtorExperimentalAPI
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
@@ -45,6 +46,7 @@ class OppgaveClient constructor(val url: String, val oidcClient: StsOidcClient) 
         // TODO: Remove this workaround whenever ktor issue #1009 is fixed
         client.post<HttpResponse>(url) {
             accept(ContentType.Application.Json)
+            contentType(ContentType.Application.Json)
             this.header("Authorization", "Bearer ${oidcClient.oidcToken()}")
             this.header("X-Correlation-ID", createOppgave.saksreferanse)
             body = createOppgave
