@@ -1,5 +1,7 @@
 package no.nav.syfo.client
 
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import io.ktor.client.HttpClient
@@ -30,6 +32,7 @@ class OppgaveClient constructor(val url: String, val oidcClient: StsOidcClient) 
             serializer = JacksonSerializer {
                 registerKotlinModule()
                 registerModule(JavaTimeModule())
+                configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
             }
             install(Logging) {
                 logger = Logger.DEFAULT
