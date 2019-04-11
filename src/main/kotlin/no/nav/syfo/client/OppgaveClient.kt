@@ -44,6 +44,7 @@ class OppgaveClient constructor(val url: String, val oidcClient: StsOidcClient) 
         // TODO: Remove this workaround whenever ktor issue #1009 is fixed
         client.post<HttpResponse>(url) {
             this.header("Authorization", "Bearer ${oidcClient.oidcToken()}")
+            this.header("X-Correlation-ID", createOppgave.saksreferanse)
             contentType(ContentType.Application.Json)
             accept(ContentType.Application.Json)
             body = createOppgave
