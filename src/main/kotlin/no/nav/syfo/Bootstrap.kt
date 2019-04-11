@@ -1,6 +1,8 @@
 package no.nav.syfo
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.SerializationFeature
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import io.confluent.kafka.serializers.KafkaAvroDeserializer
@@ -46,7 +48,9 @@ data class ApplicationState(var running: Boolean = true, var initialized: Boolea
 
 private val log = LoggerFactory.getLogger("nav.syfo.oppgave")
 val objectMapper: ObjectMapper = ObjectMapper()
+        .registerModule(JavaTimeModule())
         .registerKotlinModule()
+        .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
 
 @KtorExperimentalAPI
 fun main() = runBlocking(Executors.newFixedThreadPool(2).asCoroutineDispatcher()) {
@@ -165,11 +169,13 @@ suspend fun blockingApplicationLogic(
                         behandlingstema = produceTask.behandlingstema,
                         oppgavetype = produceTask.oppgavetype,
                         behandlingstype = produceTask.behandlingstype,
+                        versjon = 1,
                         mappeId = produceTask.mappeId.toLong(),
                         aktivDato = LocalDate.parse(produceTask.aktivDato, DateTimeFormatter.ISO_DATE),
                         fristFerdigstillelse = LocalDate.parse(produceTask.fristFerdigstillelse, DateTimeFormatter.ISO_DATE),
                         prioritet = produceTask.prioritet.name,
-                        metadata = mapOf()
+                        metadata = mapOf(),
+                        status = "OPPRETTET"
                 )
                 log.info("opprettOppgave request: ${objectMapper.writeValueAsString(opprettOppgave)}")
 
