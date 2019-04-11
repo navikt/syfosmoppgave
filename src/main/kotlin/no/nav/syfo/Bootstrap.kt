@@ -162,7 +162,6 @@ suspend fun blockingApplicationLogic(
                         journalpostkilde = registerJournal.journalpostKilde,
                         behandlesAvApplikasjon = produceTask.behandlesAvApplikasjon,
                         saksreferanse = registerJournal.sakId,
-                        orgnr = produceTask.orgnr,
                         beskrivelse = produceTask.beskrivelse,
                         temagruppe = produceTask.temagruppe,
                         tema = produceTask.tema,
