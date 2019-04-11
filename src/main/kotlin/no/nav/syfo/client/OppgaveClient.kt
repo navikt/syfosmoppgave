@@ -17,12 +17,11 @@ import io.ktor.client.request.header
 import io.ktor.client.request.post
 import io.ktor.client.response.HttpResponse
 import io.ktor.http.ContentType
-import io.ktor.http.contentType
 import io.ktor.util.KtorExperimentalAPI
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import no.nav.syfo.model.OpprettOppgave
-import no.nav.syfo.model.OpprettOppgaveResponse
+import no.nav.syfo.model.OpprettOppgaveResult
 
 @KtorExperimentalAPI
 class OppgaveClient constructor(val url: String, val oidcClient: StsOidcClient) {
@@ -40,14 +39,13 @@ class OppgaveClient constructor(val url: String, val oidcClient: StsOidcClient) 
         }
     }
 
-    fun createOppgave(createOppgave: OpprettOppgave): Deferred<OpprettOppgaveResponse> = client.async {
+    fun createOppgave(createOppgave: OpprettOppgave): Deferred<OpprettOppgaveResult> = client.async {
         // TODO: Remove this workaround whenever ktor issue #1009 is fixed
         client.post<HttpResponse>(url) {
+            accept(ContentType.Application.Json)
             this.header("Authorization", "Bearer ${oidcClient.oidcToken()}")
             this.header("X-Correlation-ID", createOppgave.saksreferanse)
-            contentType(ContentType.Application.Json)
-            accept(ContentType.Application.Json)
             body = createOppgave
-        }.use { it.call.response.receive<OpprettOppgaveResponse>() }
+        }.use { it.call.response.receive<OpprettOppgaveResult>() }
     }
 }

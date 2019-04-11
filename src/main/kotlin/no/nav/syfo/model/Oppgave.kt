@@ -1,5 +1,6 @@
 package no.nav.syfo.model
 
+import kotlinx.serialization.Serializable
 import java.time.LocalDate
 import java.time.LocalDateTime
 
@@ -28,7 +29,8 @@ data class OpprettOppgave(
     val metadata: Map<MetadataKey, String>? = null
 )
 
-data class OpprettOppgaveResponse(
+@Serializable
+data class OpprettOppgaveResult(
     val id: Long?,
     var tildeltEnhetsnr: String? = null,
     val opprettetAvEnhetsnr: String,
@@ -57,7 +59,8 @@ data class OpprettOppgaveResponse(
     val status: Oppgavestatus,
     val statuskategori: Oppgavestatuskategori,
     val metadata: Map<MetadataKey, String>,
-    val ident: Ident
+    val ident: Ident,
+    val feilmelding: String?
 )
 
 data class Ident(

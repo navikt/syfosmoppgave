@@ -4,7 +4,7 @@ import no.nav.syfo.model.Ident
 import no.nav.syfo.model.IdentType
 import no.nav.syfo.model.Oppgavestatus
 import no.nav.syfo.model.Oppgavestatuskategori
-import no.nav.syfo.model.OpprettOppgaveResponse
+import no.nav.syfo.model.OpprettOppgaveResult
 import no.nav.syfo.model.Prioritet
 import no.nav.syfo.sak.avro.PrioritetType
 import no.nav.syfo.sak.avro.ProduceTask
@@ -51,7 +51,7 @@ fun createProduceTask(msgId: String) = ProduceTask().apply {
     metadata = mapOf()
 }
 
-fun createOppgaveResponse(): OpprettOppgaveResponse = OpprettOppgaveResponse(
+fun createOppgaveResponse(): OpprettOppgaveResult = OpprettOppgaveResult(
         tildeltEnhetsnr = "9999",
         opprettetAvEnhetsnr = "TODO",
         journalpostId = "TODO",
@@ -80,8 +80,8 @@ fun createOppgaveResponse(): OpprettOppgaveResponse = OpprettOppgaveResponse(
         statuskategori = Oppgavestatuskategori.AAPEN,
         versjon = 1,
         endretAvEnhetsnr = "",
-        tilordnetRessurs = ""
-
+        tilordnetRessurs = "",
+        feilmelding = ""
 )
 
 fun createRegisterJournal(msgId: String) = RegisterJournal().apply {

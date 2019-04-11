@@ -29,7 +29,7 @@ import no.nav.syfo.kafka.toConsumerConfig
 import no.nav.syfo.kafka.toProducerConfig
 import no.nav.syfo.kafka.toStreamsConfig
 import no.nav.syfo.model.OidcToken
-import no.nav.syfo.model.OpprettOppgaveResponse
+import no.nav.syfo.model.OpprettOppgaveResult
 import no.nav.syfo.sak.avro.ProduceTask
 import no.nav.syfo.sak.avro.RegisterJournal
 import no.nav.syfo.sak.avro.RegisterTask
@@ -48,7 +48,7 @@ import java.util.concurrent.TimeUnit
 object CreateOppgaveITSpek : Spek({
     describe("A full bootstrapped environment") {
         val streamsApplicationName = "spek.integration"
-        val oppgaveMock = mock<() -> OpprettOppgaveResponse>()
+        val oppgaveMock = mock<() -> OpprettOppgaveResult>()
 
         val mockPort = ServerSocket(0).use {
             it.localPort
