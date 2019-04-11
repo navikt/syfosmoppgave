@@ -24,12 +24,7 @@ import no.nav.syfo.kafka.loadBaseConfig
 import no.nav.syfo.kafka.toConsumerConfig
 import no.nav.syfo.kafka.toStreamsConfig
 import no.nav.syfo.metrics.OPPRETT_OPPGAVE_COUNTER
-import no.nav.syfo.model.Ident
-import no.nav.syfo.model.IdentType
-import no.nav.syfo.model.Oppgavestatus
-import no.nav.syfo.model.Oppgavestatuskategori
 import no.nav.syfo.model.OpprettOppgave
-import no.nav.syfo.model.Prioritet
 import no.nav.syfo.sak.avro.ProduceTask
 import no.nav.syfo.sak.avro.RegisterJournal
 import no.nav.syfo.sak.avro.RegisterTask
@@ -42,7 +37,6 @@ import java.nio.file.Files
 import java.nio.file.Paths
 import java.time.Duration
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.Properties
 import java.util.concurrent.Executors
@@ -158,29 +152,23 @@ suspend fun blockingApplicationLogic(
                 log.info("Creating task, $logKeys", *logValues)
                 val opprettOppgave = OpprettOppgave(
                         tildeltEnhetsnr = produceTask.tildeltEnhetsnr,
-                        ident = Ident(IdentType.AKTOERID, produceTask.aktoerId),
+                        aktoerId = produceTask.aktoerId,
                         opprettetAvEnhetsnr = produceTask.opprettetAvEnhetsnr,
                         journalpostId = registerJournal.journalpostId,
                         journalpostkilde = registerJournal.journalpostKilde,
                         behandlesAvApplikasjon = produceTask.behandlesAvApplikasjon,
                         saksreferanse = registerJournal.sakId,
+                        orgnr = produceTask.orgnr,
                         beskrivelse = produceTask.beskrivelse,
                         temagruppe = produceTask.temagruppe,
                         tema = produceTask.tema,
                         behandlingstema = produceTask.behandlingstema,
                         oppgavetype = produceTask.oppgavetype,
                         behandlingstype = produceTask.behandlingstype,
-                        versjon = 1,
                         mappeId = produceTask.mappeId.toLong(),
                         aktivDato = LocalDate.parse(produceTask.aktivDato, DateTimeFormatter.ISO_DATE),
-                        opprettetTidspunkt = LocalDateTime.now(),
-                        endretTidspunkt = LocalDateTime.now(),
                         fristFerdigstillelse = LocalDate.parse(produceTask.fristFerdigstillelse, DateTimeFormatter.ISO_DATE),
-                        opprettetAv = "srvsyfosmoppgave",
-                        status = Oppgavestatus.OPPRETTET,
-                        statuskategori = Oppgavestatuskategori.AAPEN,
-                        ferdigstiltTidspunkt = LocalDateTime.now().plusDays(14),
-                        prioritet = Prioritet.NORM,
+                        prioritet = produceTask.prioritet.name,
                         metadata = mapOf()
                 )
                 log.info("opprettOppgave request: ${objectMapper.writeValueAsString(opprettOppgave)}")
