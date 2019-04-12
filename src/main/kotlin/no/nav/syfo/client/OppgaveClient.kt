@@ -32,13 +32,13 @@ class OppgaveClient constructor(val url: String, val oidcClient: StsOidcClient) 
         }
     }
 
-    suspend fun createOppgave(createOppgave: OpprettOppgave): OppgaveResponse = retry("create_oppgave") {
+    suspend fun createOppgave(createOppgave: OpprettOppgave, msgId: String): OppgaveResponse = retry("create_oppgave") {
         // TODO: Remove this workaround whenever ktor issue #1009 is fixed
         client.post<HttpResponse>(url) {
             contentType(ContentType.Application.Json)
             val oidcToken = oidcClient.oidcToken()
             this.header("Authorization", "Bearer ${oidcToken.access_token}")
-            this.header("X-Correlation-ID", createOppgave.saksreferanse)
+            this.header("X-Correlation-ID", msgId)
             body = createOppgave
         }.use { it.call.response.receive<OppgaveResponse>() }
     }

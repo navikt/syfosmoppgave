@@ -171,7 +171,7 @@ suspend fun blockingApplicationLogic(
                         metadata = produceTask.metadata
                 )
 
-                val response = oppgaveClient.createOppgave(opprettOppgave)
+                val response = oppgaveClient.createOppgave(opprettOppgave, registerJournal.messageId)
                 OPPRETT_OPPGAVE_COUNTER.inc()
                 log.info("Task created with {} $logKeys", keyValue("oppgaveId", response.id), *logValues)
             } catch (e: Exception) {
