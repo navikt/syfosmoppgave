@@ -170,7 +170,6 @@ suspend fun blockingApplicationLogic(
                         prioritet = produceTask.prioritet.name,
                         metadata = produceTask.metadata
                 )
-                log.info("opprettOppgave request: ${objectMapper.writeValueAsString(opprettOppgave)}")
 
                 val response = oppgaveClient.createOppgave(opprettOppgave)
                 OPPRETT_OPPGAVE_COUNTER.inc()

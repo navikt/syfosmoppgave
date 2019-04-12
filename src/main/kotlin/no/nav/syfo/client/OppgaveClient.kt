@@ -33,10 +33,6 @@ class OppgaveClient constructor(val url: String, val oidcClient: StsOidcClient) 
                 configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
                 configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
             }
-            install(Logging) {
-                logger = Logger.DEFAULT
-                level = LogLevel.ALL
-            }
         }
     }
 
