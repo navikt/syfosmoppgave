@@ -1,11 +1,6 @@
 package no.nav.syfo
 
-import no.nav.syfo.model.Ident
-import no.nav.syfo.model.IdentType
-import no.nav.syfo.model.Oppgavestatus
-import no.nav.syfo.model.Oppgavestatuskategori
-import no.nav.syfo.model.OpprettOppgaveResult
-import no.nav.syfo.model.Prioritet
+import no.nav.syfo.model.OppgaveResponse
 import no.nav.syfo.sak.avro.PrioritetType
 import no.nav.syfo.sak.avro.ProduceTask
 import no.nav.syfo.sak.avro.RegisterJournal
@@ -13,7 +8,6 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 fun deleteDir(dir: Path) {
@@ -51,36 +45,8 @@ fun createProduceTask(msgId: String) = ProduceTask().apply {
     metadata = mapOf()
 }
 
-fun createOppgaveResponse(): OpprettOppgaveResult = OpprettOppgaveResult(
-        tildeltEnhetsnr = "9999",
-        opprettetAvEnhetsnr = "TODO",
-        journalpostId = "TODO",
-        journalpostkilde = "TODO",
-        behandlesAvApplikasjon = "TODO",
-        saksreferanse = "TODO",
-        beskrivelse = "TODO",
-        temagruppe = "TODO",
-        tema = "TODO",
-        behandlingstema = "TODO",
-        oppgavetype = "TODO",
-        behandlingstype = "TODO",
-        mappeId = 123,
-        aktivDato = LocalDate.now(),
-        fristFerdigstillelse = LocalDate.now(),
-        prioritet = Prioritet.NORM,
-        metadata = mapOf(),
-        opprettetTidspunkt = LocalDateTime.now(),
-        opprettetAv = "TODO",
-        endretAv = "TODO",
-        ferdigstiltTidspunkt = LocalDateTime.now(),
-        endretTidspunkt = LocalDateTime.now(),
-        status = Oppgavestatus.OPPRETTET,
-        id = 1283712L,
-        ident = Ident(IdentType.AKTOERID, "asdasda"),
-        statuskategori = Oppgavestatuskategori.AAPEN,
-        versjon = 1,
-        endretAvEnhetsnr = "",
-        tilordnetRessurs = ""
+fun createOppgaveResponse(): OppgaveResponse = OppgaveResponse(
+        id = 21312313
 )
 
 fun createRegisterJournal(msgId: String) = RegisterJournal().apply {
