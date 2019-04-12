@@ -163,7 +163,6 @@ suspend fun blockingApplicationLogic(
                         behandlesAvApplikasjon = produceTask.behandlesAvApplikasjon,
                         saksreferanse = registerJournal.sakId,
                         beskrivelse = produceTask.beskrivelse,
-                        temagruppe = produceTask.temagruppe,
                         tema = produceTask.tema,
                         oppgavetype = produceTask.oppgavetype,
                         aktivDato = LocalDate.parse(produceTask.aktivDato, DateTimeFormatter.ISO_DATE),
