@@ -18,11 +18,10 @@ import io.ktor.client.request.header
 import io.ktor.client.request.post
 import io.ktor.client.response.HttpResponse
 import io.ktor.http.ContentType
-import io.ktor.http.contentType
 import io.ktor.util.KtorExperimentalAPI
 import no.nav.syfo.helpers.retry
+import no.nav.syfo.model.OppgaveResponse
 import no.nav.syfo.model.OpprettOppgave
-import no.nav.syfo.model.OpprettOppgaveResult
 
 @KtorExperimentalAPI
 class OppgaveClient constructor(val url: String, val oidcClient: StsOidcClient) {
@@ -41,14 +40,13 @@ class OppgaveClient constructor(val url: String, val oidcClient: StsOidcClient) 
         }
     }
 
-    suspend fun createOppgave(createOppgave: OpprettOppgave): OpprettOppgaveResult = retry("create_oppgave") {
+    suspend fun createOppgave(createOppgave: OpprettOppgave): OppgaveResponse = retry("create_oppgave") {
         // TODO: Remove this workaround whenever ktor issue #1009 is fixed
         client.post<HttpResponse>(url) {
             accept(ContentType.Application.Json)
-            contentType(ContentType.Application.Json)
             this.header("Authorization", "Bearer ${oidcClient.oidcToken()}")
             this.header("X-Correlation-ID", createOppgave.saksreferanse)
             body = createOppgave
-        }.use { it.call.response.receive<OpprettOppgaveResult>() }
+        }.use { it.call.response.receive<OppgaveResponse>() }
     }
 }
