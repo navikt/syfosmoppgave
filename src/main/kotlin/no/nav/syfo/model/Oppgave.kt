@@ -24,50 +24,9 @@ data class OpprettOppgave(
     val aktivDato: LocalDate,
     val fristFerdigstillelse: LocalDate? = null,
     val prioritet: String,
-    val metadata: Map<MetadataKey, String>? = null
+    val metadata: Map<String, String>? = null
 )
 
 data class OppgaveResponse(
     val id: Int
 )
-
-data class Ident(
-    val identType: IdentType,
-    val verdi: String
-)
-
-enum class IdentType {
-    AKTOERID,
-    ORGNR,
-    SAMHANDLERNR,
-    BNR
-}
-
-enum class Oppgavestatuskategori {
-    AAPEN,
-    AVSLUTTET
-}
-
-enum class Oppgavestatus {
-    OPPRETTET,
-    AAPNET,
-    UNDER_BEHANDLING,
-    FERDIGSTILT,
-    FEILREGISTRERT
-}
-
-enum class Prioritet {
-    HOY,
-    NORM,
-    LAV
-}
-
-enum class MetadataKey {
-    NORM_DATO,
-    REVURDERINGSTYPE,
-    SOKNAD_ID,
-    KRAV_ID,
-    MOTTATT_DATO,
-    EKSTERN_HENVENDELSE_ID,
-    SKANNET_DATO
-}

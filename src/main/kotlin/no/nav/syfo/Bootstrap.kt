@@ -168,7 +168,7 @@ suspend fun blockingApplicationLogic(
                         aktivDato = LocalDate.parse(produceTask.aktivDato, DateTimeFormatter.ISO_DATE),
                         fristFerdigstillelse = LocalDate.parse(produceTask.fristFerdigstillelse, DateTimeFormatter.ISO_DATE),
                         prioritet = produceTask.prioritet.name,
-                        metadata = mapOf()
+                        metadata = produceTask.metadata
                 )
                 log.info("opprettOppgave request: ${objectMapper.writeValueAsString(opprettOppgave)}")
 
