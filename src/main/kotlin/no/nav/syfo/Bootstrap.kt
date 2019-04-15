@@ -153,7 +153,10 @@ suspend fun blockingApplicationLogic(
                         keyValue("msgId", registerJournal.messageId)
                 )
                 log.info("Received a SM2013, going to create task, $logKeys", *logValues)
-                log.info("Creating task with {}, $logKeys", keyValue("sakid", registerJournal.sakId), *logValues)
+                log.info("Creating task with {}, $logKeys",
+                        keyValue("sakid", registerJournal.sakId),
+                        keyValue("journalpost", registerJournal.journalpostId),
+                        *logValues)
                 val opprettOppgave = OpprettOppgave(
                         tildeltEnhetsnr = produceTask.tildeltEnhetsnr,
                         aktoerId = produceTask.aktoerId,
@@ -171,7 +174,11 @@ suspend fun blockingApplicationLogic(
 
                 val response = oppgaveClient.createOppgave(opprettOppgave, registerJournal.messageId)
                 OPPRETT_OPPGAVE_COUNTER.inc()
-                log.info("Task created with {} $logKeys", keyValue("oppgaveId", response.id), *logValues)
+                log.info("Task created with {} $logKeys",
+                        keyValue("oppgaveId", response.id),
+                        keyValue("sakid", registerJournal.sakId),
+                        keyValue("journalpost", registerJournal.journalpostId),
+                        *logValues)
             } catch (e: Exception) {
                 log.error("Caught exception $logKeys", *logValues, e)
             }
