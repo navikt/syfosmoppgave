@@ -159,7 +159,6 @@ suspend fun blockingApplicationLogic(
                         aktoerId = produceTask.aktoerId,
                         opprettetAvEnhetsnr = produceTask.opprettetAvEnhetsnr,
                         journalpostId = registerJournal.journalpostId,
-                        journalpostkilde = registerJournal.journalpostKilde,
                         behandlesAvApplikasjon = produceTask.behandlesAvApplikasjon,
                         saksreferanse = registerJournal.sakId,
                         beskrivelse = produceTask.beskrivelse,
@@ -167,8 +166,7 @@ suspend fun blockingApplicationLogic(
                         oppgavetype = produceTask.oppgavetype,
                         aktivDato = LocalDate.parse(produceTask.aktivDato, DateTimeFormatter.ISO_DATE),
                         fristFerdigstillelse = LocalDate.parse(produceTask.fristFerdigstillelse, DateTimeFormatter.ISO_DATE),
-                        prioritet = produceTask.prioritet.name,
-                        metadata = produceTask.metadata
+                        prioritet = produceTask.prioritet.name
                 )
 
                 val response = oppgaveClient.createOppgave(opprettOppgave, registerJournal.messageId)

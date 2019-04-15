@@ -7,7 +7,6 @@ data class OpprettOppgave(
     val opprettetAvEnhetsnr: String? = null,
     val aktoerId: String? = null,
     val journalpostId: String? = null,
-    val journalpostkilde: String? = null,
     val behandlesAvApplikasjon: String? = null,
     val saksreferanse: String? = null,
     val tilordnetRessurs: String? = null,
@@ -16,8 +15,7 @@ data class OpprettOppgave(
     val oppgavetype: String,
     val aktivDato: LocalDate,
     val fristFerdigstillelse: LocalDate? = null,
-    val prioritet: String,
-    val metadata: Map<String, String>? = null
+    val prioritet: String
 )
 
 data class OppgaveResponse(
