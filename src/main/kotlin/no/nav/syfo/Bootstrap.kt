@@ -159,7 +159,8 @@ suspend fun blockingApplicationLogic(
                         keyValue("tildeltEnhetsnr", produceTask.tildeltEnhetsnr),
                         *logValues)
                 val opprettOppgave = OpprettOppgave(
-                        tildeltEnhetsnr = produceTask.tildeltEnhetsnr,
+                        // TODO remove after testing tildeltEnhetsnr = produceTask.tildeltEnhetsnr,
+                        tildeltEnhetsnr = "0316",
                         aktoerId = produceTask.aktoerId,
                         opprettetAvEnhetsnr = produceTask.opprettetAvEnhetsnr,
                         journalpostId = registerJournal.journalpostId,
