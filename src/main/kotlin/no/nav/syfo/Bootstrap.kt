@@ -152,8 +152,8 @@ suspend fun blockingApplicationLogic(
                         keyValue("orgNr", produceTask.orgnr),
                         keyValue("msgId", registerJournal.messageId)
                 )
-                log.info("Received a SM2013, going to create task, $logKeys", *logValues)
-                log.info("Creating task with {}, $logKeys",
+                log.info("Received a SM2013, going to create oppgave, $logKeys", *logValues)
+                log.info("Creating oppgave with {}, $logKeys",
                         keyValue("sakid", registerJournal.sakId),
                         keyValue("journalpost", registerJournal.journalpostId),
                         keyValue("tildeltEnhetsnr", produceTask.tildeltEnhetsnr),
