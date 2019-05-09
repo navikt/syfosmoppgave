@@ -24,7 +24,7 @@ plugins {
 }
 
 group = "no.nav.syfo"
-version = "1.0.2"
+version = "1.0.3-SNAPSHOT"
 
 tasks.withType<Jar> {
     manifest.attributes["Main-Class"] = "no.nav.syfo.BootstrapKt"
