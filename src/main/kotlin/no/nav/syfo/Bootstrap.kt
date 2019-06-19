@@ -162,11 +162,6 @@ suspend fun blockingApplicationLogic(
                         keyValue("msgId", registerJournal.messageId)
                 )
                 log.info("Received a SM2013, going to create oppgave, $logKeys", *logValues)
-                log.info("Creating oppgave with {}, $logKeys",
-                        keyValue("sakid", registerJournal.sakId),
-                        keyValue("journalpost", registerJournal.journalpostId),
-                        keyValue("tildeltEnhetsnr", produceTask.tildeltEnhetsnr),
-                        *logValues)
                 val opprettOppgave = OpprettOppgave(
                         tildeltEnhetsnr = produceTask.tildeltEnhetsnr,
                         aktoerId = produceTask.aktoerId,
@@ -188,6 +183,7 @@ suspend fun blockingApplicationLogic(
                         keyValue("oppgaveId", response.id),
                         keyValue("sakid", registerJournal.sakId),
                         keyValue("journalpost", registerJournal.journalpostId),
+                        keyValue("tildeltEnhetsnr", produceTask.tildeltEnhetsnr),
                         *logValues)
         }
         delay(100)
