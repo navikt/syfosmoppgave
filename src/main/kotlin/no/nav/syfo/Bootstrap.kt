@@ -14,6 +14,7 @@ import io.ktor.server.netty.Netty
 import io.ktor.util.KtorExperimentalAPI
 import kafka.server.KafkaConfig
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -52,8 +53,10 @@ val objectMapper: ObjectMapper = ObjectMapper()
         .registerKotlinModule()
         .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
 
+val coroutineContext = Executors.newFixedThreadPool(2).asCoroutineDispatcher()
+
 @KtorExperimentalAPI
-fun main() = runBlocking(Executors.newFixedThreadPool(2).asCoroutineDispatcher()) {
+fun main() = runBlocking(coroutineContext) {
     val env = Environment()
     val credentials = objectMapper.readValue<Credentials>(Files.newInputStream(Paths.get("/var/run/secrets/nais.io/vault/credentials.json")))
     val applicationState = ApplicationState()
@@ -100,6 +103,15 @@ fun createKafkaStream(streamProperties: Properties, env: Environment): KafkaStre
     return KafkaStreams(streamsBuilder.build(), streamProperties)
 }
 
+fun CoroutineScope.createListener(applicationState: ApplicationState, action: suspend CoroutineScope.() -> Unit): Job =
+        launch {
+            try {
+                action()
+            } finally {
+                applicationState.running = false
+            }
+        }
+
 @KtorExperimentalAPI
 fun CoroutineScope.launchListeners(
     env: Environment,
@@ -107,23 +119,21 @@ fun CoroutineScope.launchListeners(
     applicationState: ApplicationState,
     oppgaveClient: OppgaveClient
 ) {
-    try {
-        val listeners = (1..env.applicationThreads).map {
-            launch {
 
-                val kafkaConsumer = KafkaConsumer<String, RegisterTask>(consumerProperties)
+    val oppgaveListeners = 0.until(env.applicationThreads).map {
+        val kafkaconsumerOppgave = KafkaConsumer<String, RegisterTask>(consumerProperties)
 
-                kafkaConsumer.subscribe(listOf("privat-syfo-oppgave-registrerOppgave"))
+        kafkaconsumerOppgave.subscribe(
+                listOf("privat-syfo-oppgave-registrerOppgave")
+        )
+        createListener(applicationState) {
 
-                blockingApplicationLogic(applicationState, kafkaConsumer, oppgaveClient)
-            }
-        }.toList()
+            blockingApplicationLogic(applicationState, kafkaconsumerOppgave, oppgaveClient)
+        }
+    }.toList()
 
-        applicationState.initialized = true
-        runBlocking { listeners.forEach { it.join() } }
-    } finally {
-        applicationState.running = false
-    }
+    applicationState.initialized = true
+    runBlocking { oppgaveListeners.forEach { it.join() } }
 }
 
 @KtorExperimentalAPI
@@ -144,7 +154,6 @@ suspend fun blockingApplicationLogic(
         }
 
         kafkaConsumer.poll(Duration.ofMillis(0)).forEach {
-            try {
                 val produceTask = it.value().produceTask
                 val registerJournal = it.value().registerJournal
                 logValues = arrayOf(
@@ -180,9 +189,6 @@ suspend fun blockingApplicationLogic(
                         keyValue("sakid", registerJournal.sakId),
                         keyValue("journalpost", registerJournal.journalpostId),
                         *logValues)
-            } catch (e: Exception) {
-                log.error("Caught exception $logKeys", *logValues, e)
-            }
         }
         delay(100)
     }

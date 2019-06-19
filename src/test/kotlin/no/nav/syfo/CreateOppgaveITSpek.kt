@@ -5,6 +5,8 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import com.nhaarman.mockitokotlin2.whenever
+import com.nhaarman.mockitokotlin2.timeout
+import com.nhaarman.mockitokotlin2.verify
 import io.confluent.kafka.serializers.KafkaAvroDeserializer
 import io.confluent.kafka.serializers.KafkaAvroSerializer
 import io.confluent.kafka.streams.serdes.avro.GenericAvroSerde
@@ -157,8 +159,7 @@ object CreateOppgaveITSpek : Spek({
 
             journalOpprettet.send(ProducerRecord(journalOpprettetTopic, msgId, registerJournal))
             produserOppgave.send(ProducerRecord(produserOppgaveTopic, msgId, produceTask))
-            // TODO fix this
-            // verify(oppgaveMock, timeout(10000).times(1))()
+            verify(oppgaveMock, timeout(10000).times(1))()
         }
     }
 })
