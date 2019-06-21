@@ -1,5 +1,9 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
+
+group = "no.nav.syfo"
+version = "1.0.3"
+
 val avroVersion = "1.8.2"
 val confluentVersion = "5.0.0"
 val coroutinesVersion = "1.0.0"
@@ -23,13 +27,6 @@ plugins {
     id("com.github.johnrengelman.shadow") version "4.0.4"
 }
 
-group = "no.nav.syfo"
-version = "1.0.3"
-
-tasks.withType<Jar> {
-    manifest.attributes["Main-Class"] = "no.nav.syfo.BootstrapKt"
-}
-
 repositories {
     mavenCentral()
     jcenter()
@@ -38,23 +35,6 @@ repositories {
     maven ( url = "https://repo.adeo.no/repository/maven-releases/")
     maven ( url =  "https://dl.bintray.com/spekframework/spek-dev")
     maven ( url = "https://kotlin.bintray.com/kotlinx")
-}
-
-tasks.withType<Test> {
-    useJUnitPlatform {
-        includeEngines("spek2")
-    }
-    testLogging.showStandardStreams = true
-}
-
-tasks.create("printVersion") {
-    doLast {
-        println(version)
-    }
-}
-
-tasks.withType<KotlinCompile> {
-    kotlinOptions.jvmTarget = "1.8"
 }
 
 dependencies {
@@ -103,4 +83,30 @@ dependencies {
         exclude(group = "org.jetbrains.kotlin")
     }
 
+}
+
+tasks {
+    withType<Jar> {
+        manifest.attributes["Main-Class"] = "no.nav.syfo.BootstrapKt"
+    }
+
+    create("printVersion") {
+
+        doLast {
+            println(project.version)
+        }
+    }
+
+    withType<KotlinCompile> {
+        kotlinOptions.jvmTarget = "1.8"
+    }
+
+    withType<Test> {
+        useJUnitPlatform {
+            includeEngines("spek2")
+        }
+        testLogging {
+            showStandardStreams = true
+        }
+    }
 }

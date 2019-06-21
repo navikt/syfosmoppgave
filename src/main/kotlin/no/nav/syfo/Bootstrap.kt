@@ -127,7 +127,6 @@ suspend fun CoroutineScope.launchListeners(
                 listOf("privat-syfo-oppgave-registrerOppgave")
         )
         createListener(applicationState) {
-
             blockingApplicationLogic(applicationState, kafkaconsumerOppgave, oppgaveClient)
         }
     }.toList()

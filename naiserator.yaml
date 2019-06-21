@@ -38,5 +38,3 @@ spec:
   env:
     - name: KAFKA_BOOTSTRAP_SERVERS
       value: {{KAFKA_BOOTSTRAP_SERVERS}}
-    - name: OPPGAVEBEHANDLING_URL
-      value: {{OPPGAVEBEHANDLING_URL}}
