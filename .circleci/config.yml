@@ -24,7 +24,7 @@ jobs:
           name: Push docker image
           command: |
             echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin docker.pkg.github.com
-            docker push docker.pkg.github.com/navikt/${CIRCLE_PROJECT_REPONAME}/application:{IMAGE_VERSION}
+            docker push docker.pkg.github.com/navikt/${CIRCLE_PROJECT_REPONAME}/application:${IMAGE_VERSION}
 
 workflows:
   version: 2
