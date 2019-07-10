@@ -37,6 +37,7 @@ workflows:
             branches:
               only: master
       - create_deployment:
+          context: barkendeploy
           requires:
             - build_jar
           filters:
