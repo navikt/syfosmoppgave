@@ -18,7 +18,7 @@ jobs:
       - barkendeploy/gradle-cache-persist
       - run:
           name: Build and publish Docker image
-          command: docker build -t docker.pkg.github.com/navikt/
+          command: docker build -t docker.pkg.github.com/navikt/${CIRCLE_PROJECT_REPONAME}:$(date +'%m.%d.%H%M')-${CIRCLE_SHA1} .
 workflows:
   version: 2
   build_and_deploy:
