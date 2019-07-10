@@ -36,6 +36,8 @@ workflows:
             branches:
               only: master
       - create_deployment:
+          requires:
+            - build_jar
           filters:
             branches:
               only: master
