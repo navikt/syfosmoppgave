@@ -31,6 +31,7 @@ workflows:
   build_and_deploy:
     jobs:
       - build_jar:
+          context: barkendeploy
           filters:
             branches:
               only: master
