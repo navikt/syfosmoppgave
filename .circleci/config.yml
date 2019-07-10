@@ -20,14 +20,6 @@ jobs:
       - run:
           name: Build and publish Docker image
           command: docker build -t docker.pkg.github.com/navikt/${CIRCLE_PROJECT_REPONAME}:${IMAGE_VERSION} .
-  create_deployment:
-    docker:
-      - image: "navikt/deployment-cli:v0.1.8"
-    steps:
-      - barkendeploy/workspace-restore
-      - barkendeploy/load-persisted-env
-      - barkendeploy/deploy-create:
-          cluster: dev-fss
 workflows:
   version: 2
   build_and_deploy:
@@ -36,7 +28,8 @@ workflows:
           filters:
             branches:
               only: master
-      - create_deployment:
+      - barkendeploy/deploy-publish:
+          cluster: dev-fss
           context: barkendeploy
           requires:
             - build_jar
