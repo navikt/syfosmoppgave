@@ -18,7 +18,7 @@ val logbackVersion = "1.2.3"
 val mockitoKotlinVersion = "2.0.0-RC1"
 val prometheusVersion = "0.6.0"
 val spekVersion = "2.0.2"
-val smCommonVersion = "1.0.20"
+val smCommonVersion = "1.0.22"
 
 plugins {
     id("org.jmailen.kotlinter") version "1.21.0"
@@ -30,11 +30,11 @@ plugins {
 repositories {
     mavenCentral()
     jcenter()
-    maven ( url = "https://dl.bintray.com/kotlin/ktor")
-    maven ( url = "http://packages.confluent.io/maven/")
-    maven ( url = "https://repo.adeo.no/repository/maven-releases/")
-    maven ( url =  "https://dl.bintray.com/spekframework/spek-dev")
-    maven ( url = "https://kotlin.bintray.com/kotlinx")
+    maven(url = "https://oss.sonatype.org/content/groups/staging/")
+    maven(url = "https://dl.bintray.com/kotlin/ktor")
+    maven(url = "http://packages.confluent.io/maven/")
+    maven(url = "https://dl.bintray.com/spekframework/spek-dev")
+    maven(url = "https://kotlin.bintray.com/kotlinx")
 }
 
 dependencies {
@@ -72,9 +72,7 @@ dependencies {
 
     testImplementation("org.amshove.kluent:kluent:$kluentVersion")
     testImplementation("org.spekframework.spek2:spek-dsl-jvm:$spekVersion")
-    testImplementation("io.ktor:ktor-server-test-host:$ktorVersion") {
-        exclude(group = "org.eclipse.jetty") // conflicts with WireMock
-    }
+    testImplementation("io.ktor:ktor-server-test-host:$ktorVersion")
     testImplementation("no.nav:kafka-embedded-env:$kafkaEmbeddedVersion")
     testImplementation("com.nhaarman.mockitokotlin2:mockito-kotlin:$mockitoKotlinVersion")
 
