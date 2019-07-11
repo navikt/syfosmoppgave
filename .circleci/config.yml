@@ -1,6 +1,7 @@
 version: 2.1
 orbs:
   barkendeploy: navikt/barkendeploy@dev:master
+  slack: circleci/slack@3.2.0
 jobs:
   build_jar:
     docker:
@@ -39,6 +40,23 @@ workflows:
           context: barkendeploy
           requires:
             - build_jar
+  build_branch:
+    jobs:
+      - build_jar:
+          context: barkendeploy
           filters:
-            branches:
-              only: master
+            ignore: master
+      - slack/approval-notification:
+          name: deploy_branch
+          mentions: here
+          message: Repoet ${CIRCLE_PROJECT_REPONAME} trenger godkjennelse for å deploye branchen ${CIRCLE_BRANCH} til dev-fss
+          requires:
+            - build_jar
+      - await_approval_branch:
+          type: approval
+          requires:
+            - build_jar
+      - barkendeploy/deployment:
+          context: barkendeploy
+          requires:
+            - await_approval_branch
