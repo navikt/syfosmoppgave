@@ -48,6 +48,7 @@ workflows:
             branches:
               ignore: master
       - slack/approval-notification:
+          context: barkendeploy
           name: deploy_branch
           mentions: here
           message: Repoet ${CIRCLE_PROJECT_REPONAME} trenger godkjennelse for å deploye branchen ${CIRCLE_BRANCH} til dev-fss
