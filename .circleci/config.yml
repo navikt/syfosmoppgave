@@ -45,7 +45,8 @@ workflows:
       - build_jar:
           context: barkendeploy
           filters:
-            ignore: master
+            branches:
+              ignore: master
       - slack/approval-notification:
           name: deploy_branch
           mentions: here
