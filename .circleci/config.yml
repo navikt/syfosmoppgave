@@ -8,8 +8,7 @@ jobs:
     steps:
       - checkout
       - setup_remote_docker
-      - barkendeploy/init:
-          version_format: ${CIRCLE_SHA1}
+      - barkendeploy/init
       - barkendeploy/gradle-cache-restore
 #      - run:
 #          name: Run tests
@@ -31,8 +30,12 @@ workflows:
           filters:
             branches:
               only: master
-      - barkendeploy/deploy-publish:
-          cluster: dev-fss
+      - barkendeploy/deployment:
+          deployments:
+            - barkendeploy/deploy-create:
+                cluster: prod-fss
+            - barkendeploy/deploy-create:
+                cluster: dev-fss
           context: barkendeploy
           requires:
             - build_jar
