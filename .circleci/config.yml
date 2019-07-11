@@ -59,5 +59,8 @@ workflows:
             - build_jar
       - barkendeploy/deployment:
           context: barkendeploy
+          deployments:
+            - barkendeploy/deploy-create:
+              cluster: dev-fss
           requires:
             - await_approval_branch
