@@ -61,6 +61,6 @@ workflows:
           context: barkendeploy
           deployments:
             - barkendeploy/deploy-create:
-              cluster: dev-fss
+                cluster: dev-fss
           requires:
             - await_approval_branch
