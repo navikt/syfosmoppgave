@@ -17,8 +17,9 @@ val logstashEncoderVersion = "5.2"
 val logbackVersion = "1.2.3"
 val mockitoKotlinVersion = "2.0.0-RC1"
 val prometheusVersion = "0.6.0"
-val spekVersion = "2.0.2"
 val smCommonVersion = "1.0.22"
+val spekVersion = "2.0.2"
+val syfoAvroSchemasVersion = "c8be932543e7356a34690ce7979d494c5d8516d8"
 
 plugins {
     id("org.jmailen.kotlinter") version "1.21.0"
@@ -38,8 +39,6 @@ repositories {
 }
 
 dependencies {
-    implementation(project(":syfooppgave-schemas"))
-
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
 
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion")
@@ -60,6 +59,8 @@ dependencies {
     implementation("no.nav.syfo.sm:syfosm-common-kafka:$smCommonVersion")
     implementation("no.nav.syfo.sm:syfosm-common-rest-sts:$smCommonVersion")
     implementation("no.nav.syfo.sm:syfosm-common-networking:$smCommonVersion")
+
+    implementation("no.nav.syfo.schemas:syfosmoppgave-avro:$syfoAvroSchemasVersion")
 
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVersion")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonVersion")
