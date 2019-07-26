@@ -19,6 +19,7 @@ import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import net.logstash.logback.argument.StructuredArguments.fields
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.syfo.api.registerNaisApi
 import no.nav.syfo.client.OppgaveClient
@@ -36,8 +37,7 @@ import org.apache.kafka.streams.KafkaStreams
 import org.apache.kafka.streams.StreamsBuilder
 import org.apache.kafka.streams.kstream.JoinWindows
 import org.slf4j.LoggerFactory
-import java.nio.file.Files
-import java.nio.file.Paths
+import java.io.File
 import java.time.Duration
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -45,7 +45,7 @@ import java.util.Properties
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
-data class ApplicationState(var running: Boolean = true, var initialized: Boolean = false)
+data class ApplicationState(var running: Boolean = true, var ready: Boolean = false)
 
 private val log = LoggerFactory.getLogger("nav.syfo.oppgave")
 val objectMapper: ObjectMapper = ObjectMapper()
@@ -53,12 +53,12 @@ val objectMapper: ObjectMapper = ObjectMapper()
         .registerKotlinModule()
         .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
 
-val coroutineContext = Executors.newFixedThreadPool(2).asCoroutineDispatcher()
+val coroutineContext = Executors.newFixedThreadPool(4).asCoroutineDispatcher()
 
 @KtorExperimentalAPI
 fun main() = runBlocking(coroutineContext) {
     val env = Environment()
-    val credentials = objectMapper.readValue<Credentials>(Files.newInputStream(Paths.get("/var/run/secrets/nais.io/vault/credentials.json")))
+    val credentials = objectMapper.readValue<Credentials>(File("/var/run/secrets/nais.io/vault/credentials.json"))
     val applicationState = ApplicationState()
 
     val applicationServer = embeddedServer(Netty, env.applicationPort) {
@@ -103,14 +103,18 @@ fun createKafkaStream(streamProperties: Properties, env: Environment): KafkaStre
     return KafkaStreams(streamsBuilder.build(), streamProperties)
 }
 
-fun CoroutineScope.createListener(applicationState: ApplicationState, action: suspend CoroutineScope.() -> Unit): Job =
-        launch {
-            try {
-                action()
-            } finally {
-                applicationState.running = false
-            }
-        }
+fun CoroutineScope.createListener(
+    applicationState: ApplicationState,
+    action: suspend CoroutineScope.() -> Unit
+): Job = launch {
+    try {
+        action()
+    } catch (e: TrackableException) {
+        log.error("En uhåndtert feil oppstod, applikasjonen restarter {}", fields(e.loggingMeta), e.cause)
+    } finally {
+        applicationState.running = false
+    }
+}
 
 @KtorExperimentalAPI
 suspend fun CoroutineScope.launchListeners(
@@ -123,15 +127,14 @@ suspend fun CoroutineScope.launchListeners(
     val oppgaveListeners = 0.until(env.applicationThreads).map {
         val kafkaconsumerOppgave = KafkaConsumer<String, RegisterTask>(consumerProperties)
 
-        kafkaconsumerOppgave.subscribe(
-                listOf("privat-syfo-oppgave-registrerOppgave")
-        )
+        kafkaconsumerOppgave.subscribe(listOf("privat-syfo-oppgave-registrerOppgave"))
+
         createListener(applicationState) {
             blockingApplicationLogic(applicationState, kafkaconsumerOppgave, oppgaveClient)
         }
     }.toList()
 
-    applicationState.initialized = true
+    applicationState.ready = true
     oppgaveListeners.forEach { it.join() }
 }
 
@@ -142,57 +145,61 @@ suspend fun blockingApplicationLogic(
     oppgaveClient: OppgaveClient
 ) {
     while (applicationState.running) {
-        var logValues = arrayOf(
-                keyValue("orgNr", "missing"),
-                keyValue("msgId", "missing"),
-                keyValue("sykmeldingId", "missing")
-        )
-
-        val logKeys = logValues.joinToString(prefix = "(", postfix = ")", separator = ",") {
-            "{}"
-        }
-
         kafkaConsumer.poll(Duration.ofMillis(0)).forEach {
-                val produceTask = it.value().produceTask
-                val registerJournal = it.value().registerJournal
-                logValues = arrayOf(
-                        keyValue("sykmeldingId", it.key()),
-                        keyValue("orgNr", produceTask.orgnr),
-                        keyValue("msgId", registerJournal.messageId)
-                )
-                log.info("Received a SM2013, going to create oppgave, $logKeys", *logValues)
-                val opprettOppgave = OpprettOppgave(
-                        tildeltEnhetsnr = produceTask.tildeltEnhetsnr,
-                        aktoerId = produceTask.aktoerId,
-                        opprettetAvEnhetsnr = produceTask.opprettetAvEnhetsnr,
-                        journalpostId = registerJournal.journalpostId,
-                        behandlesAvApplikasjon = produceTask.behandlesAvApplikasjon,
-                        saksreferanse = registerJournal.sakId,
-                        beskrivelse = produceTask.beskrivelse,
-                        tema = produceTask.tema,
-                        oppgavetype = produceTask.oppgavetype,
-                        aktivDato = LocalDate.parse(produceTask.aktivDato, DateTimeFormatter.ISO_DATE),
-                        fristFerdigstillelse = LocalDate.parse(produceTask.fristFerdigstillelse, DateTimeFormatter.ISO_DATE),
-                        prioritet = produceTask.prioritet.name
-                )
+            val produceTask = it.value().produceTask
+            val registerJournal = it.value().registerJournal
 
-                val response = oppgaveClient.createOppgave(opprettOppgave, registerJournal.messageId)
-                OPPRETT_OPPGAVE_COUNTER.inc()
-                log.info("Task created with {} $logKeys",
-                        keyValue("oppgaveId", response.id),
-                        keyValue("sakid", registerJournal.sakId),
-                        keyValue("journalpost", registerJournal.journalpostId),
-                        keyValue("tildeltEnhetsnr", produceTask.tildeltEnhetsnr),
-                        *logValues)
+            val loggingMeta = LoggingMeta(
+                    orgNr = produceTask.orgnr,
+                    msgId = registerJournal.messageId,
+                    sykmeldingId = it.key()
+            )
+
+            wrapExceptions(loggingMeta) {
+                handleRegisterOppgaveRequest(oppgaveClient, produceTask, registerJournal, loggingMeta)
+            }
         }
         delay(100)
     }
 }
 
+@KtorExperimentalAPI
+suspend fun handleRegisterOppgaveRequest(
+    oppgaveClient: OppgaveClient,
+    produceTask: ProduceTask,
+    registerJournal: RegisterJournal,
+    loggingMeta: LoggingMeta
+) {
+    log.info("Received a SM2013, going to create oppgave, {}", fields(loggingMeta))
+    val opprettOppgave = OpprettOppgave(
+            tildeltEnhetsnr = produceTask.tildeltEnhetsnr,
+            aktoerId = produceTask.aktoerId,
+            opprettetAvEnhetsnr = produceTask.opprettetAvEnhetsnr,
+            journalpostId = registerJournal.journalpostId,
+            behandlesAvApplikasjon = produceTask.behandlesAvApplikasjon,
+            saksreferanse = registerJournal.sakId,
+            beskrivelse = produceTask.beskrivelse,
+            tema = produceTask.tema,
+            oppgavetype = produceTask.oppgavetype,
+            aktivDato = LocalDate.parse(produceTask.aktivDato, DateTimeFormatter.ISO_DATE),
+            fristFerdigstillelse = LocalDate.parse(produceTask.fristFerdigstillelse, DateTimeFormatter.ISO_DATE),
+            prioritet = produceTask.prioritet.name
+    )
+
+    val response = oppgaveClient.createOppgave(opprettOppgave, registerJournal.messageId)
+    OPPRETT_OPPGAVE_COUNTER.inc()
+    log.info("Task created with {}, {}, {}, {} {}",
+            keyValue("oppgaveId", response.id),
+            keyValue("sakid", registerJournal.sakId),
+            keyValue("journalpost", registerJournal.journalpostId),
+            keyValue("tildeltEnhetsnr", produceTask.tildeltEnhetsnr),
+            fields(loggingMeta))
+}
+
 fun Application.initRouting(applicationState: ApplicationState) {
     routing {
         registerNaisApi(
-                readynessCheck = { applicationState.initialized },
+                readynessCheck = { applicationState.ready },
                 livenessCheck = { applicationState.running }
         )
     }
