@@ -16,7 +16,7 @@ val logstashEncoderVersion = "6.1"
 val logbackVersion = "1.2.3"
 val mockitoKotlinVersion = "2.1.0"
 val prometheusVersion = "0.6.0"
-val smCommonVersion = "1.0.22"
+val smCommonVersion = "2019.08.08-01-39-335c0ead0c5ce381bb9d1a58feea76d68a50231d"
 val spekVersion = "2.0.5"
 val syfoAvroSchemasVersion = "c8be932543e7356a34690ce7979d494c5d8516d8"
 
