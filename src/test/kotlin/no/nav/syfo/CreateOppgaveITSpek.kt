@@ -7,13 +7,15 @@ import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import com.nhaarman.mockitokotlin2.timeout
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
-import com.nhaarman.mockitokotlin2.timeout
-import com.nhaarman.mockitokotlin2.verify
 import io.confluent.kafka.serializers.KafkaAvroDeserializer
 import io.confluent.kafka.serializers.KafkaAvroSerializer
 import io.confluent.kafka.streams.serdes.avro.GenericAvroSerde
 import io.ktor.application.call
 import io.ktor.application.install
+import io.ktor.client.HttpClient
+import io.ktor.client.engine.apache.Apache
+import io.ktor.client.features.json.JacksonSerializer
+import io.ktor.client.features.json.JsonFeature
 import io.ktor.features.ContentNegotiation
 import io.ktor.jackson.jackson
 import io.ktor.response.respond
@@ -45,7 +47,7 @@ import org.apache.kafka.streams.StreamsConfig
 import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe
 import java.net.ServerSocket
-import java.util.Properties
+import java.util.*
 import java.util.concurrent.TimeUnit
 
 @KtorExperimentalAPI
@@ -130,8 +132,18 @@ object CreateOppgaveITSpek : Spek({
         val registrerOppgaveConsumer = KafkaConsumer<String, RegisterTask>(consumerProperties)
         registrerOppgaveConsumer.subscribe(listOf(registrerOppgaveTopic))
 
+        val httpClient = HttpClient(Apache) {
+            install(JsonFeature) {
+                serializer = JacksonSerializer {
+                    registerKotlinModule()
+                    registerModule(JavaTimeModule())
+                    configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
+                    configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+                }
+            }
+        }
         val stsClient = StsOidcClient(credentials.serviceuserUsername, credentials.serviceuserPassword, env.securityTokenServiceUrl)
-        val oppgaveClient = OppgaveClient(env.oppgavebehandlingUrl, stsClient)
+        val oppgaveClient = OppgaveClient(env.oppgavebehandlingUrl, stsClient, httpClient)
 
         beforeGroup {
             cleanupDir(kafkaStreamsStateDir, streamsApplicationName)
