@@ -18,6 +18,26 @@ data class OpprettOppgave(
     val prioritet: String
 )
 
-data class OppgaveResponse(
+data class OpprettOppgaveResponse(
     val id: Int
+)
+
+data class OppgaveResponse(
+    val antallTreffTotalt: Int,
+    val oppgaver: List<Oppgave>
+)
+
+data class Oppgave(
+    val id: Int,
+    val tildeltEnhetsnr: String?,
+    val aktoerId: String?,
+    val journalpostId: String?,
+    val saksreferanse: String?,
+    val tema: String?,
+    val oppgavetype: String?
+)
+
+data class OppgaveResultat(
+    val oppgaveId: Int,
+    val duplikat: Boolean
 )

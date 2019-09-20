@@ -41,6 +41,7 @@ import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.apache.kafka.streams.KafkaStreams
 import org.apache.kafka.streams.StreamsBuilder
 import org.apache.kafka.streams.kstream.JoinWindows
+import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.time.Duration
@@ -52,7 +53,7 @@ import java.util.concurrent.TimeUnit
 
 data class ApplicationState(var running: Boolean = true, var ready: Boolean = false)
 
-private val log = LoggerFactory.getLogger("nav.syfo.oppgave")
+val log: Logger = LoggerFactory.getLogger("nav.syfo.oppgave")
 val objectMapper: ObjectMapper = ObjectMapper()
         .registerModule(JavaTimeModule())
         .registerKotlinModule()
@@ -201,14 +202,16 @@ suspend fun handleRegisterOppgaveRequest(
             prioritet = produceTask.prioritet.name
     )
 
-    val response = oppgaveClient.createOppgave(opprettOppgave, registerJournal.messageId)
-    OPPRETT_OPPGAVE_COUNTER.inc()
-    log.info("Task created with {}, {}, {}, {} {}",
-            keyValue("oppgaveId", response.id),
+    val oppgaveResultat = oppgaveClient.opprettOppgave(opprettOppgave, registerJournal.messageId, loggingMeta)
+    if (!oppgaveResultat.duplikat) {
+        OPPRETT_OPPGAVE_COUNTER.inc()
+        log.info("Opprettet oppgave med {}, {}, {}, {} {}",
+            keyValue("oppgaveId", oppgaveResultat.oppgaveId),
             keyValue("sakid", registerJournal.sakId),
             keyValue("journalpost", registerJournal.journalpostId),
             keyValue("tildeltEnhetsnr", produceTask.tildeltEnhetsnr),
             fields(loggingMeta))
+    }
 }
 
 fun Application.initRouting(applicationState: ApplicationState) {

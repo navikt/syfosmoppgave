@@ -36,6 +36,7 @@ import no.nav.syfo.kafka.toProducerConfig
 import no.nav.syfo.kafka.toStreamsConfig
 import no.nav.syfo.model.OidcToken
 import no.nav.syfo.model.OppgaveResponse
+import no.nav.syfo.model.OpprettOppgaveResponse
 import no.nav.syfo.sak.avro.ProduceTask
 import no.nav.syfo.sak.avro.RegisterJournal
 import no.nav.syfo.sak.avro.RegisterTask
@@ -47,14 +48,15 @@ import org.apache.kafka.streams.StreamsConfig
 import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe
 import java.net.ServerSocket
-import java.util.*
+import java.util.Properties
 import java.util.concurrent.TimeUnit
 
 @KtorExperimentalAPI
 object CreateOppgaveITSpek : Spek({
     describe("A full bootstrapped environment") {
         val streamsApplicationName = "spek.integration"
-        val oppgaveMock = mock<() -> OppgaveResponse>()
+        val opprettOppgaveMock = mock<() -> OpprettOppgaveResponse>()
+        val hentOppgaveMock = mock<() -> OppgaveResponse>()
 
         val mockPort = ServerSocket(0).use {
             it.localPort
@@ -75,7 +77,11 @@ object CreateOppgaveITSpek : Spek({
             }
             routing {
                 post("/oppgave_mock") {
-                    call.respond(oppgaveMock())
+                    call.respond(opprettOppgaveMock())
+                }
+
+                get("/oppgave_mock") {
+                    call.respond(hentOppgaveMock())
                 }
 
                 get("/sts_mock") {
@@ -169,12 +175,13 @@ object CreateOppgaveITSpek : Spek({
             val registerJournal = createRegisterJournal(msgId)
             val produceTask = createProduceTask(msgId)
 
-            whenever(oppgaveMock()).thenReturn(createOppgaveResponse())
+            whenever(opprettOppgaveMock()).thenReturn(createOpprettOppgaveResponse())
+            whenever(hentOppgaveMock()).thenReturn(createOppgaveResponse())
 
             journalOpprettet.send(ProducerRecord(journalOpprettetTopic, msgId, registerJournal))
             produserOppgave.send(ProducerRecord(produserOppgaveTopic, msgId, produceTask))
 
-            verify(oppgaveMock, timeout(10000).times(1))()
+            verify(opprettOppgaveMock, timeout(10000).times(1))()
         }
     }
 })
