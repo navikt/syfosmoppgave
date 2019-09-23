@@ -14,7 +14,6 @@ val kluentVersion = "1.52"
 val ktorVersion = "1.2.3"
 val logstashEncoderVersion = "6.1"
 val logbackVersion = "1.2.3"
-val mockitoKotlinVersion = "2.1.0"
 val prometheusVersion = "0.6.0"
 val smCommonVersion = "2019.09.03-11-07-64032e3b6381665e9f9c0914cef626331399e66d"
 val spekVersion = "2.0.5"
@@ -70,11 +69,11 @@ dependencies {
     implementation("org.apache.kafka:kafka_2.12:$kafkaVersion")
     implementation("org.apache.kafka:kafka-streams:$kafkaVersion")
 
+    testImplementation ("io.mockk:mockk:1.9.3")
     testImplementation("org.amshove.kluent:kluent:$kluentVersion")
     testImplementation("org.spekframework.spek2:spek-dsl-jvm:$spekVersion")
     testImplementation("io.ktor:ktor-server-test-host:$ktorVersion")
     testImplementation("no.nav:kafka-embedded-env:$kafkaEmbeddedVersion")
-    testImplementation("com.nhaarman.mockitokotlin2:mockito-kotlin:$mockitoKotlinVersion")
 
     testRuntimeOnly("org.spekframework.spek2:spek-runtime-jvm:$spekVersion")
     testRuntimeOnly("org.spekframework.spek2:spek-runner-junit5:$spekVersion"){

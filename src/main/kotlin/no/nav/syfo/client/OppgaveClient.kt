@@ -48,10 +48,10 @@ class OppgaveClient constructor(private val url: String, private val oidcClient:
     suspend fun opprettOppgave(opprettOppgave: OpprettOppgave, msgId: String, loggingMeta: LoggingMeta): OppgaveResultat {
         val oppgaveResponse = hentOppgave(opprettOppgave, msgId)
         if (oppgaveResponse.antallTreffTotalt > 0) {
-            log.info("Det finnes allerede en åpen oppgave for journalpost ${opprettOppgave.journalpostId} på brukeren, {}", fields(loggingMeta))
+            log.info("Det finnes allerede en åpen oppgave for journalpost {} på brukeren, {}", opprettOppgave.journalpostId, fields(loggingMeta))
             return OppgaveResultat(oppgaveResponse.oppgaver.first().id, true)
         }
-        log.info("Oppretter oppgave på enhet ${opprettOppgave.tildeltEnhetsnr}, {}", fields(loggingMeta))
+        log.info("Oppretter oppgave på enhet {}, {}", opprettOppgave.tildeltEnhetsnr, fields(loggingMeta))
         return OppgaveResultat(opprettOppgave(opprettOppgave, msgId).id, false)
     }
 }
