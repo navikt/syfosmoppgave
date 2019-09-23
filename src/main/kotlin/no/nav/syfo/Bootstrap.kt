@@ -1,5 +1,6 @@
 package no.nav.syfo
 
+import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
@@ -8,6 +9,10 @@ import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import io.confluent.kafka.serializers.KafkaAvroDeserializer
 import io.confluent.kafka.streams.serdes.avro.GenericAvroSerde
 import io.ktor.application.Application
+import io.ktor.client.HttpClient
+import io.ktor.client.engine.apache.Apache
+import io.ktor.client.features.json.JacksonSerializer
+import io.ktor.client.features.json.JsonFeature
 import io.ktor.routing.routing
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
@@ -36,6 +41,7 @@ import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.apache.kafka.streams.KafkaStreams
 import org.apache.kafka.streams.StreamsBuilder
 import org.apache.kafka.streams.kstream.JoinWindows
+import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.time.Duration
@@ -47,7 +53,7 @@ import java.util.concurrent.TimeUnit
 
 data class ApplicationState(var running: Boolean = true, var ready: Boolean = false)
 
-private val log = LoggerFactory.getLogger("nav.syfo.oppgave")
+val log: Logger = LoggerFactory.getLogger("nav.syfo.oppgave")
 val objectMapper: ObjectMapper = ObjectMapper()
         .registerModule(JavaTimeModule())
         .registerKotlinModule()
@@ -72,8 +78,18 @@ fun main() = runBlocking(coroutineContext) {
 
     kafkaStream.start()
 
+    val httpClient = HttpClient(Apache) {
+        install(JsonFeature) {
+            serializer = JacksonSerializer {
+                registerKotlinModule()
+                registerModule(JavaTimeModule())
+                configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
+                configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+            }
+        }
+    }
     val oidcClient = StsOidcClient(credentials.serviceuserUsername, credentials.serviceuserPassword)
-    val oppgaveClient = OppgaveClient(env.oppgavebehandlingUrl, oidcClient)
+    val oppgaveClient = OppgaveClient(env.oppgavebehandlingUrl, oidcClient, httpClient)
 
     launchListeners(env, consumerProperties, applicationState, oppgaveClient)
 
@@ -186,14 +202,16 @@ suspend fun handleRegisterOppgaveRequest(
             prioritet = produceTask.prioritet.name
     )
 
-    val response = oppgaveClient.createOppgave(opprettOppgave, registerJournal.messageId)
-    OPPRETT_OPPGAVE_COUNTER.inc()
-    log.info("Task created with {}, {}, {}, {} {}",
-            keyValue("oppgaveId", response.id),
+    val oppgaveResultat = oppgaveClient.opprettOppgave(opprettOppgave, registerJournal.messageId, loggingMeta)
+    if (!oppgaveResultat.duplikat) {
+        OPPRETT_OPPGAVE_COUNTER.inc()
+        log.info("Opprettet oppgave med {}, {}, {}, {} {}",
+            keyValue("oppgaveId", oppgaveResultat.oppgaveId),
             keyValue("sakid", registerJournal.sakId),
             keyValue("journalpost", registerJournal.journalpostId),
             keyValue("tildeltEnhetsnr", produceTask.tildeltEnhetsnr),
             fields(loggingMeta))
+    }
 }
 
 fun Application.initRouting(applicationState: ApplicationState) {

@@ -1,6 +1,5 @@
 package no.nav.syfo
 
-import no.nav.syfo.model.OppgaveResponse
 import no.nav.syfo.sak.avro.PrioritetType
 import no.nav.syfo.sak.avro.ProduceTask
 import no.nav.syfo.sak.avro.RegisterJournal
@@ -44,10 +43,6 @@ fun createProduceTask(msgId: String) = ProduceTask().apply {
     prioritet = PrioritetType.NORM
     metadata = mapOf()
 }
-
-fun createOppgaveResponse(): OppgaveResponse = OppgaveResponse(
-        id = 21312313
-)
 
 fun createRegisterJournal(msgId: String) = RegisterJournal().apply {
     messageId = msgId
