@@ -8,25 +8,22 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import io.confluent.kafka.serializers.KafkaAvroDeserializer
 import io.confluent.kafka.streams.serdes.avro.GenericAvroSerde
-import io.ktor.application.Application
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.apache.Apache
 import io.ktor.client.features.json.JacksonSerializer
 import io.ktor.client.features.json.JsonFeature
-import io.ktor.routing.routing
-import io.ktor.server.engine.embeddedServer
-import io.ktor.server.netty.Netty
 import io.ktor.util.KtorExperimentalAPI
 import kafka.server.KafkaConfig
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import net.logstash.logback.argument.StructuredArguments.fields
 import net.logstash.logback.argument.StructuredArguments.keyValue
-import no.nav.syfo.api.registerNaisApi
+import no.nav.syfo.application.ApplicationServer
+import no.nav.syfo.application.ApplicationState
+import no.nav.syfo.application.createApplicationEngine
 import no.nav.syfo.client.OppgaveClient
 import no.nav.syfo.client.StsOidcClient
 import no.nav.syfo.kafka.loadBaseConfig
@@ -48,10 +45,7 @@ import java.time.Duration
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Properties
-import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
-
-data class ApplicationState(var running: Boolean = true, var ready: Boolean = false)
 
 val log: Logger = LoggerFactory.getLogger("nav.syfo.oppgave")
 val objectMapper: ObjectMapper = ObjectMapper()
@@ -59,17 +53,15 @@ val objectMapper: ObjectMapper = ObjectMapper()
         .registerKotlinModule()
         .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
 
-val coroutineContext = Executors.newFixedThreadPool(4).asCoroutineDispatcher()
-
 @KtorExperimentalAPI
-fun main() = runBlocking(coroutineContext) {
+fun main() {
     val env = Environment()
     val credentials = objectMapper.readValue<Credentials>(File("/var/run/secrets/nais.io/vault/credentials.json"))
-    val applicationState = ApplicationState()
 
-    val applicationServer = embeddedServer(Netty, env.applicationPort) {
-        initRouting(applicationState)
-    }.start(wait = false)
+    val applicationState = ApplicationState()
+    val applicationEngine = createApplicationEngine(env, applicationState)
+    val applicationServer = ApplicationServer(applicationEngine)
+    applicationServer.start()
 
     val kafkaBaseConfig = loadBaseConfig(env, credentials)
     val consumerProperties = kafkaBaseConfig.toConsumerConfig("${env.applicationName}-consumer", valueDeserializer = KafkaAvroDeserializer::class)
@@ -91,12 +83,9 @@ fun main() = runBlocking(coroutineContext) {
     val oidcClient = StsOidcClient(credentials.serviceuserUsername, credentials.serviceuserPassword)
     val oppgaveClient = OppgaveClient(env.oppgavebehandlingUrl, oidcClient, httpClient)
 
-    launchListeners(env, consumerProperties, applicationState, oppgaveClient)
+    launchListeners(consumerProperties, applicationState, oppgaveClient)
 
-    Runtime.getRuntime().addShutdownHook(Thread {
-        kafkaStream.close()
-        applicationServer.stop(10, 10, TimeUnit.SECONDS)
-    })
+    applicationState.ready = true
 }
 
 fun createKafkaStream(streamProperties: Properties, env: Environment): KafkaStreams {
@@ -119,39 +108,31 @@ fun createKafkaStream(streamProperties: Properties, env: Environment): KafkaStre
     return KafkaStreams(streamsBuilder.build(), streamProperties)
 }
 
-fun CoroutineScope.createListener(
+fun createListener(
     applicationState: ApplicationState,
     action: suspend CoroutineScope.() -> Unit
-): Job = launch {
+): Job =  GlobalScope.launch {
     try {
         action()
     } catch (e: TrackableException) {
         log.error("En uhåndtert feil oppstod, applikasjonen restarter {}", fields(e.loggingMeta), e.cause)
     } finally {
-        applicationState.running = false
+        applicationState.alive = false
     }
 }
 
 @KtorExperimentalAPI
-suspend fun CoroutineScope.launchListeners(
-    env: Environment,
+fun launchListeners(
     consumerProperties: Properties,
     applicationState: ApplicationState,
     oppgaveClient: OppgaveClient
 ) {
-
-    val oppgaveListeners = 0.until(env.applicationThreads).map {
-        val kafkaconsumerOppgave = KafkaConsumer<String, RegisterTask>(consumerProperties)
-
-        kafkaconsumerOppgave.subscribe(listOf("privat-syfo-oppgave-registrerOppgave"))
-
         createListener(applicationState) {
+            val kafkaconsumerOppgave = KafkaConsumer<String, RegisterTask>(consumerProperties)
+
+            kafkaconsumerOppgave.subscribe(listOf("privat-syfo-oppgave-registrerOppgave"))
             blockingApplicationLogic(applicationState, kafkaconsumerOppgave, oppgaveClient)
         }
-    }.toList()
-
-    applicationState.ready = true
-    oppgaveListeners.forEach { it.join() }
 }
 
 @KtorExperimentalAPI
@@ -160,7 +141,7 @@ suspend fun blockingApplicationLogic(
     kafkaConsumer: KafkaConsumer<String, RegisterTask>,
     oppgaveClient: OppgaveClient
 ) {
-    while (applicationState.running) {
+    while (applicationState.ready) {
         kafkaConsumer.poll(Duration.ofMillis(0)).forEach {
             val produceTask = it.value().produceTask
             val registerJournal = it.value().registerJournal
@@ -211,14 +192,5 @@ suspend fun handleRegisterOppgaveRequest(
             keyValue("journalpost", registerJournal.journalpostId),
             keyValue("tildeltEnhetsnr", produceTask.tildeltEnhetsnr),
             fields(loggingMeta))
-    }
-}
-
-fun Application.initRouting(applicationState: ApplicationState) {
-    routing {
-        registerNaisApi(
-                readynessCheck = { applicationState.ready },
-                livenessCheck = { applicationState.running }
-        )
     }
 }
