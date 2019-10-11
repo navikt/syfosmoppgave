@@ -13,6 +13,12 @@ import io.ktor.client.engine.apache.Apache
 import io.ktor.client.features.json.JacksonSerializer
 import io.ktor.client.features.json.JsonFeature
 import io.ktor.util.KtorExperimentalAPI
+import java.io.File
+import java.time.Duration
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.util.Properties
+import java.util.concurrent.TimeUnit
 import kafka.server.KafkaConfig
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.GlobalScope
@@ -40,14 +46,8 @@ import org.apache.kafka.streams.StreamsBuilder
 import org.apache.kafka.streams.kstream.JoinWindows
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import java.io.File
-import java.time.Duration
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
-import java.util.Properties
-import java.util.concurrent.TimeUnit
 
-val log: Logger = LoggerFactory.getLogger("nav.syfo.oppgave")
+val log: Logger = LoggerFactory.getLogger("no.nav.syfo.smmoppgave")
 val objectMapper: ObjectMapper = ObjectMapper()
         .registerModule(JavaTimeModule())
         .registerKotlinModule()
@@ -111,7 +111,7 @@ fun createKafkaStream(streamProperties: Properties, env: Environment): KafkaStre
 fun createListener(
     applicationState: ApplicationState,
     action: suspend CoroutineScope.() -> Unit
-): Job =  GlobalScope.launch {
+): Job = GlobalScope.launch {
     try {
         action()
     } catch (e: TrackableException) {
@@ -127,12 +127,12 @@ fun launchListeners(
     applicationState: ApplicationState,
     oppgaveClient: OppgaveClient
 ) {
-        createListener(applicationState) {
-            val kafkaconsumerOppgave = KafkaConsumer<String, RegisterTask>(consumerProperties)
+    createListener(applicationState) {
+        val kafkaconsumerOppgave = KafkaConsumer<String, RegisterTask>(consumerProperties)
 
-            kafkaconsumerOppgave.subscribe(listOf("privat-syfo-oppgave-registrerOppgave"))
-            blockingApplicationLogic(applicationState, kafkaconsumerOppgave, oppgaveClient)
-        }
+        kafkaconsumerOppgave.subscribe(listOf("privat-syfo-oppgave-registrerOppgave"))
+        blockingApplicationLogic(applicationState, kafkaconsumerOppgave, oppgaveClient)
+    }
 }
 
 @KtorExperimentalAPI
@@ -187,10 +187,10 @@ suspend fun handleRegisterOppgaveRequest(
     if (!oppgaveResultat.duplikat) {
         OPPRETT_OPPGAVE_COUNTER.inc()
         log.info("Opprettet oppgave med {}, {}, {}, {} {}",
-            keyValue("oppgaveId", oppgaveResultat.oppgaveId),
-            keyValue("sakid", registerJournal.sakId),
-            keyValue("journalpost", registerJournal.journalpostId),
-            keyValue("tildeltEnhetsnr", produceTask.tildeltEnhetsnr),
-            fields(loggingMeta))
+                keyValue("oppgaveId", oppgaveResultat.oppgaveId),
+                keyValue("sakid", registerJournal.sakId),
+                keyValue("journalpost", registerJournal.journalpostId),
+                keyValue("tildeltEnhetsnr", produceTask.tildeltEnhetsnr),
+                fields(loggingMeta))
     }
 }
