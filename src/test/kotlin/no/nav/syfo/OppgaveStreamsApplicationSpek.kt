@@ -3,6 +3,8 @@ package no.nav.syfo
 import io.confluent.kafka.serializers.KafkaAvroDeserializer
 import io.confluent.kafka.serializers.KafkaAvroSerializer
 import io.confluent.kafka.streams.serdes.avro.GenericAvroSerde
+import java.time.Duration
+import java.util.Properties
 import no.nav.common.KafkaEnvironment
 import no.nav.syfo.kafka.loadBaseConfig
 import no.nav.syfo.kafka.toConsumerConfig
@@ -18,8 +20,6 @@ import org.apache.kafka.clients.producer.ProducerRecord
 import org.apache.kafka.streams.StreamsConfig
 import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe
-import java.time.Duration
-import java.util.Properties
 
 object OppgaveStreamsApplicationSpek : Spek({
     describe("A full bootstrapped environment") {

@@ -22,6 +22,10 @@ import io.ktor.server.netty.Netty
 import io.ktor.util.KtorExperimentalAPI
 import io.mockk.coEvery
 import io.mockk.mockk
+import java.net.ServerSocket
+import java.time.LocalDate
+import java.time.Month
+import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.runBlocking
 import no.nav.syfo.LoggingMeta
 import no.nav.syfo.model.Oppgave
@@ -32,10 +36,6 @@ import no.nav.syfo.model.OpprettOppgaveResponse
 import org.amshove.kluent.shouldEqual
 import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe
-import java.net.ServerSocket
-import java.time.LocalDate
-import java.time.Month
-import java.util.concurrent.TimeUnit
 
 @KtorExperimentalAPI
 object OppgaveClientSpek : Spek({

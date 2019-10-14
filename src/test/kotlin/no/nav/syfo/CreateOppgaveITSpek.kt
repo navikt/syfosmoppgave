@@ -8,9 +8,11 @@ import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
+import java.util.Properties
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import no.nav.common.KafkaEnvironment
+import no.nav.syfo.application.ApplicationState
 import no.nav.syfo.client.OppgaveClient
 import no.nav.syfo.kafka.loadBaseConfig
 import no.nav.syfo.kafka.toConsumerConfig
@@ -26,7 +28,6 @@ import org.apache.kafka.clients.producer.ProducerRecord
 import org.apache.kafka.streams.StreamsConfig
 import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe
-import java.util.Properties
 
 @KtorExperimentalAPI
 object CreateOppgaveITSpek : Spek({
@@ -38,12 +39,12 @@ object CreateOppgaveITSpek : Spek({
         val registrerOppgaveTopic = "privat-syfo-oppgave-registrerOppgave"
 
         val embeddedEnvironment = KafkaEnvironment(
-            topicNames = listOf(
-                journalOpprettetTopic,
-                produserOppgaveTopic,
-                registrerOppgaveTopic
-            ),
-            withSchemaRegistry = true
+                topicNames = listOf(
+                        journalOpprettetTopic,
+                        produserOppgaveTopic,
+                        registrerOppgaveTopic
+                ),
+                withSchemaRegistry = true
         )
 
         fun Properties.overrideForTest(): Properties = apply {
@@ -54,11 +55,13 @@ object CreateOppgaveITSpek : Spek({
         }
 
         val applicationState = ApplicationState()
+        applicationState.ready = true
+        applicationState.alive = true
 
         val env = Environment(
-            kafkaBootstrapServers = embeddedEnvironment.brokersURL,
-            oppgavebehandlingUrl = "http://localhost/oppgave_mock",
-            securityTokenServiceUrl = "http://localhost/sts_mock"
+                kafkaBootstrapServers = embeddedEnvironment.brokersURL,
+                oppgavebehandlingUrl = "http://localhost/oppgave_mock",
+                securityTokenServiceUrl = "http://localhost/sts_mock"
         )
 
         val credentials = Credentials("UNUSED", "UNUSED")
@@ -66,13 +69,13 @@ object CreateOppgaveITSpek : Spek({
         val baseConfig = loadBaseConfig(env, credentials).overrideForTest()
 
         val consumerProperties = baseConfig
-            .toConsumerConfig("spek.integration-consumer", valueDeserializer = KafkaAvroDeserializer::class)
+                .toConsumerConfig("spek.integration-consumer", valueDeserializer = KafkaAvroDeserializer::class)
 
         val producerProperties = baseConfig
-            .toProducerConfig("spek.integration", valueSerializer = KafkaAvroSerializer::class)
+                .toProducerConfig("spek.integration", valueSerializer = KafkaAvroSerializer::class)
 
         val streamProperties = baseConfig
-            .toStreamsConfig(streamsApplicationName, valueSerde = GenericAvroSerde::class)
+                .toStreamsConfig(streamsApplicationName, valueSerde = GenericAvroSerde::class)
 
         val stream = createKafkaStream(streamProperties, env)
 
@@ -99,7 +102,7 @@ object CreateOppgaveITSpek : Spek({
         }
 
         afterGroup {
-            applicationState.running = false
+            applicationState.alive = false
             stream.close()
             embeddedEnvironment.tearDown()
             deleteDir(kafkaStreamsStateDir)
@@ -116,10 +119,10 @@ object CreateOppgaveITSpek : Spek({
             coVerify(exactly = 1, timeout = 10000) {
                 oppgaveClientMock.opprettOppgave(coMatch {
                     it.journalpostId == registerJournal.journalpostId &&
-                        it.aktoerId == produceTask.aktoerId &&
-                        it.oppgavetype == produceTask.oppgavetype &&
-                        it.tema == produceTask.tema &&
-                        it.saksreferanse == registerJournal.sakId
+                            it.aktoerId == produceTask.aktoerId &&
+                            it.oppgavetype == produceTask.oppgavetype &&
+                            it.tema == produceTask.tema &&
+                            it.saksreferanse == registerJournal.sakId
                 }, msgId, any())
             }
         }
