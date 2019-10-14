@@ -13,6 +13,7 @@ import io.ktor.client.engine.apache.Apache
 import io.ktor.client.features.json.JacksonSerializer
 import io.ktor.client.features.json.JsonFeature
 import io.ktor.util.KtorExperimentalAPI
+import io.prometheus.client.hotspot.DefaultExports
 import java.io.File
 import java.time.Duration
 import java.time.LocalDate
@@ -57,18 +58,13 @@ val objectMapper: ObjectMapper = ObjectMapper()
 fun main() {
     val env = Environment()
     val credentials = objectMapper.readValue<Credentials>(File("/var/run/secrets/nais.io/vault/credentials.json"))
-
     val applicationState = ApplicationState()
     val applicationEngine = createApplicationEngine(env, applicationState)
+
     val applicationServer = ApplicationServer(applicationEngine)
     applicationServer.start()
 
-    val kafkaBaseConfig = loadBaseConfig(env, credentials)
-    val consumerProperties = kafkaBaseConfig.toConsumerConfig("${env.applicationName}-consumer", valueDeserializer = KafkaAvroDeserializer::class)
-    val streamProperties = kafkaBaseConfig.toStreamsConfig(env.applicationName, valueSerde = GenericAvroSerde::class)
-    val kafkaStream = createKafkaStream(streamProperties, env)
-
-    kafkaStream.start()
+    DefaultExports.initialize()
 
     val httpClient = HttpClient(Apache) {
         install(JsonFeature) {
@@ -82,6 +78,13 @@ fun main() {
     }
     val oidcClient = StsOidcClient(credentials.serviceuserUsername, credentials.serviceuserPassword)
     val oppgaveClient = OppgaveClient(env.oppgavebehandlingUrl, oidcClient, httpClient)
+
+    val kafkaBaseConfig = loadBaseConfig(env, credentials)
+    val consumerProperties = kafkaBaseConfig.toConsumerConfig("${env.applicationName}-consumer", valueDeserializer = KafkaAvroDeserializer::class)
+    val streamProperties = kafkaBaseConfig.toStreamsConfig(env.applicationName, valueSerde = GenericAvroSerde::class)
+    val kafkaStream = createKafkaStream(streamProperties, env)
+
+    kafkaStream.start()
 
     launchListeners(consumerProperties, applicationState, oppgaveClient)
 
@@ -152,9 +155,7 @@ suspend fun blockingApplicationLogic(
                     sykmeldingId = it.key()
             )
 
-            wrapExceptions(loggingMeta) {
                 handleRegisterOppgaveRequest(oppgaveClient, produceTask, registerJournal, loggingMeta)
-            }
         }
         delay(100)
     }
@@ -167,30 +168,32 @@ suspend fun handleRegisterOppgaveRequest(
     registerJournal: RegisterJournal,
     loggingMeta: LoggingMeta
 ) {
-    log.info("Received a SM2013, going to create oppgave, {}", fields(loggingMeta))
-    val opprettOppgave = OpprettOppgave(
-            tildeltEnhetsnr = produceTask.tildeltEnhetsnr,
-            aktoerId = produceTask.aktoerId,
-            opprettetAvEnhetsnr = produceTask.opprettetAvEnhetsnr,
-            journalpostId = registerJournal.journalpostId,
-            behandlesAvApplikasjon = produceTask.behandlesAvApplikasjon,
-            saksreferanse = registerJournal.sakId,
-            beskrivelse = produceTask.beskrivelse,
-            tema = produceTask.tema,
-            oppgavetype = produceTask.oppgavetype,
-            aktivDato = LocalDate.parse(produceTask.aktivDato, DateTimeFormatter.ISO_DATE),
-            fristFerdigstillelse = LocalDate.parse(produceTask.fristFerdigstillelse, DateTimeFormatter.ISO_DATE),
-            prioritet = produceTask.prioritet.name
-    )
+    wrapExceptions(loggingMeta) {
+        log.info("Received a SM2013, going to create oppgave, {}", fields(loggingMeta))
+        val opprettOppgave = OpprettOppgave(
+                tildeltEnhetsnr = produceTask.tildeltEnhetsnr,
+                aktoerId = produceTask.aktoerId,
+                opprettetAvEnhetsnr = produceTask.opprettetAvEnhetsnr,
+                journalpostId = registerJournal.journalpostId,
+                behandlesAvApplikasjon = produceTask.behandlesAvApplikasjon,
+                saksreferanse = registerJournal.sakId,
+                beskrivelse = produceTask.beskrivelse,
+                tema = produceTask.tema,
+                oppgavetype = produceTask.oppgavetype,
+                aktivDato = LocalDate.parse(produceTask.aktivDato, DateTimeFormatter.ISO_DATE),
+                fristFerdigstillelse = LocalDate.parse(produceTask.fristFerdigstillelse, DateTimeFormatter.ISO_DATE),
+                prioritet = produceTask.prioritet.name
+        )
 
-    val oppgaveResultat = oppgaveClient.opprettOppgave(opprettOppgave, registerJournal.messageId, loggingMeta)
-    if (!oppgaveResultat.duplikat) {
-        OPPRETT_OPPGAVE_COUNTER.inc()
-        log.info("Opprettet oppgave med {}, {}, {}, {} {}",
-                keyValue("oppgaveId", oppgaveResultat.oppgaveId),
-                keyValue("sakid", registerJournal.sakId),
-                keyValue("journalpost", registerJournal.journalpostId),
-                keyValue("tildeltEnhetsnr", produceTask.tildeltEnhetsnr),
-                fields(loggingMeta))
+        val oppgaveResultat = oppgaveClient.opprettOppgave(opprettOppgave, registerJournal.messageId, loggingMeta)
+        if (!oppgaveResultat.duplikat) {
+            OPPRETT_OPPGAVE_COUNTER.inc()
+            log.info("Opprettet oppgave med {}, {}, {}, {} {}",
+                    keyValue("oppgaveId", oppgaveResultat.oppgaveId),
+                    keyValue("sakid", registerJournal.sakId),
+                    keyValue("journalpost", registerJournal.journalpostId),
+                    keyValue("tildeltEnhetsnr", produceTask.tildeltEnhetsnr),
+                    fields(loggingMeta))
+        }
     }
 }

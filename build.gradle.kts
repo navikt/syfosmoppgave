@@ -2,7 +2,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 
 group = "no.nav.syfo"
-version = "1.0.3"
+version = "1.0.0"
 
 val avroVersion = "1.8.2"
 val confluentVersion = "5.0.0"
