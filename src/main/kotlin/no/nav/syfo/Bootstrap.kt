@@ -16,8 +16,6 @@ import io.ktor.util.KtorExperimentalAPI
 import io.prometheus.client.hotspot.DefaultExports
 import java.io.File
 import java.time.Duration
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
 import java.util.Properties
 import java.util.concurrent.TimeUnit
 import kafka.server.KafkaConfig
@@ -27,7 +25,6 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import net.logstash.logback.argument.StructuredArguments.fields
-import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.syfo.application.ApplicationServer
 import no.nav.syfo.application.ApplicationState
 import no.nav.syfo.application.createApplicationEngine
@@ -36,11 +33,10 @@ import no.nav.syfo.client.StsOidcClient
 import no.nav.syfo.kafka.loadBaseConfig
 import no.nav.syfo.kafka.toConsumerConfig
 import no.nav.syfo.kafka.toStreamsConfig
-import no.nav.syfo.metrics.OPPRETT_OPPGAVE_COUNTER
-import no.nav.syfo.model.OpprettOppgave
 import no.nav.syfo.sak.avro.ProduceTask
 import no.nav.syfo.sak.avro.RegisterJournal
 import no.nav.syfo.sak.avro.RegisterTask
+import no.nav.syfo.service.handleRegisterOppgaveRequest
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.apache.kafka.streams.KafkaStreams
 import org.apache.kafka.streams.StreamsBuilder
@@ -158,42 +154,5 @@ suspend fun blockingApplicationLogic(
                 handleRegisterOppgaveRequest(oppgaveClient, produceTask, registerJournal, loggingMeta)
         }
         delay(100)
-    }
-}
-
-@KtorExperimentalAPI
-suspend fun handleRegisterOppgaveRequest(
-    oppgaveClient: OppgaveClient,
-    produceTask: ProduceTask,
-    registerJournal: RegisterJournal,
-    loggingMeta: LoggingMeta
-) {
-    wrapExceptions(loggingMeta) {
-        log.info("Received a SM2013, going to create oppgave, {}", fields(loggingMeta))
-        val opprettOppgave = OpprettOppgave(
-                tildeltEnhetsnr = produceTask.tildeltEnhetsnr,
-                aktoerId = produceTask.aktoerId,
-                opprettetAvEnhetsnr = produceTask.opprettetAvEnhetsnr,
-                journalpostId = registerJournal.journalpostId,
-                behandlesAvApplikasjon = produceTask.behandlesAvApplikasjon,
-                saksreferanse = registerJournal.sakId,
-                beskrivelse = produceTask.beskrivelse,
-                tema = produceTask.tema,
-                oppgavetype = produceTask.oppgavetype,
-                aktivDato = LocalDate.parse(produceTask.aktivDato, DateTimeFormatter.ISO_DATE),
-                fristFerdigstillelse = LocalDate.parse(produceTask.fristFerdigstillelse, DateTimeFormatter.ISO_DATE),
-                prioritet = produceTask.prioritet.name
-        )
-
-        val oppgaveResultat = oppgaveClient.opprettOppgave(opprettOppgave, registerJournal.messageId, loggingMeta)
-        if (!oppgaveResultat.duplikat) {
-            OPPRETT_OPPGAVE_COUNTER.inc()
-            log.info("Opprettet oppgave med {}, {}, {}, {} {}",
-                    keyValue("oppgaveId", oppgaveResultat.oppgaveId),
-                    keyValue("sakid", registerJournal.sakId),
-                    keyValue("journalpost", registerJournal.journalpostId),
-                    keyValue("tildeltEnhetsnr", produceTask.tildeltEnhetsnr),
-                    fields(loggingMeta))
-        }
     }
 }
