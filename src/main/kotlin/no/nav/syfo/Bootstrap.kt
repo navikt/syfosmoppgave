@@ -96,7 +96,7 @@ fun createKafkaStream(streamProperties: Properties, env: Environment): KafkaStre
     KafkaConfig.LogRetentionTimeMillisProp()
 
     val joinWindow = JoinWindows.of(TimeUnit.DAYS.toMillis(65))
-            .until(TimeUnit.DAYS.toMillis(65))
+            .until(TimeUnit.DAYS.toMillis(131))
 
     createTaskStream.join(journalCreatedTaskStream, { produceTask, registerJournal ->
         RegisterTask.newBuilder().apply {
