@@ -5,26 +5,54 @@
       "members": [
         {"member":"srvsyfosmoppgave", "role":"CONSUMER"},
         {"member":"srvsyfosmarena", "role":"CONSUMER"},
-        {"member":"srvsyfosmsak", "role":"PRODUCER"}
+        {"member":"srvsyfosmsak", "role":"PRODUCER"},
+        {"member":"s151890", "role":"MANAGER"},
+        {"member":"k143566", "role":"MANAGER"},
+        {"member":"f133008", "role":"MANAGER"},
+        {"member":"n157016", "role":"MANAGER"},
+        {"member":"k157140", "role":"MANAGER"},
+        {"member":"g153850", "role":"MANAGER"}
       ],
-      "numPartitions": 3
+      "numPartitions": 3,
+      "configEntries": {
+        "retention.ms": "-1"
+      }
     },
     {
       "topicName": "aapen-syfo-oppgave-produserOppgave",
       "members": [
         {"member":"srvsyfosmoppgave", "role":"CONSUMER"},
         {"member":"srvsyfosminfotrygd", "role":"PRODUCER"},
-        {"member":"srvsyfosmmottak", "role":"PRODUCER"}
+        {"member":"srvsyfosmmottak", "role":"PRODUCER"},
+        {"member":"srvsyfosmsak", "role":"PRODUCER"},
+        {"member":"s151890", "role":"MANAGER"},
+        {"member":"k143566", "role":"MANAGER"},
+        {"member":"f133008", "role":"MANAGER"},
+        {"member":"n157016", "role":"MANAGER"},
+        {"member":"k157140", "role":"MANAGER"},
+        {"member":"g153850", "role":"MANAGER"}
       ],
-      "numPartitions": 3
+      "numPartitions": 3,
+      "configEntries": {
+        "retention.ms": "-1"
+      }
     },
     {
       "topicName": "privat-syfo-oppgave-registrerOppgave",
       "members": [
         {"member":"srvsyfosmoppgave", "role":"CONSUMER"},
-        {"member":"srvsyfosmoppgave", "role":"PRODUCER"}
+        {"member":"srvsyfosmoppgave", "role":"PRODUCER"},
+        {"member":"s151890", "role":"MANAGER"},
+        {"member":"k143566", "role":"MANAGER"},
+        {"member":"f133008", "role":"MANAGER"},
+        {"member":"n157016", "role":"MANAGER"},
+        {"member":"k157140", "role":"MANAGER"},
+        {"member":"g153850", "role":"MANAGER"}
       ],
-      "numPartitions": 3
+      "numPartitions": 3,
+      "configEntries": {
+        "retention.ms": "-1"
+      }
     }
   ]
 }
