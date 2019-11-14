@@ -58,7 +58,7 @@ fun main() {
     val applicationState = ApplicationState()
     val applicationEngine = createApplicationEngine(env, applicationState)
 
-    val applicationServer = ApplicationServer(applicationEngine)
+    val applicationServer = ApplicationServer(applicationEngine, applicationState)
     applicationServer.start()
 
     DefaultExports.initialize()
