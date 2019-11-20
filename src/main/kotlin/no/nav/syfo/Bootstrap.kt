@@ -79,13 +79,8 @@ fun main() {
     val kafkaBaseConfig = loadBaseConfig(env, credentials)
     val consumerProperties = kafkaBaseConfig.toConsumerConfig("${env.applicationName}-consumer", valueDeserializer = KafkaAvroDeserializer::class)
     val streamProperties = kafkaBaseConfig.toStreamsConfig(env.applicationName, valueSerde = GenericAvroSerde::class)
-    val kafkaStream = createKafkaStream(streamProperties, env)
 
-    kafkaStream.start()
-
-    launchListeners(consumerProperties, applicationState, oppgaveClient)
-
-    applicationState.ready = true
+    launchListeners(consumerProperties, applicationState, oppgaveClient, streamProperties, env)
 }
 
 fun createKafkaStream(streamProperties: Properties, env: Environment): KafkaStreams {
@@ -125,12 +120,19 @@ fun createListener(
 fun launchListeners(
     consumerProperties: Properties,
     applicationState: ApplicationState,
-    oppgaveClient: OppgaveClient
+    oppgaveClient: OppgaveClient,
+    streamProperties: Properties,
+    env: Environment
 ) {
     createListener(applicationState) {
-        val kafkaconsumerOppgave = KafkaConsumer<String, RegisterTask>(consumerProperties)
+        val kafkaStream = createKafkaStream(streamProperties, env)
+        kafkaStream.start()
 
+        val kafkaconsumerOppgave = KafkaConsumer<String, RegisterTask>(consumerProperties)
         kafkaconsumerOppgave.subscribe(listOf("privat-syfo-oppgave-registrerOppgave"))
+
+        applicationState.ready = true
+
         blockingApplicationLogic(applicationState, kafkaconsumerOppgave, oppgaveClient)
     }
 }
@@ -152,7 +154,7 @@ suspend fun blockingApplicationLogic(
                     sykmeldingId = it.key()
             )
 
-                handleRegisterOppgaveRequest(oppgaveClient, produceTask, registerJournal, loggingMeta)
+            handleRegisterOppgaveRequest(oppgaveClient, produceTask, registerJournal, loggingMeta)
         }
         delay(100)
     }
