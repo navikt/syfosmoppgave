@@ -1,4 +1,5 @@
-#  SYFO Oppgave Gsak
+[![Build status](https://github.com/navikt/syfosmoppgave/workflows/Deploy%20to%20dev%20and%20prod/badge.svg)](https://github.com/navikt/syfosmoppgave/workflows/Deploy%20to%20dev%20and%20prod/badge.svg)
+#  SYFO sm oppgave
 This project contains creating task to Gsak for the sykmelding2013 message
 
 ## Technologies used
@@ -6,6 +7,7 @@ This project contains creating task to Gsak for the sykmelding2013 message
 * Ktor
 * Gradle
 * Spek
+* Kafka
 
 ## Getting started
 ### Getting github-package-registry packages NAV-IT
@@ -56,6 +58,7 @@ Creating a docker image should be as simple as `docker build -t syfosmoppgave .`
 * Andreas Nilsen, `andreas.nilsen@nav.no`
 * Sebastian Knudsen, `sebastian.knudsen@nav.no`
 * Tia Firing, `tia.firing@nav.no`
+* Jonas Henie, `jonas.henie@nav.no`
 
 ### For NAV employees
 We are available at the Slack channel #team-sykmelding
