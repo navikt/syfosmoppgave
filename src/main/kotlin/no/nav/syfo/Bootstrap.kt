@@ -126,14 +126,14 @@ fun launchListeners(
 ) {
     createListener(applicationState) {
         val kafkaStream = createKafkaStream(streamProperties, env)
-        kafkaStream.start()
+        // kafkaStream.start()
 
         val kafkaconsumerOppgave = KafkaConsumer<String, RegisterTask>(consumerProperties)
         kafkaconsumerOppgave.subscribe(listOf("privat-syfo-oppgave-registrerOppgave"))
 
         applicationState.ready = true
 
-        blockingApplicationLogic(applicationState, kafkaconsumerOppgave, oppgaveClient)
+        // blockingApplicationLogic(applicationState, kafkaconsumerOppgave, oppgaveClient)
     }
 }
 
