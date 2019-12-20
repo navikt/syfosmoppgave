@@ -80,7 +80,10 @@ fun main() {
     val consumerProperties = kafkaBaseConfig.toConsumerConfig("${env.applicationName}-consumer", valueDeserializer = KafkaAvroDeserializer::class)
     val streamProperties = kafkaBaseConfig.toStreamsConfig(env.applicationName, valueSerde = GenericAvroSerde::class)
 
-    launchListeners(consumerProperties, applicationState, oppgaveClient, streamProperties, env)
+    // launchListeners(consumerProperties, applicationState, oppgaveClient, streamProperties, env)
+
+    // skal fjernes!
+    applicationState.ready = true
 }
 
 fun createKafkaStream(streamProperties: Properties, env: Environment): KafkaStreams {
