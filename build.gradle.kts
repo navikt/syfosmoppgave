@@ -11,19 +11,19 @@ val jacksonVersion = "2.9.9"
 val kafkaVersion = "2.0.0"
 val kafkaEmbeddedVersion = "2.1.1"
 val kluentVersion = "1.52"
-val ktorVersion = "1.2.5"
+val ktorVersion = "1.2.6"
 val logstashEncoderVersion = "6.1"
 val logbackVersion = "1.2.3"
-val prometheusVersion = "0.6.0"
-val smCommonVersion = "1.bba46d9"
+val prometheusVersion = "0.8.0"
+val smCommonVersion = "1.7bf5e6f"
 val spekVersion = "2.0.8"
 val syfoAvroSchemasVersion = "c8be932543e7356a34690ce7979d494c5d8516d8"
 
 plugins {
-    id("org.jmailen.kotlinter") version "2.1.1"
-    kotlin("jvm") version "1.3.60"
+    id("org.jmailen.kotlinter") version "2.2.0"
+    kotlin("jvm") version "1.3.61"
     id("com.diffplug.gradle.spotless") version "3.18.0"
-    id("com.github.johnrengelman.shadow") version "4.0.4"
+    id("com.github.johnrengelman.shadow") version "5.2.0"
 }
 
 val githubUser: String by project
@@ -114,5 +114,9 @@ tasks {
         testLogging {
             showStandardStreams = true
         }
+    }
+
+    "check" {
+        dependsOn("formatKotlin")
     }
 }
