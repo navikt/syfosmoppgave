@@ -40,7 +40,6 @@ import no.nav.syfo.service.handleRegisterOppgaveRequest
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.apache.kafka.streams.KafkaStreams
 import org.apache.kafka.streams.StreamsBuilder
-import org.apache.kafka.streams.errors.LogAndContinueExceptionHandler
 import org.apache.kafka.streams.kstream.JoinWindows
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -80,10 +79,6 @@ fun main() {
     val kafkaBaseConfig = loadBaseConfig(env, credentials)
     val consumerProperties = kafkaBaseConfig.toConsumerConfig("${env.applicationName}-consumer", valueDeserializer = KafkaAvroDeserializer::class)
     val streamProperties = kafkaBaseConfig.toStreamsConfig(env.applicationName, valueSerde = GenericAvroSerde::class)
-
-    // TODO REMOVE THIS
-    // Config to log the error & continue processing.
-    streamProperties.put("default.deserialization.exception.handler", LogAndContinueExceptionHandler::class.java)
 
     launchListeners(consumerProperties, applicationState, oppgaveClient, streamProperties, env)
 }
