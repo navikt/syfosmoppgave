@@ -5,10 +5,10 @@ group = "no.nav.syfo"
 version = "1.0.0"
 
 val avroVersion = "1.8.2"
-val confluentVersion = "5.3.1"
+val confluentVersion = "5.0.0"
 val coroutinesVersion = "1.2.2"
 val jacksonVersion = "2.9.9"
-val kafkaVersion = "2.4.0"
+val kafkaVersion = "2.0.0"
 val kafkaEmbeddedVersion = "2.3.0"
 val kluentVersion = "1.52"
 val ktorVersion = "1.2.6"
@@ -75,7 +75,7 @@ dependencies {
     implementation("ch.qos.logback:logback-classic:$logbackVersion")
     implementation("net.logstash.logback:logstash-logback-encoder:$logstashEncoderVersion")
 
-    implementation("org.apache.kafka:kafka_2.13:$kafkaVersion")
+    implementation("org.apache.kafka:kafka_2.12:$kafkaVersion")
     implementation("org.apache.kafka:kafka-streams:$kafkaVersion")
 
     testImplementation("io.mockk:mockk:1.9.3")
