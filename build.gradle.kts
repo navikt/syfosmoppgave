@@ -5,11 +5,11 @@ group = "no.nav.syfo"
 version = "1.0.0"
 
 val avroVersion = "1.8.2"
-val confluentVersion = "5.0.0"
+val confluentVersion = "5.3.1"
 val coroutinesVersion = "1.2.2"
 val jacksonVersion = "2.9.9"
-val kafkaVersion = "2.0.0"
-val kafkaEmbeddedVersion = "2.1.1"
+val kafkaVersion = "2.4.0"
+val kafkaEmbeddedVersion = "2.3.0"
 val kluentVersion = "1.52"
 val ktorVersion = "1.2.6"
 val logstashEncoderVersion = "6.1"
@@ -75,10 +75,10 @@ dependencies {
     implementation("ch.qos.logback:logback-classic:$logbackVersion")
     implementation("net.logstash.logback:logstash-logback-encoder:$logstashEncoderVersion")
 
-    implementation("org.apache.kafka:kafka_2.12:$kafkaVersion")
+    implementation("org.apache.kafka:kafka_2.13:$kafkaVersion")
     implementation("org.apache.kafka:kafka-streams:$kafkaVersion")
 
-    testImplementation ("io.mockk:mockk:1.9.3")
+    testImplementation("io.mockk:mockk:1.9.3")
     testImplementation("org.amshove.kluent:kluent:$kluentVersion")
     testImplementation("org.spekframework.spek2:spek-dsl-jvm:$spekVersion")
     testImplementation("io.ktor:ktor-server-test-host:$ktorVersion")
