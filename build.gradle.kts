@@ -6,17 +6,17 @@ version = "1.0.0"
 
 val avroVersion = "1.8.2"
 val confluentVersion = "5.0.0"
-val coroutinesVersion = "1.2.2"
+val coroutinesVersion = "1.3.3"
 val jacksonVersion = "2.9.9"
 val kafkaVersion = "2.0.0"
 val kafkaEmbeddedVersion = "2.3.0"
 val kluentVersion = "1.52"
-val ktorVersion = "1.2.6"
+val ktorVersion = "1.3.0"
 val logstashEncoderVersion = "6.1"
 val logbackVersion = "1.2.3"
 val prometheusVersion = "0.8.0"
-val smCommonVersion = "1.7bf5e6f"
-val spekVersion = "2.0.8"
+val smCommonVersion = "1.84cb553"
+val spekVersion = "2.0.9"
 val syfoAvroSchemasVersion = "c8be932543e7356a34690ce7979d494c5d8516d8"
 
 plugins {
@@ -33,7 +33,7 @@ repositories {
     mavenCentral()
     jcenter()
     maven(url = "https://dl.bintray.com/kotlin/ktor")
-    maven(url = "http://packages.confluent.io/maven/")
+    maven(url = "https://packages.confluent.io/maven/")
     maven(url = "https://dl.bintray.com/spekframework/spek-dev")
     maven(url = "https://kotlin.bintray.com/kotlinx")
     maven {
@@ -104,7 +104,7 @@ tasks {
     }
 
     withType<KotlinCompile> {
-        kotlinOptions.jvmTarget = "1.8"
+        kotlinOptions.jvmTarget = "12"
     }
 
     withType<Test> {
