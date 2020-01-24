@@ -9,6 +9,10 @@ This project contains creating task to Gsak for the sykmelding2013 message
 * Spek
 * Kafka
 
+#### Requirements
+
+* JDK 12
+
 ## Getting started
 ### Getting github-package-registry packages NAV-IT
 Some packages used in this repo is uploaded to the Github Package Registry which requires authentication. It can, for example, be solved like this in Gradle:
