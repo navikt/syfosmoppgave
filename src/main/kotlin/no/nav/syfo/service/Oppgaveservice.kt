@@ -23,7 +23,6 @@ suspend fun handleRegisterOppgaveRequest(
     wrapExceptions(loggingMeta) {
         log.info("Received a SM2013, going to create oppgave, {}", StructuredArguments.fields(loggingMeta))
         val opprettOppgave = OpprettOppgave(
-                tildeltEnhetsnr = produceTask.tildeltEnhetsnr,
                 aktoerId = produceTask.aktoerId,
                 opprettetAvEnhetsnr = produceTask.opprettetAvEnhetsnr,
                 journalpostId = registerJournal.journalpostId,
@@ -40,11 +39,10 @@ suspend fun handleRegisterOppgaveRequest(
         val oppgaveResultat = oppgaveClient.opprettOppgave(opprettOppgave, registerJournal.messageId, loggingMeta)
         if (!oppgaveResultat.duplikat) {
             OPPRETT_OPPGAVE_COUNTER.inc()
-            log.info("Opprettet oppgave med {}, {}, {}, {} {}",
+            log.info("Opprettet oppgave med {}, {}, {}, {}",
                     StructuredArguments.keyValue("oppgaveId", oppgaveResultat.oppgaveId),
                     StructuredArguments.keyValue("sakid", registerJournal.sakId),
                     StructuredArguments.keyValue("journalpost", registerJournal.journalpostId),
-                    StructuredArguments.keyValue("tildeltEnhetsnr", produceTask.tildeltEnhetsnr),
                     StructuredArguments.fields(loggingMeta))
         }
     }
