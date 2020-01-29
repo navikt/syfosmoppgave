@@ -74,7 +74,8 @@ fun main() {
         }
     }
     val oidcClient = StsOidcClient(credentials.serviceuserUsername, credentials.serviceuserPassword)
-    val oppgaveClient = OppgaveClient(env.oppgavebehandlingUrl, oidcClient, httpClient)
+    val oppgaveClient = OppgaveClient("https://oppgave-q0.nais.preprod.local/api/v1/oppgaver", oidcClient, httpClient)
+    //val oppgaveClient = OppgaveClient(env.oppgavebehandlingUrl, oidcClient, httpClient)
 
     val kafkaBaseConfig = loadBaseConfig(env, credentials)
     val consumerProperties = kafkaBaseConfig.toConsumerConfig("${env.applicationName}-consumer", valueDeserializer = KafkaAvroDeserializer::class)
