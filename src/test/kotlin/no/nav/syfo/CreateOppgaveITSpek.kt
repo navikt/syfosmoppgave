@@ -1,36 +1,11 @@
 package no.nav.syfo
 
-import io.confluent.kafka.serializers.KafkaAvroDeserializer
-import io.confluent.kafka.serializers.KafkaAvroSerializer
-import io.confluent.kafka.streams.serdes.avro.GenericAvroSerde
 import io.ktor.util.KtorExperimentalAPI
-import io.mockk.clearAllMocks
-import io.mockk.coEvery
-import io.mockk.coVerify
-import io.mockk.mockk
-import java.util.Properties
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import no.nav.common.KafkaEnvironment
-import no.nav.syfo.application.ApplicationState
-import no.nav.syfo.client.OppgaveClient
-import no.nav.syfo.kafka.loadBaseConfig
-import no.nav.syfo.kafka.toConsumerConfig
-import no.nav.syfo.kafka.toProducerConfig
-import no.nav.syfo.kafka.toStreamsConfig
-import no.nav.syfo.model.OppgaveResultat
-import no.nav.syfo.sak.avro.ProduceTask
-import no.nav.syfo.sak.avro.RegisterJournal
-import no.nav.syfo.sak.avro.RegisterTask
-import org.apache.kafka.clients.consumer.KafkaConsumer
-import org.apache.kafka.clients.producer.KafkaProducer
-import org.apache.kafka.clients.producer.ProducerRecord
-import org.apache.kafka.streams.StreamsConfig
 import org.spekframework.spek2.Spek
-import org.spekframework.spek2.style.specification.describe
 
 @KtorExperimentalAPI
 object CreateOppgaveITSpek : Spek({
+    /*
     describe("A full bootstrapped environment") {
         val streamsApplicationName = "spek.integration"
 
@@ -127,4 +102,5 @@ object CreateOppgaveITSpek : Spek({
             }
         }
     }
+     */
 })
