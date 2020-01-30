@@ -7,6 +7,7 @@ import net.logstash.logback.argument.StructuredArguments
 import no.nav.syfo.LoggingMeta
 import no.nav.syfo.client.OppgaveClient
 import no.nav.syfo.log
+import no.nav.syfo.metrics.OPPRETT_OPPGAVE_COUNTER
 import no.nav.syfo.model.OpprettOppgave
 import no.nav.syfo.sak.avro.ProduceTask
 import no.nav.syfo.sak.avro.RegisterJournal
@@ -35,7 +36,6 @@ suspend fun handleRegisterOppgaveRequest(
                 prioritet = produceTask.prioritet.name
         )
 
-        /*
         val oppgaveResultat = oppgaveClient.opprettOppgave(opprettOppgave, registerJournal.messageId, loggingMeta)
         if (!oppgaveResultat.duplikat) {
             OPPRETT_OPPGAVE_COUNTER.inc()
@@ -45,6 +45,5 @@ suspend fun handleRegisterOppgaveRequest(
                     StructuredArguments.keyValue("journalpost", registerJournal.journalpostId),
                     StructuredArguments.fields(loggingMeta))
         }
-         */
     }
 }
