@@ -66,4 +66,3 @@ Creating a docker image should be as simple as `docker build -t syfosmoppgave .`
 
 ### For NAV employees
 We are available at the Slack channel #team-sykmelding
-
