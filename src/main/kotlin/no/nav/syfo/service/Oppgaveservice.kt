@@ -23,20 +23,21 @@ suspend fun handleRegisterOppgaveRequest(
     wrapExceptions(loggingMeta) {
         log.info("Received a SM2013, going to create oppgave, {}", StructuredArguments.fields(loggingMeta))
         val opprettOppgave = if (produceTask.messageId == "3470E13A-5429-4B8E-87F3-BEFC9AC5A976") {
-            OpprettOppgave(
-                aktoerId = produceTask.aktoerId,
-                opprettetAvEnhetsnr = produceTask.opprettetAvEnhetsnr,
-                tildeltEnhetsnr = "0393",
-                journalpostId = registerJournal.journalpostId,
-                behandlesAvApplikasjon = produceTask.behandlesAvApplikasjon,
-                saksreferanse = registerJournal.sakId,
-                beskrivelse = produceTask.beskrivelse,
-                tema = produceTask.tema,
-                oppgavetype = produceTask.oppgavetype,
-                aktivDato = LocalDate.parse(produceTask.aktivDato, DateTimeFormatter.ISO_DATE),
-                fristFerdigstillelse = LocalDate.parse(produceTask.fristFerdigstillelse, DateTimeFormatter.ISO_DATE),
-                prioritet = produceTask.prioritet.name
-        )
+                log.info("Oppretter oppgave på enhet 0393")
+                OpprettOppgave(
+                    aktoerId = produceTask.aktoerId,
+                    opprettetAvEnhetsnr = produceTask.opprettetAvEnhetsnr,
+                    tildeltEnhetsnr = "0393",
+                    journalpostId = registerJournal.journalpostId,
+                    behandlesAvApplikasjon = produceTask.behandlesAvApplikasjon,
+                    saksreferanse = registerJournal.sakId,
+                    beskrivelse = produceTask.beskrivelse,
+                    tema = produceTask.tema,
+                    oppgavetype = produceTask.oppgavetype,
+                    aktivDato = LocalDate.parse(produceTask.aktivDato, DateTimeFormatter.ISO_DATE),
+                    fristFerdigstillelse = LocalDate.parse(produceTask.fristFerdigstillelse, DateTimeFormatter.ISO_DATE),
+                    prioritet = produceTask.prioritet.name
+            )
         } else {
             OpprettOppgave(
                 aktoerId = produceTask.aktoerId,
