@@ -22,24 +22,7 @@ suspend fun handleRegisterOppgaveRequest(
 ) {
     wrapExceptions(loggingMeta) {
         log.info("Received a SM2013, going to create oppgave, {}", StructuredArguments.fields(loggingMeta))
-        val opprettOppgave = if (produceTask.messageId == "bf89be85-ee28-4298-8bb1-124c01d787be") {
-            log.info("Oppretter oppgave på enhet 0315")
-            OpprettOppgave(
-                aktoerId = produceTask.aktoerId,
-                opprettetAvEnhetsnr = produceTask.opprettetAvEnhetsnr,
-                tildeltEnhetsnr = "0315",
-                journalpostId = registerJournal.journalpostId,
-                behandlesAvApplikasjon = produceTask.behandlesAvApplikasjon,
-                saksreferanse = registerJournal.sakId,
-                beskrivelse = produceTask.beskrivelse,
-                tema = produceTask.tema,
-                oppgavetype = produceTask.oppgavetype,
-                aktivDato = LocalDate.parse(produceTask.aktivDato, DateTimeFormatter.ISO_DATE),
-                fristFerdigstillelse = LocalDate.parse(produceTask.fristFerdigstillelse, DateTimeFormatter.ISO_DATE),
-                prioritet = produceTask.prioritet.name
-            )
-        } else {
-            OpprettOppgave(
+        val opprettOppgave = OpprettOppgave(
                 aktoerId = produceTask.aktoerId,
                 opprettetAvEnhetsnr = produceTask.opprettetAvEnhetsnr,
                 journalpostId = registerJournal.journalpostId,
@@ -51,8 +34,7 @@ suspend fun handleRegisterOppgaveRequest(
                 aktivDato = LocalDate.parse(produceTask.aktivDato, DateTimeFormatter.ISO_DATE),
                 fristFerdigstillelse = LocalDate.parse(produceTask.fristFerdigstillelse, DateTimeFormatter.ISO_DATE),
                 prioritet = produceTask.prioritet.name
-            )
-        }
+        )
 
         val oppgaveResultat = oppgaveClient.opprettOppgave(opprettOppgave, registerJournal.messageId, loggingMeta)
         if (!oppgaveResultat.duplikat) {
