@@ -1,7 +1,5 @@
 package no.nav.syfo.service
 
-import io.ktor.client.engine.mock.respond
-import io.ktor.client.engine.mock.respondError
 import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.headersOf
@@ -22,6 +20,7 @@ import no.nav.syfo.model.OpprettOppgaveResponse
 import no.nav.syfo.objectMapper
 import no.nav.syfo.retry.KafkaRetryPublisher
 import no.nav.syfo.util.HttpClientTest
+import no.nav.syfo.util.ResponseData
 import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe
 
@@ -44,8 +43,8 @@ class OppgaveserviceKtTest : Spek({
     }
     describe("test OpprettOppgave") {
         it("Opprett oppgave OK") {
-            httpClientTest.setResponseData(HttpMethod.Get, respond(objectMapper.writeValueAsString(OppgaveResponse(0, emptyList())), HttpStatusCode.OK, headersOf("Content-Type", "application/json")))
-            httpClientTest.setResponseData(HttpMethod.Post, respond(objectMapper.writeValueAsString(OpprettOppgaveResponse(0)), HttpStatusCode.OK, headersOf("Content-Type", "application/json")))
+            httpClientTest.setResponseData(HttpMethod.Get, ResponseData(objectMapper.writeValueAsString(OppgaveResponse(0, emptyList())), HttpStatusCode.OK))
+            httpClientTest.setResponseData(HttpMethod.Post, ResponseData(objectMapper.writeValueAsString(OpprettOppgaveResponse(0)), HttpStatusCode.OK, headersOf("Content-Type", "application/json")))
             val registerJournal = createRegisterJournal("msgId")
             val produceTask = createProduceTask("msgId")
             runBlocking {
@@ -54,8 +53,8 @@ class OppgaveserviceKtTest : Spek({
             verify(exactly = 0) { kafkaRetryPublisher.publishOppgaveToRetryTopic(any(), any(), any()) }
         }
         it("Opprett oppgave feiler med status 500 -> publisert til retrytopic") {
-            httpClientTest.setResponseData(HttpMethod.Get, respond(objectMapper.writeValueAsString(OppgaveResponse(0, emptyList())), HttpStatusCode.OK, headersOf("Content-Type", "application/json")))
-            httpClientTest.setResponseData(HttpMethod.Post, respondError(HttpStatusCode.InternalServerError))
+            httpClientTest.setResponseData(HttpMethod.Get, ResponseData(objectMapper.writeValueAsString(OppgaveResponse(0, emptyList())), HttpStatusCode.OK, headersOf("Content-Type", "application/json")))
+            httpClientTest.setResponseData(HttpMethod.Post, ResponseData("", HttpStatusCode.InternalServerError))
             val registerJournal = createRegisterJournal("msgId")
             val produceTask = createProduceTask("msgId")
             runBlocking {
