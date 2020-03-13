@@ -51,7 +51,7 @@ class OppgaveClient constructor(private val url: String, private val oidcClient:
             log.info("Det finnes allerede en åpen oppgave for journalpost {} på brukeren, {}", opprettOppgave.journalpostId, fields(loggingMeta))
             return OppgaveResultat(oppgaveResponse.oppgaver.first().id, true)
         }
-        log.info("Oppretter oppgave på enhet {}, {}", opprettOppgave.tildeltEnhetsnr, fields(loggingMeta))
+        log.info("Oppretter oppgave {}", fields(loggingMeta))
         return OppgaveResultat(opprettOppgave(opprettOppgave, msgId).id, false)
     }
 }

@@ -67,7 +67,7 @@ fun main() {
     val applicationState = ApplicationState()
     val applicationEngine = createApplicationEngine(env, applicationState)
 
-    val applicationServer = ApplicationServer(applicationEngine)
+    val applicationServer = ApplicationServer(applicationEngine, applicationState)
     applicationServer.start()
 
     DefaultExports.initialize()
@@ -88,18 +88,16 @@ fun main() {
     val kafkaBaseConfig = loadBaseConfig(env, credentials)
     val consumerProperties = kafkaBaseConfig.toConsumerConfig("${env.applicationName}-consumer", valueDeserializer = KafkaAvroDeserializer::class)
     val streamProperties = kafkaBaseConfig.toStreamsConfig(env.applicationName, valueSerde = GenericAvroSerde::class)
-    val kafkaStream = createKafkaStream(streamProperties, env)
 
     val kafkaRetryProducer = KafkaProducer<String, OppgaveRetryKafkaMessage>(kafkaBaseConfig.toProducerConfig("${env.applicationName}-retry-producer", keySerializer = StringSerializer::class, valueSerializer = OppgaveKafkaSerializer::class))
     val kafkaRetryPublisher = KafkaRetryPublisher(kafkaRetryProducer, env.retryOppgaveTopic)
     val kafkaRetryConsumer = KafkaConsumer<String, OppgaveRetryKafkaMessage>(kafkaBaseConfig.toConsumerConfig("${env.applicationName}-retry-consumer", keyDeserializer = StringDeserializer::class, valueDeserializer = OppgaveKafkaDeserializer::class))
 
-    applicationState.ready = true
     val oppgaveRetryService = OpprettOppgaveRetryService(kafkaRetryConsumer, applicationState, oppgaveClient, env.retryOppgaveTopic)
 
-    kafkaStream.start()
+    applicationState.ready = true
 
-    launchListeners(consumerProperties, applicationState, oppgaveClient, kafkaRetryPublisher, oppgaveRetryService)
+    launchListeners(consumerProperties, applicationState, oppgaveClient, streamProperties, env, kafkaRetryPublisher, oppgaveRetryService)
 }
 
 fun createKafkaStream(streamProperties: Properties, env: Environment): KafkaStreams {
@@ -140,12 +138,17 @@ fun launchListeners(
     consumerProperties: Properties,
     applicationState: ApplicationState,
     oppgaveClient: OppgaveClient,
+    streamProperties: Properties,
+    env: Environment,
     kafkaRetryPublisher: KafkaRetryPublisher,
     oppgaveRetryService: OpprettOppgaveRetryService
+
 ) {
     createListener(applicationState) {
-        val kafkaconsumerOppgave = KafkaConsumer<String, RegisterTask>(consumerProperties)
+        val kafkaStream = createKafkaStream(streamProperties, env)
+        kafkaStream.start()
 
+        val kafkaconsumerOppgave = KafkaConsumer<String, RegisterTask>(consumerProperties)
         kafkaconsumerOppgave.subscribe(listOf("privat-syfo-oppgave-registrerOppgave"))
         blockingApplicationLogic(applicationState, kafkaconsumerOppgave, oppgaveClient, kafkaRetryPublisher)
     }
@@ -172,6 +175,7 @@ suspend fun blockingApplicationLogic(
                     msgId = registerJournal.messageId,
                     sykmeldingId = it.key()
             )
+
             handleRegisterOppgaveRequest(oppgaveClient, produceTask, registerJournal, loggingMeta, kafkaRetryPublisher)
         }
         delay(100)

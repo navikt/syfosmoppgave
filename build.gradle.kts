@@ -6,34 +6,43 @@ version = "1.0.0"
 
 val avroVersion = "1.8.2"
 val confluentVersion = "5.0.0"
-val coroutinesVersion = "1.2.2"
+val coroutinesVersion = "1.3.3"
 val jacksonVersion = "2.9.9"
 val kafkaVersion = "2.0.0"
-val kafkaEmbeddedVersion = "2.1.1"
+val kafkaEmbeddedVersion = "2.3.0"
 val kluentVersion = "1.52"
-val ktorVersion = "1.2.5"
+val ktorVersion = "1.3.0"
 val logstashEncoderVersion = "6.1"
 val logbackVersion = "1.2.3"
-val prometheusVersion = "0.6.0"
-val smCommonVersion = "2019.09.25-05-44-08e26429f4e37cd57d99ba4d39fc74099a078b97"
-val spekVersion = "2.0.8"
+val prometheusVersion = "0.8.0"
+val smCommonVersion = "1.84cb553"
+val spekVersion = "2.0.9"
 val syfoAvroSchemasVersion = "c8be932543e7356a34690ce7979d494c5d8516d8"
 val testContainerKafkaVersion = "1.12.5"
 plugins {
-    id("org.jmailen.kotlinter") version "2.1.1"
-    kotlin("jvm") version "1.3.50"
+    id("org.jmailen.kotlinter") version "2.2.0"
+    kotlin("jvm") version "1.3.61"
     id("com.diffplug.gradle.spotless") version "3.18.0"
-    id("com.github.johnrengelman.shadow") version "4.0.4"
+    id("com.github.johnrengelman.shadow") version "5.2.0"
 }
+
+val githubUser: String by project
+val githubPassword: String by project
 
 repositories {
     mavenCentral()
     jcenter()
-    maven(url = "https://oss.sonatype.org/content/groups/staging/")
     maven(url = "https://dl.bintray.com/kotlin/ktor")
-    maven(url = "http://packages.confluent.io/maven/")
+    maven(url = "https://packages.confluent.io/maven/")
     maven(url = "https://dl.bintray.com/spekframework/spek-dev")
     maven(url = "https://kotlin.bintray.com/kotlinx")
+    maven {
+        url = uri("https://maven.pkg.github.com/navikt/syfosm-common")
+        credentials {
+            username = githubUser
+            password = githubPassword
+        }
+    }
 }
 
 dependencies {
@@ -54,9 +63,9 @@ dependencies {
     implementation("io.confluent:kafka-streams-avro-serde:$confluentVersion")
     implementation("org.apache.avro:avro:$avroVersion")
 
-    implementation("no.nav.syfo.sm:syfosm-common-kafka:$smCommonVersion")
-    implementation("no.nav.syfo.sm:syfosm-common-rest-sts:$smCommonVersion")
-    implementation("no.nav.syfo.sm:syfosm-common-networking:$smCommonVersion")
+    implementation("no.nav.helse:syfosm-common-kafka:$smCommonVersion")
+    implementation("no.nav.helse:syfosm-common-rest-sts:$smCommonVersion")
+    implementation("no.nav.helse:syfosm-common-networking:$smCommonVersion")
 
     implementation("no.nav.syfo.schemas:syfosmoppgave-avro:$syfoAvroSchemasVersion")
 
@@ -95,7 +104,7 @@ tasks {
     }
 
     withType<KotlinCompile> {
-        kotlinOptions.jvmTarget = "1.8"
+        kotlinOptions.jvmTarget = "12"
     }
 
     withType<Test> {
@@ -105,5 +114,9 @@ tasks {
         testLogging {
             showStandardStreams = true
         }
+    }
+
+    "check" {
+        dependsOn("formatKotlin")
     }
 }
