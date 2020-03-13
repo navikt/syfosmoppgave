@@ -47,8 +47,8 @@ object OppgaveStreamsApplicationSpek : Spek({
 
         val env = Environment(
                 kafkaBootstrapServers = embeddedEnvironment.brokersURL,
-                oppgavebehandlingUrl = "UNUSED",
-                securityTokenServiceUrl = "UNUSED"
+                securityTokenServiceUrl = "UNUSED",
+                oppgavebehandlingUrl = "UNUSED"
         )
 
         val credentials = Credentials("UNUSED", "UNUSED")

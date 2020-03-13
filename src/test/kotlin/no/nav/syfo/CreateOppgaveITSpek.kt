@@ -7,7 +7,9 @@ import io.ktor.util.KtorExperimentalAPI
 import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
+import io.mockk.every
 import io.mockk.mockk
+import io.mockk.mockkClass
 import java.util.Properties
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -19,6 +21,7 @@ import no.nav.syfo.kafka.toConsumerConfig
 import no.nav.syfo.kafka.toProducerConfig
 import no.nav.syfo.kafka.toStreamsConfig
 import no.nav.syfo.model.OppgaveResultat
+import no.nav.syfo.retry.KafkaRetryPublisher
 import no.nav.syfo.sak.avro.ProduceTask
 import no.nav.syfo.sak.avro.RegisterJournal
 import no.nav.syfo.sak.avro.RegisterTask
@@ -60,8 +63,8 @@ object CreateOppgaveITSpek : Spek({
 
         val env = Environment(
                 kafkaBootstrapServers = embeddedEnvironment.brokersURL,
-                oppgavebehandlingUrl = "http://localhost/oppgave_mock",
-                securityTokenServiceUrl = "http://localhost/sts_mock"
+                securityTokenServiceUrl = "http://localhost/sts_mock",
+                oppgavebehandlingUrl = "http://localhost/oppgave_mock"
         )
 
         val credentials = Credentials("UNUSED", "UNUSED")
@@ -85,11 +88,12 @@ object CreateOppgaveITSpek : Spek({
         registrerOppgaveConsumer.subscribe(listOf(registrerOppgaveTopic))
 
         val oppgaveClientMock = mockk<OppgaveClient>()
+        val kafkaRetryPublisher = mockkClass(KafkaRetryPublisher::class)
 
         beforeGroup {
             cleanupDir(kafkaStreamsStateDir, streamsApplicationName)
             clearAllMocks()
-
+            every { kafkaRetryPublisher.publishOppgaveToRetryTopic(any(), any(), any()) } returns Unit
             coEvery { oppgaveClientMock.opprettOppgave(any(), any(), any()) } returns OppgaveResultat(21312313, false)
 
             embeddedEnvironment.start()
@@ -97,7 +101,7 @@ object CreateOppgaveITSpek : Spek({
             stream.start()
 
             GlobalScope.launch {
-                blockingApplicationLogic(applicationState, registrerOppgaveConsumer, oppgaveClientMock)
+                blockingApplicationLogic(applicationState, registrerOppgaveConsumer, oppgaveClientMock, kafkaRetryPublisher)
             }
         }
 
@@ -116,7 +120,7 @@ object CreateOppgaveITSpek : Spek({
             journalOpprettet.send(ProducerRecord(journalOpprettetTopic, msgId, registerJournal))
             produserOppgave.send(ProducerRecord(produserOppgaveTopic, msgId, produceTask))
 
-            coVerify(exactly = 1, timeout = 10000) {
+            coVerify(exactly = 1, timeout = 10_000) {
                 oppgaveClientMock.opprettOppgave(coMatch {
                     it.journalpostId == registerJournal.journalpostId &&
                             it.aktoerId == produceTask.aktoerId &&

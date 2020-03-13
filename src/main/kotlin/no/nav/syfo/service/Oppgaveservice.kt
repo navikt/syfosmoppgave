@@ -1,5 +1,7 @@
 package no.nav.syfo.service
 
+import io.ktor.client.features.ServerResponseException
+import io.ktor.http.HttpStatusCode
 import io.ktor.util.KtorExperimentalAPI
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -9,6 +11,7 @@ import no.nav.syfo.client.OppgaveClient
 import no.nav.syfo.log
 import no.nav.syfo.metrics.OPPRETT_OPPGAVE_COUNTER
 import no.nav.syfo.model.OpprettOppgave
+import no.nav.syfo.retry.KafkaRetryPublisher
 import no.nav.syfo.sak.avro.ProduceTask
 import no.nav.syfo.sak.avro.RegisterJournal
 import no.nav.syfo.wrapExceptions
@@ -18,7 +21,8 @@ suspend fun handleRegisterOppgaveRequest(
     oppgaveClient: OppgaveClient,
     produceTask: ProduceTask,
     registerJournal: RegisterJournal,
-    loggingMeta: LoggingMeta
+    loggingMeta: LoggingMeta,
+    kafkaRetryPublisher: KafkaRetryPublisher
 ) {
     wrapExceptions(loggingMeta) {
         log.info("Received a SM2013, going to create oppgave, {}", StructuredArguments.fields(loggingMeta))
@@ -37,15 +41,26 @@ suspend fun handleRegisterOppgaveRequest(
                 prioritet = produceTask.prioritet.name
         )
 
-        val oppgaveResultat = oppgaveClient.opprettOppgave(opprettOppgave, registerJournal.messageId, loggingMeta)
-        if (!oppgaveResultat.duplikat) {
-            OPPRETT_OPPGAVE_COUNTER.inc()
-            log.info("Opprettet oppgave med {}, {}, {}, {} {}",
-                    StructuredArguments.keyValue("oppgaveId", oppgaveResultat.oppgaveId),
-                    StructuredArguments.keyValue("sakid", registerJournal.sakId),
-                    StructuredArguments.keyValue("journalpost", registerJournal.journalpostId),
-                    StructuredArguments.keyValue("tildeltEnhetsnr", produceTask.tildeltEnhetsnr),
-                    StructuredArguments.fields(loggingMeta))
+        try {
+            opprettOppgave(oppgaveClient, opprettOppgave, loggingMeta, registerJournal.messageId)
+        } catch (ex: ServerResponseException) {
+            when (ex.response.status) {
+                HttpStatusCode.InternalServerError -> kafkaRetryPublisher.publishOppgaveToRetryTopic(opprettOppgave, registerJournal.messageId, loggingMeta)
+                else -> throw ex
+            }
         }
+    }
+}
+
+suspend fun opprettOppgave(oppgaveClient: OppgaveClient, opprettOppgave: OpprettOppgave, loggingMeta: LoggingMeta, messageId: String) {
+    val oppgaveResultat = oppgaveClient.opprettOppgave(opprettOppgave, messageId, loggingMeta)
+    if (!oppgaveResultat.duplikat) {
+        OPPRETT_OPPGAVE_COUNTER.inc()
+        log.info("Opprettet oppgave med {}, {}, {}, {} {}",
+                StructuredArguments.keyValue("oppgaveId", oppgaveResultat.oppgaveId),
+                StructuredArguments.keyValue("sakid", opprettOppgave.saksreferanse),
+                StructuredArguments.keyValue("journalpost", opprettOppgave.journalpostId),
+                StructuredArguments.keyValue("tildeltEnhetsnr", opprettOppgave.tildeltEnhetsnr),
+                StructuredArguments.fields(loggingMeta))
     }
 }
