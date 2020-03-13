@@ -24,6 +24,8 @@ plugins {
     kotlin("jvm") version "1.3.61"
     id("com.diffplug.gradle.spotless") version "3.18.0"
     id("com.github.johnrengelman.shadow") version "5.2.0"
+    id("org.sonarqube") version "2.8"
+    jacoco
 }
 
 val githubUser: String by project
@@ -91,6 +93,22 @@ dependencies {
 
 }
 
+sonarqube {
+    properties {
+        property("sonar.projectKey", "syfosmoppgave")
+        property("sonar.organization", "navit")
+        property("sonar.host.url", "https://sonarcloud.io")
+        property("sonar.login", System.getenv("SONAR_TOKEN") )
+    }
+}
+
+tasks.jacocoTestReport {
+    reports {
+        xml.isEnabled = true
+        html.isEnabled = true
+    }
+}
+
 tasks {
     withType<Jar> {
         manifest.attributes["Main-Class"] = "no.nav.syfo.BootstrapKt"
@@ -105,6 +123,7 @@ tasks {
 
     withType<KotlinCompile> {
         kotlinOptions.jvmTarget = "12"
+        kotlinOptions.freeCompilerArgs = listOf("-Xnormalize-constructor-calls=enable")
     }
 
     withType<Test> {
@@ -115,7 +134,14 @@ tasks {
             showStandardStreams = true
         }
     }
+    withType<JacocoReport> {
+        classDirectories.setFrom(
+                sourceSets.main.get().output.asFileTree.matching {
+                    exclude()
+                }
+        )
 
+    }
     "check" {
         dependsOn("formatKotlin")
     }

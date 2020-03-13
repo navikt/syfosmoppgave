@@ -54,7 +54,7 @@ class OppgaveserviceKtTest : Spek({
         }
         it("Opprett oppgave feiler med status 500 -> publisert til retrytopic") {
             httpClientTest.setResponseData(HttpMethod.Get, ResponseData(objectMapper.writeValueAsString(OppgaveResponse(0, emptyList())), HttpStatusCode.OK, headersOf("Content-Type", "application/json")))
-            httpClientTest.setResponseData(HttpMethod.Post, ResponseData("", HttpStatusCode.InternalServerError))
+            httpClientTest.setResponseData(HttpMethod.Post, ResponseData("", HttpStatusCode.InternalServerError, headersOf()))
             val registerJournal = createRegisterJournal("msgId")
             val produceTask = createProduceTask("msgId")
             runBlocking {
