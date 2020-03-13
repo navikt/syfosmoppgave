@@ -59,7 +59,6 @@
       "topicName": "privat-syfo-oppgave-retry",
       "members": [
         {"member":"srvsyfosmoppgave", "role":"CONSUMER"},
-        {"member":"srvsyfoservice-dat", "role":"CONSUMER"},
         {"member":"srvsyfosmoppgave", "role":"PRODUCER"},
         {"member":"s151890", "role":"MANAGER"},
         {"member":"k143566", "role":"MANAGER"},
