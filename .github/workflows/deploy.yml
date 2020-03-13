@@ -37,7 +37,7 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          ./gradlew build test jacocoTestReport sonarqube
+          ./gradlew test jacocoTestReport sonarqube
       - name: Build jar
         env:
           ORG_GRADLE_PROJECT_githubUser: x-access-token
