@@ -10,7 +10,8 @@ data class Environment(
     val securityTokenServiceUrl: String = getEnvVar("SECURITYTOKENSERVICE_URL", "http://security-token-service/rest/v1/sts/token"),
     val oppgavebehandlingUrl: String = getEnvVar("OPPGAVEBEHANDLING_URL", "http://oppgave/api/v1/oppgaver"),
     val journalCreatedTopic: String = getEnvVar("KAFKA_JOURNAL_CREATED_TOPIC", "aapen-syfo-oppgave-journalOpprettet"),
-    val oppgaveTopic: String = getEnvVar("KAFKA_OPPGAVE_TOPIC", "aapen-syfo-oppgave-produserOppgave")
+    val oppgaveTopic: String = getEnvVar("KAFKA_OPPGAVE_TOPIC", "aapen-syfo-oppgave-produserOppgave"),
+    val retryOppgaveTopic: String = "privat-syfo-oppgave-retry"
 ) : KafkaConfig
 
 data class Credentials(

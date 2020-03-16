@@ -18,12 +18,14 @@ val prometheusVersion = "0.8.0"
 val smCommonVersion = "1.84cb553"
 val spekVersion = "2.0.9"
 val syfoAvroSchemasVersion = "c8be932543e7356a34690ce7979d494c5d8516d8"
-
+val testContainerKafkaVersion = "1.12.5"
 plugins {
     id("org.jmailen.kotlinter") version "2.2.0"
     kotlin("jvm") version "1.3.61"
     id("com.diffplug.gradle.spotless") version "3.18.0"
     id("com.github.johnrengelman.shadow") version "5.2.0"
+    id("org.sonarqube") version "2.8"
+    jacoco
 }
 
 val githubUser: String by project
@@ -83,12 +85,28 @@ dependencies {
     testImplementation("org.spekframework.spek2:spek-dsl-jvm:$spekVersion")
     testImplementation("io.ktor:ktor-server-test-host:$ktorVersion")
     testImplementation("no.nav:kafka-embedded-env:$kafkaEmbeddedVersion")
-
+    testImplementation("org.testcontainers:kafka:$testContainerKafkaVersion")
     testRuntimeOnly("org.spekframework.spek2:spek-runtime-jvm:$spekVersion")
-    testRuntimeOnly("org.spekframework.spek2:spek-runner-junit5:$spekVersion"){
+    testRuntimeOnly("org.spekframework.spek2:spek-runner-junit5:$spekVersion") {
         exclude(group = "org.jetbrains.kotlin")
     }
 
+}
+
+sonarqube {
+    properties {
+        property("sonar.projectKey", "syfosmoppgave")
+        property("sonar.organization", "navit")
+        property("sonar.host.url", "https://sonarcloud.io")
+        property("sonar.login", System.getenv("SONAR_TOKEN") )
+    }
+}
+
+tasks.jacocoTestReport {
+    reports {
+        xml.isEnabled = true
+        html.isEnabled = true
+    }
 }
 
 tasks {
@@ -105,6 +123,7 @@ tasks {
 
     withType<KotlinCompile> {
         kotlinOptions.jvmTarget = "12"
+        kotlinOptions.freeCompilerArgs = listOf("-Xnormalize-constructor-calls=enable")
     }
 
     withType<Test> {
@@ -115,7 +134,14 @@ tasks {
             showStandardStreams = true
         }
     }
+    withType<JacocoReport> {
+        classDirectories.setFrom(
+                sourceSets.main.get().output.asFileTree.matching {
+                    exclude()
+                }
+        )
 
+    }
     "check" {
         dependsOn("formatKotlin")
     }

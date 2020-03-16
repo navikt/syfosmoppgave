@@ -10,7 +10,6 @@ import io.ktor.http.contentType
 import io.ktor.util.KtorExperimentalAPI
 import net.logstash.logback.argument.StructuredArguments.fields
 import no.nav.syfo.LoggingMeta
-import no.nav.syfo.helpers.retry
 import no.nav.syfo.log
 import no.nav.syfo.model.OppgaveResponse
 import no.nav.syfo.model.OppgaveResultat
@@ -19,8 +18,8 @@ import no.nav.syfo.model.OpprettOppgaveResponse
 
 @KtorExperimentalAPI
 class OppgaveClient constructor(private val url: String, private val oidcClient: StsOidcClient, private val httpClient: HttpClient) {
-    private suspend fun opprettOppgave(opprettOppgave: OpprettOppgave, msgId: String): OpprettOppgaveResponse = retry("create_oppgave") {
-        httpClient.post<OpprettOppgaveResponse>(url) {
+    private suspend fun opprettOppgave(opprettOppgave: OpprettOppgave, msgId: String): OpprettOppgaveResponse {
+        return httpClient.post<OpprettOppgaveResponse>(url) {
             contentType(ContentType.Application.Json)
             val oidcToken = oidcClient.oidcToken()
             header("Authorization", "Bearer ${oidcToken.access_token}")
@@ -29,8 +28,8 @@ class OppgaveClient constructor(private val url: String, private val oidcClient:
         }
     }
 
-    private suspend fun hentOppgave(opprettOppgave: OpprettOppgave, msgId: String): OppgaveResponse = retry("hent_oppgave") {
-        httpClient.get<OppgaveResponse>(url) {
+    private suspend fun hentOppgave(opprettOppgave: OpprettOppgave, msgId: String): OppgaveResponse {
+        return httpClient.get<OppgaveResponse>(url) {
             val oidcToken = oidcClient.oidcToken()
             header("Authorization", "Bearer ${oidcToken.access_token}")
             header("X-Correlation-ID", msgId)

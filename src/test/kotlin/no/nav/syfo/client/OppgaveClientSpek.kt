@@ -62,9 +62,9 @@ object OppgaveClientSpek : Spek({
             get("/oppgave") {
                 when {
                     call.request.queryParameters["journalpostId"] == "jpId" -> call.respond(OppgaveResponse(1,
-                        listOf(Oppgave(1, "9999",
-                            "12345678910", "jpId", "sakId",
-                            "SYM", "BEH_EL_SYM"))))
+                            listOf(Oppgave(1, "9999",
+                                    "12345678910", "jpId", "sakId",
+                                    "SYM", "BEH_EL_SYM"))))
                     call.request.queryParameters["journalpostId"] == "nyJpId" -> call.respond(OppgaveResponse(0, emptyList()))
                     else -> call.respond(HttpStatusCode.InternalServerError)
                 }
@@ -108,17 +108,17 @@ object OppgaveClientSpek : Spek({
 })
 
 fun lagOpprettOppgaveRequest(jpId: String): OpprettOppgave =
-    OpprettOppgave(
-        tildeltEnhetsnr = "0101",
-        aktoerId = "12345678910",
-        opprettetAvEnhetsnr = "9999",
-        journalpostId = jpId,
-        behandlesAvApplikasjon = "FS22",
-        saksreferanse = "sakId",
-        beskrivelse = "Masse beskrivelse",
-        tema = "SYM",
-        oppgavetype = "BEH_EL_SYM",
-        aktivDato = LocalDate.of(2019, Month.JANUARY, 12),
-        fristFerdigstillelse = LocalDate.of(2019, Month.JANUARY, 14),
-        prioritet = "NORM"
-    )
+        OpprettOppgave(
+                tildeltEnhetsnr = "0101",
+                aktoerId = "12345678910",
+                opprettetAvEnhetsnr = "9999",
+                journalpostId = jpId,
+                behandlesAvApplikasjon = "FS22",
+                saksreferanse = "sakId",
+                beskrivelse = "Masse beskrivelse",
+                tema = "SYM",
+                oppgavetype = "BEH_EL_SYM",
+                aktivDato = LocalDate.of(2019, Month.JANUARY, 12),
+                fristFerdigstillelse = LocalDate.of(2019, Month.JANUARY, 14),
+                prioritet = "NORM"
+        )
