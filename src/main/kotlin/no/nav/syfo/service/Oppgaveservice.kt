@@ -44,7 +44,10 @@ suspend fun handleRegisterOppgaveRequest(
             opprettOppgave(oppgaveClient, opprettOppgave, loggingMeta, registerJournal.messageId)
         } catch (ex: ServerResponseException) {
             when (ex.response.status) {
-                HttpStatusCode.InternalServerError -> kafkaRetryPublisher.publishOppgaveToRetryTopic(opprettOppgave, registerJournal.messageId, loggingMeta)
+                HttpStatusCode.InternalServerError -> {
+                    log.error("Noe gikk galt ved oppretting av oppgave, {}", StructuredArguments.fields(loggingMeta))
+                    kafkaRetryPublisher.publishOppgaveToRetryTopic(opprettOppgave, registerJournal.messageId, loggingMeta)
+                }
                 else -> throw ex
             }
         }

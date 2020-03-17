@@ -25,7 +25,11 @@ class OpprettOppgaveRetryService(
 
         private val rerunTimes = listOf<OffsetTime>(
                 OffsetTime.of(3, 0, 0, 0, ZoneOffset.UTC),
-                OffsetTime.of(12, 0, 0, 0, ZoneOffset.UTC))
+                OffsetTime.of(6, 0, 0, 0, ZoneOffset.UTC),
+                OffsetTime.of(9, 0, 0, 0, ZoneOffset.UTC),
+                OffsetTime.of(12, 0, 0, 0, ZoneOffset.UTC),
+                OffsetTime.of(15, 0, 0, 0, ZoneOffset.UTC),
+                OffsetTime.of(21, 0, 0, 0, ZoneOffset.UTC))
     }
 
     private val runtimeMinutes: Long = 5
