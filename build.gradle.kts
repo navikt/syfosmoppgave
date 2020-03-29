@@ -21,7 +21,7 @@ val syfoAvroSchemasVersion = "c8be932543e7356a34690ce7979d494c5d8516d8"
 val testContainerKafkaVersion = "1.12.5"
 plugins {
     id("org.jmailen.kotlinter") version "2.2.0"
-    kotlin("jvm") version "1.3.61"
+    kotlin("jvm") version "1.3.71"
     id("com.diffplug.gradle.spotless") version "3.18.0"
     id("com.github.johnrengelman.shadow") version "5.2.0"
     id("org.sonarqube") version "2.8"
