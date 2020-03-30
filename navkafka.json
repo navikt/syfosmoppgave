@@ -25,6 +25,8 @@
         {"member":"srvsyfosminfotrygd", "role":"PRODUCER"},
         {"member":"srvsyfosmmottak", "role":"PRODUCER"},
         {"member":"srvsyfosmsak", "role":"PRODUCER"},
+        {"member":"srvregpapirsm", "role":"PRODUCER"},
+        {"member":"srvsyfosmpapirmottak", "role":"PRODUCER"},
         {"member":"s151890", "role":"MANAGER"},
         {"member":"k143566", "role":"MANAGER"},
         {"member":"f133008", "role":"MANAGER"},
