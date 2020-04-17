@@ -5,7 +5,8 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.util.KtorExperimentalAPI
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
-import net.logstash.logback.argument.StructuredArguments
+import net.logstash.logback.argument.StructuredArguments.fields
+import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.syfo.LoggingMeta
 import no.nav.syfo.client.OppgaveClient
 import no.nav.syfo.log
@@ -25,7 +26,7 @@ suspend fun handleRegisterOppgaveRequest(
     kafkaRetryPublisher: KafkaRetryPublisher
 ) {
     wrapExceptions(loggingMeta) {
-        log.info("Received a SM2013, going to create oppgave, {}", StructuredArguments.fields(loggingMeta))
+        log.info("Received a SM2013, going to create oppgave, {}", fields(loggingMeta))
         val opprettOppgave = OpprettOppgave(
                 aktoerId = produceTask.aktoerId,
                 opprettetAvEnhetsnr = produceTask.opprettetAvEnhetsnr,
@@ -45,7 +46,7 @@ suspend fun handleRegisterOppgaveRequest(
         } catch (ex: ServerResponseException) {
             when (ex.response.status) {
                 HttpStatusCode.InternalServerError -> {
-                    log.error("Noe gikk galt ved oppretting av oppgave, {}", StructuredArguments.fields(loggingMeta))
+                    log.error("Noe gikk galt ved oppretting av oppgave, {}", fields(loggingMeta))
                     kafkaRetryPublisher.publishOppgaveToRetryTopic(opprettOppgave, registerJournal.messageId, loggingMeta)
                 }
                 else -> throw ex
@@ -54,14 +55,15 @@ suspend fun handleRegisterOppgaveRequest(
     }
 }
 
+@KtorExperimentalAPI
 suspend fun opprettOppgave(oppgaveClient: OppgaveClient, opprettOppgave: OpprettOppgave, loggingMeta: LoggingMeta, messageId: String) {
     val oppgaveResultat = oppgaveClient.opprettOppgave(opprettOppgave, messageId, loggingMeta)
     if (!oppgaveResultat.duplikat) {
         OPPRETT_OPPGAVE_COUNTER.inc()
         log.info("Opprettet oppgave med {}, {}, {}, {}",
-                StructuredArguments.keyValue("oppgaveId", oppgaveResultat.oppgaveId),
-                StructuredArguments.keyValue("sakid", opprettOppgave.saksreferanse),
-                StructuredArguments.keyValue("journalpost", opprettOppgave.journalpostId),
-                StructuredArguments.fields(loggingMeta))
+                keyValue("oppgaveId", oppgaveResultat.oppgaveId),
+                keyValue("sakid", opprettOppgave.saksreferanse),
+                keyValue("journalpost", opprettOppgave.journalpostId),
+                fields(loggingMeta))
     }
 }

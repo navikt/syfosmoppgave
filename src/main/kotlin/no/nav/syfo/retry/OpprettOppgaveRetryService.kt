@@ -1,11 +1,12 @@
 package no.nav.syfo.retry
 
+import io.ktor.util.KtorExperimentalAPI
 import java.time.Duration
 import java.time.OffsetDateTime
 import java.time.OffsetTime
 import java.time.ZoneOffset
 import kotlinx.coroutines.delay
-import net.logstash.logback.argument.StructuredArguments
+import net.logstash.logback.argument.StructuredArguments.fields
 import no.nav.syfo.application.ApplicationState
 import no.nav.syfo.client.OppgaveClient
 import no.nav.syfo.retry.util.getNextRunTime
@@ -13,7 +14,7 @@ import no.nav.syfo.service.opprettOppgave
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.slf4j.LoggerFactory
 
-class OpprettOppgaveRetryService(
+class OpprettOppgaveRetryService @KtorExperimentalAPI constructor(
     private val kafkaConsumer: KafkaConsumer<String, OppgaveRetryKafkaMessage>,
     private val applicationState: ApplicationState,
     private val oppgaveClient: OppgaveClient,
@@ -41,7 +42,7 @@ class OpprettOppgaveRetryService(
             records.forEach {
                 val kafkaMessage = it.value()
                 val messageId = it.key()
-                log.info("Running retry for opprett oppgave", StructuredArguments.fields(kafkaMessage.loggingMeta))
+                log.info("Running retry for opprett oppgave {}", fields(kafkaMessage.loggingMeta))
                 opprettOppgave(oppgaveClient, kafkaMessage.opprettOppgave, kafkaMessage.loggingMeta, messageId = messageId)
             }
             if (!records.isEmpty) {
