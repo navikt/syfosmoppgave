@@ -46,10 +46,13 @@ suspend fun handleRegisterOppgaveRequest(
         } catch (ex: ServerResponseException) {
             when (ex.response.status) {
                 HttpStatusCode.InternalServerError -> {
-                    log.error("Noe gikk galt ved oppretting av oppgave, {}", fields(loggingMeta))
+                    log.error("Noe gikk galt ved oppretting av oppgave, error melding: {}, {}", ex.message ,fields(loggingMeta))
                     kafkaRetryPublisher.publishOppgaveToRetryTopic(opprettOppgave, registerJournal.messageId, loggingMeta)
                 }
-                else -> throw ex
+                else -> {
+                    log.error("Noe gikk galt ved oppretting av oppgave, error melding: {}, {}", ex.message ,fields(loggingMeta))
+                    throw ex
+                }
             }
         }
     }
