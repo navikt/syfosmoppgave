@@ -14,7 +14,8 @@ import no.nav.syfo.service.opprettOppgave
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.slf4j.LoggerFactory
 
-class OpprettOppgaveRetryService @KtorExperimentalAPI constructor(
+@KtorExperimentalAPI
+class OpprettOppgaveRetryService(
     private val kafkaConsumer: KafkaConsumer<String, OppgaveRetryKafkaMessage>,
     private val applicationState: ApplicationState,
     private val oppgaveClient: OppgaveClient,
@@ -35,6 +36,7 @@ class OpprettOppgaveRetryService @KtorExperimentalAPI constructor(
 
     private val runtimeMinutes: Long = 5
 
+    @KtorExperimentalAPI
     suspend fun runConsumer() {
         var endTime = OffsetDateTime.now(ZoneOffset.UTC).plusMinutes(runtimeMinutes)
         while (applicationState.ready && OffsetDateTime.now(ZoneOffset.UTC).isBefore(endTime)) {
