@@ -60,7 +60,7 @@ class OpprettOppgaveRetryService(
             log.info("Delaying for $nextRunTime")
             delay(nextRunTime)
             try {
-                log.info("Rerunning opprett oppgave")
+                log.info("Starting opprett oppgave consumer")
                 kafkaConsumer.subscribe(listOf(topic))
                 runConsumer()
             } catch (ex: Exception) {
