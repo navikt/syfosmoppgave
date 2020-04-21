@@ -6,12 +6,12 @@ version = "1.0.0"
 
 val avroVersion = "1.8.2"
 val confluentVersion = "5.0.0"
-val coroutinesVersion = "1.3.3"
+val coroutinesVersion = "1.3.4"
 val jacksonVersion = "2.9.9"
 val kafkaVersion = "2.0.0"
 val kafkaEmbeddedVersion = "2.3.0"
 val kluentVersion = "1.52"
-val ktorVersion = "1.3.0"
+val ktorVersion = "1.3.2"
 val logstashEncoderVersion = "6.1"
 val logbackVersion = "1.2.3"
 val prometheusVersion = "0.8.0"
@@ -19,9 +19,11 @@ val smCommonVersion = "1.84cb553"
 val spekVersion = "2.0.9"
 val syfoAvroSchemasVersion = "c8be932543e7356a34690ce7979d494c5d8516d8"
 val testContainerKafkaVersion = "1.12.5"
+val mockVersion = "1.9.3"
+
 plugins {
     id("org.jmailen.kotlinter") version "2.2.0"
-    kotlin("jvm") version "1.3.71"
+    kotlin("jvm") version "1.3.72"
     id("com.diffplug.gradle.spotless") version "3.18.0"
     id("com.github.johnrengelman.shadow") version "5.2.0"
     id("org.sonarqube") version "2.8"
@@ -80,12 +82,13 @@ dependencies {
     implementation("org.apache.kafka:kafka_2.12:$kafkaVersion")
     implementation("org.apache.kafka:kafka-streams:$kafkaVersion")
 
-    testImplementation("io.mockk:mockk:1.9.3")
+    testImplementation("io.mockk:mockk:$mockVersion")
     testImplementation("org.amshove.kluent:kluent:$kluentVersion")
     testImplementation("org.spekframework.spek2:spek-dsl-jvm:$spekVersion")
     testImplementation("io.ktor:ktor-server-test-host:$ktorVersion")
     testImplementation("no.nav:kafka-embedded-env:$kafkaEmbeddedVersion")
     testImplementation("org.testcontainers:kafka:$testContainerKafkaVersion")
+
     testRuntimeOnly("org.spekframework.spek2:spek-runtime-jvm:$spekVersion")
     testRuntimeOnly("org.spekframework.spek2:spek-runner-junit5:$spekVersion") {
         exclude(group = "org.jetbrains.kotlin")

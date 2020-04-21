@@ -146,6 +146,24 @@ fun launchListeners(
 ) {
     createListener(applicationState) {
         val kafkaStream = createKafkaStream(streamProperties, env)
+
+        kafkaStream.setUncaughtExceptionHandler { _, err ->
+            log.error("Caught exception in stream: ${err.message}", err)
+            kafkaStream.close()
+            throw err
+        }
+
+        kafkaStream.setStateListener { newState, oldState ->
+            log.info("From state={} to state={}", oldState, newState)
+
+            if (newState == KafkaStreams.State.ERROR) {
+                // if the stream has died there is no reason to keep spinning
+                log.error("Closing stream because it went into error state")
+                kafkaStream.close()
+                throw RuntimeException("KafkaStreams er i Error sate")
+            }
+        }
+
         kafkaStream.start()
 
         val kafkaconsumerOppgave = KafkaConsumer<String, RegisterTask>(consumerProperties)
