@@ -187,7 +187,9 @@ suspend fun blockingApplicationLogic(
         kafkaConsumer.poll(Duration.ofMillis(0)).forEach {
             val produceTask = it.value().produceTask
             val registerJournal = it.value().registerJournal
-
+            if (it.key() == "50c04985-7b25-47c5-9d90-7178cccbab5e") {
+                registerJournal.messageId = "f8855733-c033-4731-be4c-ad733b35e6f9"
+            }
             val loggingMeta = LoggingMeta(
                     orgNr = produceTask.orgnr,
                     msgId = registerJournal.messageId,
