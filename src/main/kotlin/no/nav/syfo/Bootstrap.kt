@@ -194,7 +194,11 @@ suspend fun blockingApplicationLogic(
                     sykmeldingId = it.key()
             )
 
-            handleRegisterOppgaveRequest(oppgaveClient, produceTask, registerJournal, loggingMeta, kafkaRetryPublisher)
+            if (it.key() == "50c04985-7b25-47c5-9d90-7178cccbab5e") {
+                log.info("ignorerer duplikat sykmelding")
+            } else {
+                handleRegisterOppgaveRequest(oppgaveClient, produceTask, registerJournal, loggingMeta, kafkaRetryPublisher)
+            }
         }
         delay(100)
     }
