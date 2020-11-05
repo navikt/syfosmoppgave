@@ -52,6 +52,8 @@ import org.apache.kafka.streams.StreamsBuilder
 import org.apache.kafka.streams.kstream.JoinWindows
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 val log: Logger = LoggerFactory.getLogger("no.nav.syfo.smoppgave")
 val objectMapper: ObjectMapper = ObjectMapper()
@@ -86,6 +88,7 @@ fun main() {
     val oppgaveClient = OppgaveClient(env.oppgavebehandlingUrl, oidcClient, httpClient)
 
     val kafkaBaseConfig = loadBaseConfig(env, credentials)
+    kafkaBaseConfig["auto.offset.reset"] = "none"
     val consumerProperties = kafkaBaseConfig.toConsumerConfig("${env.applicationName}-consumer", valueDeserializer = KafkaAvroDeserializer::class)
     val streamProperties = kafkaBaseConfig.toStreamsConfig(env.applicationName, valueSerde = GenericAvroSerde::class)
 
@@ -196,8 +199,13 @@ suspend fun blockingApplicationLogic(
                     sykmeldingId = it.key()
             )
 
-            handleRegisterOppgaveRequest(oppgaveClient, produceTask, registerJournal, loggingMeta, kafkaRetryPublisher)
+            val aktivDato = LocalDate.parse(produceTask.aktivDato, DateTimeFormatter.ISO_DATE)
+            if (aktivDato.isBefore(LocalDate.of(2020, 11, 5))) {
+                log.info("Ignorerer gammel melding {}", fields(loggingMeta))
+            } else {
+                handleRegisterOppgaveRequest(oppgaveClient, produceTask, registerJournal, loggingMeta, kafkaRetryPublisher)
+            }
         }
-        delay(100)
+        delay(1)
     }
 }
