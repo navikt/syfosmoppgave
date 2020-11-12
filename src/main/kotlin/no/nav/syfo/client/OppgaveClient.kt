@@ -19,12 +19,17 @@ import no.nav.syfo.model.OpprettOppgaveResponse
 @KtorExperimentalAPI
 class OppgaveClient constructor(private val url: String, private val oidcClient: StsOidcClient, private val httpClient: HttpClient) {
     private suspend fun opprettOppgave(opprettOppgave: OpprettOppgave, msgId: String): OpprettOppgaveResponse {
-        return httpClient.post<OpprettOppgaveResponse>(url) {
-            contentType(ContentType.Application.Json)
-            val oidcToken = oidcClient.oidcToken()
-            header("Authorization", "Bearer ${oidcToken.access_token}")
-            header("X-Correlation-ID", msgId)
-            body = opprettOppgave
+        try {
+            return httpClient.post<OpprettOppgaveResponse>(url) {
+                contentType(ContentType.Application.Json)
+                val oidcToken = oidcClient.oidcToken()
+                header("Authorization", "Bearer ${oidcToken.access_token}")
+                header("X-Correlation-ID", msgId)
+                body = opprettOppgave
+            }
+        } catch (ex: Exception) {
+            log.error("Could not OpprettOppgave for \naktorID: ${opprettOppgave.aktoerId}\njournalPostid=${opprettOppgave.journalpostId}\n$opprettOppgave", ex)
+            throw ex
         }
     }
 

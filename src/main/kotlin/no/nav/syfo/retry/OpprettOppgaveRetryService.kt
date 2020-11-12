@@ -55,8 +55,14 @@ class OpprettOppgaveRetryService(
     }
 
     suspend fun start() {
+        var firstRun = true
         while (applicationState.ready) {
-            val nextRunTime = getNextRunTime(OffsetDateTime.now(ZoneOffset.UTC), rerunTimes)
+            val nextRunTime = if (firstRun) {
+                firstRun = false
+                0
+            } else {
+                getNextRunTime(OffsetDateTime.now(ZoneOffset.UTC), rerunTimes)
+            }
             log.info("Delaying for $nextRunTime")
             delay(nextRunTime)
             try {

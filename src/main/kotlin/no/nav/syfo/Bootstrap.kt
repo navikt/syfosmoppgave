@@ -16,6 +16,8 @@ import io.ktor.util.KtorExperimentalAPI
 import io.prometheus.client.hotspot.DefaultExports
 import java.io.File
 import java.time.Duration
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import java.util.Properties
 import java.util.concurrent.TimeUnit
 import kafka.server.KafkaConfig
@@ -52,8 +54,6 @@ import org.apache.kafka.streams.StreamsBuilder
 import org.apache.kafka.streams.kstream.JoinWindows
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
 
 val log: Logger = LoggerFactory.getLogger("no.nav.syfo.smoppgave")
 val objectMapper: ObjectMapper = ObjectMapper()
