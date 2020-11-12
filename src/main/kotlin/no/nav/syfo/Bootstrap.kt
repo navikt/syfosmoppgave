@@ -198,13 +198,7 @@ suspend fun blockingApplicationLogic(
                     msgId = registerJournal.messageId,
                     sykmeldingId = it.key()
             )
-
-            val aktivDato = LocalDate.parse(produceTask.aktivDato, DateTimeFormatter.ISO_DATE)
-            if (aktivDato.isBefore(LocalDate.of(2020, 11, 5))) {
-                log.info("Ignorerer gammel melding {}", fields(loggingMeta))
-            } else {
-                handleRegisterOppgaveRequest(oppgaveClient, produceTask, registerJournal, loggingMeta, kafkaRetryPublisher)
-            }
+            handleRegisterOppgaveRequest(oppgaveClient, produceTask, registerJournal, loggingMeta, kafkaRetryPublisher)
         }
         delay(1)
     }
