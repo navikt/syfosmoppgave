@@ -13,7 +13,6 @@ import no.nav.syfo.retry.util.getNextRunTime
 import no.nav.syfo.service.opprettOppgave
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.slf4j.LoggerFactory
-import java.time.Instant
 
 @KtorExperimentalAPI
 class OpprettOppgaveRetryService(
@@ -45,12 +44,8 @@ class OpprettOppgaveRetryService(
             records.forEach {
                 val kafkaMessage = it.value()
                 val messageId = it.key()
-                if(Instant.ofEpochMilli(it.timestamp()).atOffset(ZoneOffset.UTC) < OffsetDateTime.of(2020, 11, 8, 0, 0, 0, 0, ZoneOffset.UTC)) {
-                    log.warn("skipping oppgave ${kafkaMessage.opprettOppgave}")
-                } else {
-                    log.info("Running retry for opprett oppgave {}", fields(kafkaMessage.loggingMeta))
-                    opprettOppgave(oppgaveClient, kafkaMessage.opprettOppgave, kafkaMessage.loggingMeta, messageId = messageId)
-                }
+                log.info("Running retry for opprett oppgave {}", fields(kafkaMessage.loggingMeta))
+                opprettOppgave(oppgaveClient, kafkaMessage.opprettOppgave, kafkaMessage.loggingMeta, messageId = messageId)
             }
             if (!records.isEmpty) {
                 endTime = OffsetDateTime.now(ZoneOffset.UTC).plusMinutes(5)

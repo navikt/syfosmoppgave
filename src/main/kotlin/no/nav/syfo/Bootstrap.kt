@@ -16,8 +16,6 @@ import io.ktor.util.KtorExperimentalAPI
 import io.prometheus.client.hotspot.DefaultExports
 import java.io.File
 import java.time.Duration
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
 import java.util.Properties
 import java.util.concurrent.TimeUnit
 import kafka.server.KafkaConfig
