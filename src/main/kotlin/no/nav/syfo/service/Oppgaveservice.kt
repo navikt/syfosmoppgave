@@ -37,6 +37,7 @@ suspend fun handleRegisterOppgaveRequest(
                 tema = produceTask.tema,
                 oppgavetype = produceTask.oppgavetype,
                 behandlingstype = if (produceTask.behandlingstype != "ANY") produceTask.behandlingstype else { null },
+                behandlingstema = if (produceTask.behandlingstema != "ANY") produceTask.behandlingstema else { null },
                 aktivDato = LocalDate.parse(produceTask.aktivDato, DateTimeFormatter.ISO_DATE),
                 fristFerdigstillelse = LocalDate.parse(produceTask.fristFerdigstillelse, DateTimeFormatter.ISO_DATE),
                 prioritet = produceTask.prioritet.name

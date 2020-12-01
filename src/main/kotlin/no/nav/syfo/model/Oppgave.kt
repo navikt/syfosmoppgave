@@ -14,6 +14,7 @@ data class OpprettOppgave(
     val tema: String? = null,
     val oppgavetype: String,
     val behandlingstype: String? = null,
+    val behandlingstema: String? = null,
     val aktivDato: LocalDate,
     val fristFerdigstillelse: LocalDate? = null,
     val prioritet: String
