@@ -27,6 +27,7 @@ suspend fun handleRegisterOppgaveRequest(
 ) {
     wrapExceptions(loggingMeta) {
         log.info("Received a SM2013, going to create oppgave, {}", fields(loggingMeta))
+
         val opprettOppgave = OpprettOppgave(
                 aktoerId = produceTask.aktoerId,
                 opprettetAvEnhetsnr = produceTask.opprettetAvEnhetsnr,
@@ -40,7 +41,9 @@ suspend fun handleRegisterOppgaveRequest(
                 behandlingstema = if (produceTask.behandlingstema != "ANY") produceTask.behandlingstema else { null },
                 aktivDato = LocalDate.parse(produceTask.aktivDato, DateTimeFormatter.ISO_DATE),
                 fristFerdigstillelse = LocalDate.parse(produceTask.fristFerdigstillelse, DateTimeFormatter.ISO_DATE),
-                prioritet = produceTask.prioritet.name
+                prioritet = produceTask.prioritet.name,
+                tildeltEnhetsnr = if (produceTask.tildeltEnhetsnr.isNotEmpty()) { produceTask.tildeltEnhetsnr } else null,
+                tilordnetRessurs = produceTask.metadata["tilordnetRessurs"]
         )
 
         try {
