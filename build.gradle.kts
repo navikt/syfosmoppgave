@@ -18,7 +18,7 @@ val prometheusVersion = "0.8.0"
 val smCommonVersion = "1.125b076"
 val spekVersion = "2.0.9"
 val syfoAvroSchemasVersion = "c8be932543e7356a34690ce7979d494c5d8516d8"
-val testContainerKafkaVersion = "1.15.0"
+val testContainerKafkaVersion = "1.15.3"
 val mockVersion = "1.9.3"
 
 plugins {

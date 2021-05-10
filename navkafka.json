@@ -7,11 +7,11 @@
         {"member":"srvsyfosmarena", "role":"CONSUMER"},
         {"member":"srvsyfosmsak", "role":"PRODUCER"},
         {"member":"s151890", "role":"MANAGER"},
-        {"member":"k143566", "role":"MANAGER"},
         {"member":"f133008", "role":"MANAGER"},
         {"member":"n157016", "role":"MANAGER"},
         {"member":"k157140", "role":"MANAGER"},
-        {"member":"g153850", "role":"MANAGER"}
+        {"member":"g153850", "role":"MANAGER"},
+        {"member":"H157812", "role":"MANAGER"}
       ],
       "numPartitions": 3,
       "configEntries": {
@@ -27,12 +27,13 @@
         {"member":"srvsyfosmsak", "role":"PRODUCER"},
         {"member":"srvregpapirsm", "role":"PRODUCER"},
         {"member":"srvsyfosmpapirmottak", "role":"PRODUCER"},
+        {"member":"srvsyfosmmanuell-b", "role":"PRODUCER"},
         {"member":"s151890", "role":"MANAGER"},
-        {"member":"k143566", "role":"MANAGER"},
         {"member":"f133008", "role":"MANAGER"},
         {"member":"n157016", "role":"MANAGER"},
         {"member":"k157140", "role":"MANAGER"},
-        {"member":"g153850", "role":"MANAGER"}
+        {"member":"g153850", "role":"MANAGER"},
+        {"member":"H157812", "role":"MANAGER"}
       ],
       "numPartitions": 3,
       "configEntries": {
@@ -46,11 +47,11 @@
         {"member":"srvsyfoservice-dat", "role":"CONSUMER"},
         {"member":"srvsyfosmoppgave", "role":"PRODUCER"},
         {"member":"s151890", "role":"MANAGER"},
-        {"member":"k143566", "role":"MANAGER"},
         {"member":"f133008", "role":"MANAGER"},
         {"member":"n157016", "role":"MANAGER"},
         {"member":"k157140", "role":"MANAGER"},
-        {"member":"g153850", "role":"MANAGER"}
+        {"member":"g153850", "role":"MANAGER"},
+        {"member":"H157812", "role":"MANAGER"}
       ],
       "numPartitions": 3,
       "configEntries": {
@@ -63,11 +64,11 @@
         {"member":"srvsyfosmoppgave", "role":"CONSUMER"},
         {"member":"srvsyfosmoppgave", "role":"PRODUCER"},
         {"member":"s151890", "role":"MANAGER"},
-        {"member":"k143566", "role":"MANAGER"},
         {"member":"f133008", "role":"MANAGER"},
         {"member":"n157016", "role":"MANAGER"},
         {"member":"k157140", "role":"MANAGER"},
-        {"member":"g153850", "role":"MANAGER"}
+        {"member":"g153850", "role":"MANAGER"},
+        {"member":"H157812", "role":"MANAGER"}
       ],
       "numPartitions": 3,
       "configEntries": {
