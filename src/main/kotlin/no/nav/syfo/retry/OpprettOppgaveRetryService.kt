@@ -40,7 +40,7 @@ class OpprettOppgaveRetryService(
     suspend fun runConsumer() {
         var endTime = OffsetDateTime.now(ZoneOffset.UTC).plusMinutes(runtimeMinutes)
         while (applicationState.ready && OffsetDateTime.now(ZoneOffset.UTC).isBefore(endTime)) {
-            val records = kafkaConsumer.poll(Duration.ofMillis(0))
+            val records = kafkaConsumer.poll(Duration.ofMillis(1000))
             records.forEach {
                 val kafkaMessage = it.value()
                 val messageId = it.key()
@@ -50,7 +50,6 @@ class OpprettOppgaveRetryService(
             if (!records.isEmpty) {
                 endTime = OffsetDateTime.now(ZoneOffset.UTC).plusMinutes(5)
             }
-            delay(100)
         }
     }
 
