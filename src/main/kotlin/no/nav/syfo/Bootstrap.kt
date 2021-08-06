@@ -188,7 +188,7 @@ suspend fun blockingApplicationLogic(
     kafkaRetryPublisher: KafkaRetryPublisher
 ) {
     while (applicationState.ready) {
-        kafkaConsumer.poll(Duration.ofMillis(0)).forEach {
+        kafkaConsumer.poll(Duration.ofMillis(1000)).forEach {
             val produceTask = it.value().produceTask
             val registerJournal = it.value().registerJournal
 
