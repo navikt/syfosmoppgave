@@ -18,9 +18,9 @@ import java.util.Properties
 import java.util.concurrent.TimeUnit
 import kafka.server.KafkaConfig
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import net.logstash.logback.argument.StructuredArguments.fields
 import no.nav.syfo.application.ApplicationServer
@@ -41,7 +41,6 @@ import no.nav.syfo.sak.avro.ProduceTask
 import no.nav.syfo.sak.avro.RegisterJournal
 import no.nav.syfo.sak.avro.RegisterTask
 import no.nav.syfo.service.handleRegisterOppgaveRequest
-import no.nav.syfo.util.Unbounded
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.common.serialization.StringDeserializer
@@ -123,14 +122,13 @@ fun createKafkaStream(streamProperties: Properties, env: Environment): KafkaStre
 fun createListener(
     applicationState: ApplicationState,
     action: suspend CoroutineScope.() -> Unit
-): Job = GlobalScope.launch(Dispatchers.Unbounded) {
+): Job = GlobalScope.launch {
     try {
         action()
     } catch (e: TrackableException) {
         log.error("En uhåndtert feil oppstod, applikasjonen restarter {}", fields(e.loggingMeta), e.cause)
     } finally {
         applicationState.alive = false
-        applicationState.ready = false
     }
 }
 
@@ -145,30 +143,30 @@ fun launchListeners(
     oppgaveRetryService: OpprettOppgaveRetryService
 
 ) {
-    val kafkaStream = createKafkaStream(streamProperties, env)
-
-    kafkaStream.setUncaughtExceptionHandler { _, err ->
-        log.error("Caught exception in stream: ${err.message}", err)
-        kafkaStream.close()
-        throw err
-    }
-
-    kafkaStream.setStateListener { newState, oldState ->
-        log.info("From state={} to state={}", oldState, newState)
-
-        if (newState == KafkaStreams.State.ERROR) {
-            // if the stream has died there is no reason to keep spinning
-            log.error("Closing stream because it went into error state")
-            kafkaStream.close(30, TimeUnit.SECONDS)
-            log.error("Restarter applikasjon")
-            applicationState.ready = false
-            applicationState.alive = false
-        }
-    }
-
-    kafkaStream.start()
-
     createListener(applicationState) {
+        val kafkaStream = createKafkaStream(streamProperties, env)
+
+        kafkaStream.setUncaughtExceptionHandler { _, err ->
+            log.error("Caught exception in stream: ${err.message}", err)
+            kafkaStream.close()
+            throw err
+        }
+
+        kafkaStream.setStateListener { newState, oldState ->
+            log.info("From state={} to state={}", oldState, newState)
+
+            if (newState == KafkaStreams.State.ERROR) {
+                // if the stream has died there is no reason to keep spinning
+                log.error("Closing stream because it went into error state")
+                kafkaStream.close(30, TimeUnit.SECONDS)
+                log.error("Restarter applikasjon")
+                applicationState.ready = false
+                applicationState.alive = false
+            }
+        }
+
+        kafkaStream.start()
+
         val kafkaconsumerOppgave = KafkaConsumer<String, RegisterTask>(consumerProperties)
         kafkaconsumerOppgave.subscribe(listOf("privat-syfo-oppgave-registrerOppgave"))
         blockingApplicationLogic(applicationState, kafkaconsumerOppgave, oppgaveClient, kafkaRetryPublisher)
@@ -187,7 +185,7 @@ suspend fun blockingApplicationLogic(
     kafkaRetryPublisher: KafkaRetryPublisher
 ) {
     while (applicationState.ready) {
-        kafkaConsumer.poll(Duration.ofMillis(1000)).forEach {
+        kafkaConsumer.poll(Duration.ofMillis(0)).forEach {
             val produceTask = it.value().produceTask
             val registerJournal = it.value().registerJournal
 
@@ -198,5 +196,6 @@ suspend fun blockingApplicationLogic(
             )
             handleRegisterOppgaveRequest(oppgaveClient, produceTask, registerJournal, loggingMeta, kafkaRetryPublisher)
         }
+        delay(1)
     }
 }
