@@ -11,8 +11,8 @@ fun createApplicationEngine(
     env: Environment,
     applicationState: ApplicationState
 ): ApplicationEngine =
-        embeddedServer(Netty, env.applicationPort) {
-            routing {
-                registerNaisApi(applicationState)
-            }
+    embeddedServer(Netty, env.applicationPort) {
+        routing {
+            registerNaisApi(applicationState)
         }
+    }

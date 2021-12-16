@@ -1,13 +1,13 @@
 package no.nav.syfo
 
+import no.nav.syfo.sak.avro.PrioritetType
+import no.nav.syfo.sak.avro.ProduceTask
+import no.nav.syfo.sak.avro.RegisterJournal
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
-import no.nav.syfo.sak.avro.PrioritetType
-import no.nav.syfo.sak.avro.ProduceTask
-import no.nav.syfo.sak.avro.RegisterJournal
 
 fun deleteDir(dir: Path) {
     if (Files.exists(dir)) {
@@ -22,7 +22,7 @@ fun cleanupDir(dir: Path, streamApplicationName: String) {
 }
 
 val kafkaStreamsStateDir: Path = Paths.get(System.getProperty("java.io.tmpdir"))
-        .resolve("kafka-stream-integration-tests")
+    .resolve("kafka-stream-integration-tests")
 
 fun createProduceTask(msgId: String) = ProduceTask().apply {
     messageId = msgId
