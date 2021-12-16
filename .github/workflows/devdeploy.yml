@@ -46,10 +46,9 @@ jobs:
         env:
           ORG_GRADLE_PROJECT_githubUser: x-access-token
           ORG_GRADLE_PROJECT_githubPassword: ${{ secrets.GITHUB_TOKEN }}
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          ./gradlew test jacocoTestReport sonarqube
+          ./gradlew test
       - name: Build jar
         env:
           ORG_GRADLE_PROJECT_githubUser: x-access-token
