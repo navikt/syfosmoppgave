@@ -4,30 +4,28 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 group = "no.nav.syfo"
 version = "1.0.0"
 
-val avroVersion = "1.8.2"
-val confluentVersion = "5.0.0"
-val coroutinesVersion = "1.3.4"
-val jacksonVersion = "2.9.9"
-val kafkaVersion = "2.0.0"
-val kafkaEmbeddedVersion = "2.3.0"
-val kluentVersion = "1.52"
-val ktorVersion = "1.3.2"
-val logstashEncoderVersion = "6.1"
-val logbackVersion = "1.2.3"
-val prometheusVersion = "0.8.0"
-val smCommonVersion = "1.125b076"
-val spekVersion = "2.0.9"
+val avroVersion = "1.11.0"
+val confluentVersion = "6.2.2"
+val coroutinesVersion = "1.5.1"
+val jacksonVersion = "2.13.0"
+val kafkaVersion = "2.8.0"
+val kluentVersion = "1.68"
+val ktorVersion = "1.6.7"
+val logstashEncoderVersion = "7.0.1"
+val logbackVersion = "1.2.8"
+val prometheusVersion = "0.12.0"
+val smCommonVersion = "1.a92720c"
+val spekVersion = "2.0.17"
 val syfoAvroSchemasVersion = "c8be932543e7356a34690ce7979d494c5d8516d8"
-val testContainerKafkaVersion = "1.15.3"
-val mockVersion = "1.9.3"
+val testContainerKafkaVersion = "1.16.2"
+val mockVersion = "1.12.1"
+val kotlinVersion = "1.6.0"
 
 plugins {
-    id("org.jmailen.kotlinter") version "2.2.0"
-    kotlin("jvm") version "1.3.72"
-    id("com.diffplug.gradle.spotless") version "3.18.0"
-    id("com.github.johnrengelman.shadow") version "5.2.0"
-    id("org.sonarqube") version "2.8"
-    jacoco
+    id("org.jmailen.kotlinter") version "3.6.0"
+    kotlin("jvm") version "1.6.0"
+    id("com.diffplug.spotless") version "5.16.0"
+    id("com.github.johnrengelman.shadow") version "7.0.0"
 }
 
 val githubUser: String by project
@@ -35,11 +33,6 @@ val githubPassword: String by project
 
 repositories {
     mavenCentral()
-    jcenter()
-    maven(url = "https://dl.bintray.com/kotlin/ktor")
-    maven(url = "https://packages.confluent.io/maven/")
-    maven(url = "https://dl.bintray.com/spekframework/spek-dev")
-    maven(url = "https://kotlin.bintray.com/kotlinx")
     maven {
         url = uri("https://maven.pkg.github.com/navikt/syfosm-common")
         credentials {
@@ -47,10 +40,11 @@ repositories {
             password = githubPassword
         }
     }
+    maven(url = "https://packages.confluent.io/maven/")
 }
 
 dependencies {
-    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
+    implementation("org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion")
 
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion")
     implementation("io.prometheus:simpleclient_hotspot:$prometheusVersion")
@@ -85,8 +79,8 @@ dependencies {
     testImplementation("io.mockk:mockk:$mockVersion")
     testImplementation("org.amshove.kluent:kluent:$kluentVersion")
     testImplementation("org.spekframework.spek2:spek-dsl-jvm:$spekVersion")
+    testImplementation("io.ktor:ktor-client-mock:$ktorVersion")
     testImplementation("io.ktor:ktor-server-test-host:$ktorVersion")
-    testImplementation("no.nav:kafka-embedded-env:$kafkaEmbeddedVersion")
     testImplementation("org.testcontainers:kafka:$testContainerKafkaVersion")
 
     testRuntimeOnly("org.spekframework.spek2:spek-runtime-jvm:$spekVersion")
@@ -94,22 +88,6 @@ dependencies {
         exclude(group = "org.jetbrains.kotlin")
     }
 
-}
-
-sonarqube {
-    properties {
-        property("sonar.projectKey", "syfosmoppgave")
-        property("sonar.organization", "navit")
-        property("sonar.host.url", "https://sonarcloud.io")
-        property("sonar.login", System.getenv("SONAR_TOKEN") )
-    }
-}
-
-tasks.jacocoTestReport {
-    reports {
-        xml.isEnabled = true
-        html.isEnabled = true
-    }
 }
 
 tasks {
@@ -125,7 +103,7 @@ tasks {
     }
 
     withType<KotlinCompile> {
-        kotlinOptions.jvmTarget = "12"
+        kotlinOptions.jvmTarget = "17"
         kotlinOptions.freeCompilerArgs = listOf("-Xnormalize-constructor-calls=enable")
     }
 
@@ -137,14 +115,7 @@ tasks {
             showStandardStreams = true
         }
     }
-    withType<JacocoReport> {
-        classDirectories.setFrom(
-                sourceSets.main.get().output.asFileTree.matching {
-                    exclude()
-                }
-        )
 
-    }
     "check" {
         dependsOn("formatKotlin")
     }

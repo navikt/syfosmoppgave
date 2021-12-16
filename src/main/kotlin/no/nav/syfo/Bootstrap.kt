@@ -11,11 +11,7 @@ import io.ktor.client.HttpClient
 import io.ktor.client.engine.apache.Apache
 import io.ktor.client.features.json.JacksonSerializer
 import io.ktor.client.features.json.JsonFeature
-import io.ktor.util.KtorExperimentalAPI
 import io.prometheus.client.hotspot.DefaultExports
-import java.time.Duration
-import java.util.Properties
-import java.util.concurrent.TimeUnit
 import kafka.server.KafkaConfig
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -52,15 +48,17 @@ import org.apache.kafka.streams.StreamsBuilder
 import org.apache.kafka.streams.kstream.JoinWindows
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import java.time.Duration
+import java.util.Properties
+import java.util.concurrent.TimeUnit
 
 val log: Logger = LoggerFactory.getLogger("no.nav.syfo.smoppgave")
 val objectMapper: ObjectMapper = ObjectMapper()
-        .registerModule(JavaTimeModule())
-        .registerKotlinModule()
-        .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
-        .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+    .registerModule(JavaTimeModule())
+    .registerKotlinModule()
+    .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
+    .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
 
-@KtorExperimentalAPI
 fun main() {
     val env = Environment()
     val credentials = Credentials()
@@ -109,7 +107,7 @@ fun createKafkaStream(streamProperties: Properties, env: Environment): KafkaStre
     KafkaConfig.LogRetentionTimeMillisProp()
 
     val joinWindow = JoinWindows.of(TimeUnit.DAYS.toMillis(65))
-            .until(TimeUnit.DAYS.toMillis(131))
+        .until(TimeUnit.DAYS.toMillis(131))
 
     createTaskStream.join(journalCreatedTaskStream, { produceTask, registerJournal ->
         RegisterTask.newBuilder().apply {
@@ -118,87 +116,86 @@ fun createKafkaStream(streamProperties: Properties, env: Environment): KafkaStre
         }.build()
     }, joinWindow).to("privat-syfo-oppgave-registrerOppgave")
 
-    return KafkaStreams(streamsBuilder.build(), streamProperties)
-}
-
-fun createListener(
-    applicationState: ApplicationState,
-    action: suspend CoroutineScope.() -> Unit
-): Job = GlobalScope.launch(Dispatchers.Unbounded) {
-    try {
-        action()
-    } catch (e: TrackableException) {
-        log.error("En uhåndtert feil oppstod, applikasjonen restarter {}", fields(e.loggingMeta), e.cause)
-    } finally {
-        applicationState.alive = false
-        applicationState.ready = false
-    }
-}
-
-@KtorExperimentalAPI
-fun launchListeners(
-    consumerProperties: Properties,
-    applicationState: ApplicationState,
-    oppgaveClient: OppgaveClient,
-    streamProperties: Properties,
-    env: Environment,
-    kafkaRetryPublisher: KafkaRetryPublisher,
-    oppgaveRetryService: OpprettOppgaveRetryService
-
-) {
-    val kafkaStream = createKafkaStream(streamProperties, env)
-
-    kafkaStream.setUncaughtExceptionHandler { _, err ->
-        log.error("Caught exception in stream: ${err.message}", err)
-        kafkaStream.close()
-        throw err
+        return KafkaStreams(streamsBuilder.build(), streamProperties)
     }
 
-    kafkaStream.setStateListener { newState, oldState ->
-        log.info("From state={} to state={}", oldState, newState)
-
-        if (newState == KafkaStreams.State.ERROR) {
-            // if the stream has died there is no reason to keep spinning
-            log.error("Closing stream because it went into error state")
-            kafkaStream.close(30, TimeUnit.SECONDS)
-            log.error("Restarter applikasjon")
-            applicationState.ready = false
+    fun createListener(
+        applicationState: ApplicationState,
+        action: suspend CoroutineScope.() -> Unit
+    ): Job = GlobalScope.launch(Dispatchers.Unbounded) {
+        try {
+            action()
+        } catch (e: TrackableException) {
+            log.error("En uhåndtert feil oppstod, applikasjonen restarter {}", fields(e.loggingMeta), e.cause)
+        } finally {
             applicationState.alive = false
+            applicationState.ready = false
         }
     }
 
-    kafkaStream.start()
+    fun launchListeners(
+        consumerProperties: Properties,
+        applicationState: ApplicationState,
+        oppgaveClient: OppgaveClient,
+        streamProperties: Properties,
+        env: Environment,
+        kafkaRetryPublisher: KafkaRetryPublisher,
+        oppgaveRetryService: OpprettOppgaveRetryService
 
-    createListener(applicationState) {
-        val kafkaconsumerOppgave = KafkaConsumer<String, RegisterTask>(consumerProperties)
-        kafkaconsumerOppgave.subscribe(listOf("privat-syfo-oppgave-registrerOppgave"))
-        blockingApplicationLogic(applicationState, kafkaconsumerOppgave, oppgaveClient, kafkaRetryPublisher)
+    ) {
+        val kafkaStream = createKafkaStream(streamProperties, env)
+
+        kafkaStream.setUncaughtExceptionHandler { _, err ->
+            log.error("Caught exception in stream: ${err.message}", err)
+            kafkaStream.close()
+            throw err
+        }
+
+        kafkaStream.setStateListener { newState, oldState ->
+            log.info("From state={} to state={}", oldState, newState)
+
+            if (newState == KafkaStreams.State.ERROR) {
+                // if the stream has died there is no reason to keep spinning
+                log.error("Closing stream because it went into error state")
+                kafkaStream.close(30, TimeUnit.SECONDS)
+                log.error("Restarter applikasjon")
+                applicationState.ready = false
+                applicationState.alive = false
+            }
+        }
+
+        kafkaStream.start()
+
+        createListener(applicationState) {
+            val kafkaconsumerOppgave = KafkaConsumer<String, RegisterTask>(consumerProperties)
+            kafkaconsumerOppgave.subscribe(listOf("privat-syfo-oppgave-registrerOppgave"))
+            blockingApplicationLogic(applicationState, kafkaconsumerOppgave, oppgaveClient, kafkaRetryPublisher)
+        }
+
+        createListener(applicationState) {
+            oppgaveRetryService.start()
+        }
     }
 
-    createListener(applicationState) {
-        oppgaveRetryService.start()
-    }
-}
+    suspend fun blockingApplicationLogic(
+        applicationState: ApplicationState,
+        kafkaConsumer: KafkaConsumer<String, RegisterTask>,
+        oppgaveClient: OppgaveClient,
+        kafkaRetryPublisher: KafkaRetryPublisher
+    ) {
+        while (applicationState.ready) {
+            kafkaConsumer.poll(Duration.ofMillis(1000)).forEach {
+                val produceTask = it.value().produceTask
+                val registerJournal = it.value().registerJournal
 
-@KtorExperimentalAPI
-suspend fun blockingApplicationLogic(
-    applicationState: ApplicationState,
-    kafkaConsumer: KafkaConsumer<String, RegisterTask>,
-    oppgaveClient: OppgaveClient,
-    kafkaRetryPublisher: KafkaRetryPublisher
-) {
-    while (applicationState.ready) {
-        kafkaConsumer.poll(Duration.ofMillis(1000)).forEach {
-            val produceTask = it.value().produceTask
-            val registerJournal = it.value().registerJournal
-
-            val loggingMeta = LoggingMeta(
+                val loggingMeta = LoggingMeta(
                     orgNr = produceTask.orgnr,
                     msgId = registerJournal.messageId,
                     sykmeldingId = it.key()
-            )
-            handleRegisterOppgaveRequest(oppgaveClient, produceTask, registerJournal, loggingMeta, kafkaRetryPublisher)
+                )
+                handleRegisterOppgaveRequest(oppgaveClient, produceTask, registerJournal, loggingMeta, kafkaRetryPublisher)
+            }
+            delay(Duration.ofMillis(1))
         }
-        delay(Duration.ofMillis(1))
     }
-}
+    

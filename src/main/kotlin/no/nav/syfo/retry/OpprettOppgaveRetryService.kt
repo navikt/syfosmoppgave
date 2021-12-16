@@ -1,10 +1,5 @@
 package no.nav.syfo.retry
 
-import io.ktor.util.KtorExperimentalAPI
-import java.time.Duration
-import java.time.OffsetDateTime
-import java.time.OffsetTime
-import java.time.ZoneOffset
 import kotlinx.coroutines.delay
 import net.logstash.logback.argument.StructuredArguments.fields
 import no.nav.syfo.application.ApplicationState
@@ -13,8 +8,11 @@ import no.nav.syfo.retry.util.getNextRunTime
 import no.nav.syfo.service.opprettOppgave
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.slf4j.LoggerFactory
+import java.time.Duration
+import java.time.OffsetDateTime
+import java.time.OffsetTime
+import java.time.ZoneOffset
 
-@KtorExperimentalAPI
 class OpprettOppgaveRetryService(
     private val kafkaConsumer: KafkaConsumer<String, OppgaveRetryKafkaMessage>,
     private val applicationState: ApplicationState,
@@ -26,17 +24,17 @@ class OpprettOppgaveRetryService(
         private val log = LoggerFactory.getLogger(OpprettOppgaveRetryService::class.java)
 
         private val rerunTimes = listOf<OffsetTime>(
-                OffsetTime.of(3, 0, 0, 0, ZoneOffset.UTC),
-                OffsetTime.of(6, 0, 0, 0, ZoneOffset.UTC),
-                OffsetTime.of(9, 0, 0, 0, ZoneOffset.UTC),
-                OffsetTime.of(12, 0, 0, 0, ZoneOffset.UTC),
-                OffsetTime.of(15, 0, 0, 0, ZoneOffset.UTC),
-                OffsetTime.of(21, 0, 0, 0, ZoneOffset.UTC))
+            OffsetTime.of(3, 0, 0, 0, ZoneOffset.UTC),
+            OffsetTime.of(6, 0, 0, 0, ZoneOffset.UTC),
+            OffsetTime.of(9, 0, 0, 0, ZoneOffset.UTC),
+            OffsetTime.of(12, 0, 0, 0, ZoneOffset.UTC),
+            OffsetTime.of(15, 0, 0, 0, ZoneOffset.UTC),
+            OffsetTime.of(21, 0, 0, 0, ZoneOffset.UTC)
+        )
     }
 
     private val runtimeMinutes: Long = 5
 
-    @KtorExperimentalAPI
     suspend fun runConsumer() {
         var endTime = OffsetDateTime.now(ZoneOffset.UTC).plusMinutes(runtimeMinutes)
         while (applicationState.ready && OffsetDateTime.now(ZoneOffset.UTC).isBefore(endTime)) {

@@ -5,7 +5,6 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockkClass
 import io.mockk.mockkStatic
-import java.util.Properties
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import no.nav.syfo.application.ApplicationState
@@ -23,10 +22,13 @@ import org.apache.kafka.common.serialization.StringSerializer
 import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe
 import org.testcontainers.containers.KafkaContainer
+import org.testcontainers.containers.Network
+import org.testcontainers.utility.DockerImageName
+import java.util.Properties
 
 class OpprettOppgaveRetryServiceTest : Spek({
 
-    val kafka = KafkaContainer()
+    val kafka = KafkaContainer(DockerImageName.parse(KAFKA_IMAGE_NAME).withTag(KAFKA_IMAGE_VERSION)).withNetwork(Network.newNetwork())
     kafka.start()
     fun setupKafkaConfig(): Properties {
         val kafkaConfig = Properties()
@@ -46,7 +48,7 @@ class OpprettOppgaveRetryServiceTest : Spek({
     val oppgaveClient = mockkClass(OppgaveClient::class)
     beforeEachTest {
         mockkStatic("kotlinx.coroutines.DelayKt")
-        coEvery { delay(any()) } returns Unit
+        coEvery { delay(any<Long>()) } returns Unit
         applicationState.alive = true
         applicationState.ready = true
     }
@@ -57,7 +59,7 @@ class OpprettOppgaveRetryServiceTest : Spek({
     val kafkaConfig = setupKafkaConfig()
 
     val kafkaProducerProperties = kafkaConfig.toProducerConfig(
-            "test-producer", OppgaveKafkaSerializer::class
+        "test-producer", OppgaveKafkaSerializer::class
     )
     val kafkaProducer = KafkaProducer<String, OppgaveRetryKafkaMessage>(kafkaProducerProperties)
 

@@ -19,13 +19,8 @@ import io.ktor.routing.post
 import io.ktor.routing.routing
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
-import io.ktor.util.KtorExperimentalAPI
 import io.mockk.coEvery
 import io.mockk.mockk
-import java.net.ServerSocket
-import java.time.LocalDate
-import java.time.Month
-import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.runBlocking
 import no.nav.syfo.LoggingMeta
 import no.nav.syfo.model.Oppgave
@@ -33,11 +28,14 @@ import no.nav.syfo.model.OppgaveResponse
 import no.nav.syfo.model.OppgaveResultat
 import no.nav.syfo.model.OpprettOppgave
 import no.nav.syfo.model.OpprettOppgaveResponse
-import org.amshove.kluent.shouldEqual
+import org.amshove.kluent.shouldBeEqualTo
 import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe
+import java.net.ServerSocket
+import java.time.LocalDate
+import java.time.Month
+import java.util.concurrent.TimeUnit
 
-@KtorExperimentalAPI
 object OppgaveClientSpek : Spek({
     val stsOidcClientMock = mockk<StsOidcClient>()
     val httpClient = HttpClient(Apache) {
@@ -61,10 +59,18 @@ object OppgaveClientSpek : Spek({
         routing {
             get("/oppgave") {
                 when {
-                    call.request.queryParameters["journalpostId"] == "jpId" -> call.respond(OppgaveResponse(1,
-                            listOf(Oppgave(1, "9999",
+                    call.request.queryParameters["journalpostId"] == "jpId" -> call.respond(
+                        OppgaveResponse(
+                            1,
+                            listOf(
+                                Oppgave(
+                                    1, "9999",
                                     "12345678910", "jpId", "sakId",
-                                    "SYM", "BEH_EL_SYM"))))
+                                    "SYM", "BEH_EL_SYM"
+                                )
+                            )
+                        )
+                    )
                     call.request.queryParameters["journalpostId"] == "nyJpId" -> call.respond(OppgaveResponse(0, emptyList()))
                     else -> call.respond(HttpStatusCode.InternalServerError)
                 }
@@ -89,36 +95,38 @@ object OppgaveClientSpek : Spek({
         it("Oppretter ikke oppgave hvis det finnes fra før") {
             var oppgave: OppgaveResultat? = null
             runBlocking {
-                oppgave = oppgaveClient.opprettOppgave(lagOpprettOppgaveRequest("jpId"), "sykmeldingId", loggingMetadata)
+                oppgave =
+                    oppgaveClient.opprettOppgave(lagOpprettOppgaveRequest("jpId"), "sykmeldingId", loggingMetadata)
             }
 
-            oppgave?.oppgaveId shouldEqual 1
-            oppgave?.duplikat shouldEqual true
+            oppgave?.oppgaveId shouldBeEqualTo 1
+            oppgave?.duplikat shouldBeEqualTo true
         }
         it("Oppretter oppgave hvis det ikke finnes fra før") {
             var oppgave: OppgaveResultat? = null
             runBlocking {
-                oppgave = oppgaveClient.opprettOppgave(lagOpprettOppgaveRequest("nyJpId"), "sykmeldingId", loggingMetadata)
+                oppgave =
+                    oppgaveClient.opprettOppgave(lagOpprettOppgaveRequest("nyJpId"), "sykmeldingId", loggingMetadata)
             }
 
-            oppgave?.oppgaveId shouldEqual 42
-            oppgave?.duplikat shouldEqual false
+            oppgave?.oppgaveId shouldBeEqualTo 42
+            oppgave?.duplikat shouldBeEqualTo false
         }
     }
 })
 
 fun lagOpprettOppgaveRequest(jpId: String): OpprettOppgave =
-        OpprettOppgave(
-                tildeltEnhetsnr = "0101",
-                aktoerId = "12345678910",
-                opprettetAvEnhetsnr = "9999",
-                journalpostId = jpId,
-                behandlesAvApplikasjon = "FS22",
-                saksreferanse = "sakId",
-                beskrivelse = "Masse beskrivelse",
-                tema = "SYM",
-                oppgavetype = "BEH_EL_SYM",
-                aktivDato = LocalDate.of(2019, Month.JANUARY, 12),
-                fristFerdigstillelse = LocalDate.of(2019, Month.JANUARY, 14),
-                prioritet = "NORM"
-        )
+    OpprettOppgave(
+        tildeltEnhetsnr = "0101",
+        aktoerId = "12345678910",
+        opprettetAvEnhetsnr = "9999",
+        journalpostId = jpId,
+        behandlesAvApplikasjon = "FS22",
+        saksreferanse = "sakId",
+        beskrivelse = "Masse beskrivelse",
+        tema = "SYM",
+        oppgavetype = "BEH_EL_SYM",
+        aktivDato = LocalDate.of(2019, Month.JANUARY, 12),
+        fristFerdigstillelse = LocalDate.of(2019, Month.JANUARY, 14),
+        prioritet = "NORM"
+    )
