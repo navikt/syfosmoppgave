@@ -85,7 +85,7 @@ class OpprettOppgaveRetryServiceTest : Spek({
             coVerify(exactly = 1) { oppgaveClient.opprettOppgave(any(), any(), any()) }
         }
         it("Should retry failed") {
-            coEvery { oppgaveClient.opprettOppgave(any(), any(), any()) } throws RuntimeException("error") andThen {
+            coEvery { oppgaveClient.opprettOppgave(any(), any(), any()) } throws RuntimeException("error") andThenAnswer {
                 applicationState.ready = false
                 applicationState.alive = false
                 OppgaveResultat(1, false)

@@ -16,6 +16,7 @@ import io.ktor.network.sockets.SocketTimeoutException
 import io.prometheus.client.hotspot.DefaultExports
 import kafka.server.KafkaConfig
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
@@ -53,7 +54,6 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.time.Duration
 import java.util.Properties
-import java.util.concurrent.TimeUnit
 
 val log: Logger = LoggerFactory.getLogger("no.nav.syfo.smoppgave")
 val objectMapper: ObjectMapper = ObjectMapper()
@@ -62,6 +62,7 @@ val objectMapper: ObjectMapper = ObjectMapper()
     .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
     .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
 
+@DelicateCoroutinesApi
 fun main() {
     val env = Environment()
     val credentials = Credentials()
@@ -116,8 +117,7 @@ fun createKafkaStream(streamProperties: Properties, env: Environment): KafkaStre
     val createTaskStream = streamsBuilder.stream<String, ProduceTask>(env.oppgaveTopic)
     KafkaConfig.LogRetentionTimeMillisProp()
 
-    val joinWindow = JoinWindows.of(TimeUnit.DAYS.toMillis(65))
-        .until(TimeUnit.DAYS.toMillis(131))
+    val joinWindow = JoinWindows.of(Duration.ofDays(31))
 
     createTaskStream.join(journalCreatedTaskStream, { produceTask, registerJournal ->
         RegisterTask.newBuilder().apply {
@@ -129,6 +129,7 @@ fun createKafkaStream(streamProperties: Properties, env: Environment): KafkaStre
         return KafkaStreams(streamsBuilder.build(), streamProperties)
     }
 
+    @DelicateCoroutinesApi
     fun createListener(
         applicationState: ApplicationState,
         action: suspend CoroutineScope.() -> Unit
@@ -143,6 +144,7 @@ fun createKafkaStream(streamProperties: Properties, env: Environment): KafkaStre
         }
     }
 
+    @DelicateCoroutinesApi
     fun launchListeners(
         consumerProperties: Properties,
         applicationState: ApplicationState,
@@ -155,9 +157,11 @@ fun createKafkaStream(streamProperties: Properties, env: Environment): KafkaStre
     ) {
         val kafkaStream = createKafkaStream(streamProperties, env)
 
-        kafkaStream.setUncaughtExceptionHandler { _, err ->
+        kafkaStream.setUncaughtExceptionHandler { err ->
             log.error("Caught exception in stream: ${err.message}", err)
-            kafkaStream.close()
+            kafkaStream.close(Duration.ofSeconds(30))
+            applicationState.ready = false
+            applicationState.alive = false
             throw err
         }
 
@@ -167,7 +171,7 @@ fun createKafkaStream(streamProperties: Properties, env: Environment): KafkaStre
             if (newState == KafkaStreams.State.ERROR) {
                 // if the stream has died there is no reason to keep spinning
                 log.error("Closing stream because it went into error state")
-                kafkaStream.close(30, TimeUnit.SECONDS)
+                kafkaStream.close(Duration.ofSeconds(30))
                 log.error("Restarter applikasjon")
                 applicationState.ready = false
                 applicationState.alive = false
