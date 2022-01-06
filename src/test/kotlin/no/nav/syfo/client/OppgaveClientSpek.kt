@@ -93,7 +93,7 @@ object OppgaveClientSpek : Spek({
 
     describe("OppgaveClient oppretter oppgave når det ikke finnes fra før") {
         it("Oppretter ikke oppgave hvis det finnes fra før") {
-            var oppgave: OppgaveResultat? = null
+            var oppgave: OppgaveResultat?
             runBlocking {
                 oppgave =
                     oppgaveClient.opprettOppgave(lagOpprettOppgaveRequest("jpId"), "sykmeldingId", loggingMetadata)
@@ -103,7 +103,7 @@ object OppgaveClientSpek : Spek({
             oppgave?.duplikat shouldBeEqualTo true
         }
         it("Oppretter oppgave hvis det ikke finnes fra før") {
-            var oppgave: OppgaveResultat? = null
+            var oppgave: OppgaveResultat?
             runBlocking {
                 oppgave =
                     oppgaveClient.opprettOppgave(lagOpprettOppgaveRequest("nyJpId"), "sykmeldingId", loggingMetadata)
