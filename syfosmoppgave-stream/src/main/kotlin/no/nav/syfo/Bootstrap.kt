@@ -8,7 +8,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 val log: Logger = LoggerFactory.getLogger("no.nav.syfo.syfosmoppgave-stream")
-@KtorE
+
 fun main() {
     val env = Environment()
     DefaultExports.initialize()
