@@ -54,4 +54,4 @@ jobs:
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY_TEAMSYKMELDING }}
           CLUSTER: dev-gcp
-          RESOURCE: naiserator-dev.yaml
+          RESOURCE: syfosmoppgave-stream/naiserator-dev.yaml
