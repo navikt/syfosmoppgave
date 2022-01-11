@@ -19,6 +19,7 @@ import org.apache.kafka.streams.StreamsBuilder
 import org.apache.kafka.streams.StreamsConfig
 import org.apache.kafka.streams.kstream.Consumed
 import org.apache.kafka.streams.kstream.JoinWindows
+import org.apache.kafka.streams.kstream.Produced
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.time.Duration
@@ -48,7 +49,8 @@ fun main() {
 
 fun createAndStartKafkaStream(env: Environment, applicationState: ApplicationState) {
     val streamBuilder = StreamsBuilder()
-    val streamProperties = KafkaUtils.getAivenKafkaConfig().toStreamsConfig(env.applicationName, Serdes.String()::class, Serdes.ByteArray()::class)
+    val streamProperties = KafkaUtils.getAivenKafkaConfig()
+        .toStreamsConfig(env.applicationName, Serdes.ByteArray()::class)
     streamProperties[StreamsConfig.APPLICATION_ID_CONFIG] = env.applicationId
     val journalOpprettetStream =
         streamBuilder.stream(env.oppgaveJournalOpprettet, Consumed.with(Serdes.String(), Serdes.ByteArray()))
