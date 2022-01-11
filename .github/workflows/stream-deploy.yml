@@ -3,6 +3,10 @@ on:
   push:
     branches:
       - master
+    paths:
+      - 'syfosmoppgave-stream/**'
+      - '.github/workflows/stream-deploy.yml'
+      - 'build.gradle.kts'
 env:
   IMAGE: docker.pkg.github.com/${{ github.repository }}/syfosmoppgave-stream:${{ github.sha }}
 
