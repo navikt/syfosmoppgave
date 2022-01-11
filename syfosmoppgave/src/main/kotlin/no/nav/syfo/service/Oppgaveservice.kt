@@ -8,7 +8,9 @@ import no.nav.syfo.LoggingMeta
 import no.nav.syfo.client.OppgaveClient
 import no.nav.syfo.log
 import no.nav.syfo.metrics.OPPRETT_OPPGAVE_COUNTER
+import no.nav.syfo.model.JournalKafkaMessage
 import no.nav.syfo.model.OpprettOppgave
+import no.nav.syfo.model.ProduserOppgaveKafkaMessage
 import no.nav.syfo.retry.KafkaRetryPublisher
 import no.nav.syfo.sak.avro.ProduceTask
 import no.nav.syfo.sak.avro.RegisterJournal
@@ -18,42 +20,32 @@ import java.time.format.DateTimeFormatter
 
 suspend fun handleRegisterOppgaveRequest(
     oppgaveClient: OppgaveClient,
-    produceTask: ProduceTask,
-    registerJournal: RegisterJournal,
+    opprettOppgave: OpprettOppgave,
+    messageId: String,
     loggingMeta: LoggingMeta,
     kafkaRetryPublisher: KafkaRetryPublisher
 ) {
     wrapExceptions(loggingMeta) {
         log.info("Received a SM2013, going to create oppgave, {}", fields(loggingMeta))
 
-        val opprettOppgave = OpprettOppgave(
-            aktoerId = produceTask.aktoerId,
-            opprettetAvEnhetsnr = produceTask.opprettetAvEnhetsnr,
-            journalpostId = registerJournal.journalpostId,
-            behandlesAvApplikasjon = produceTask.behandlesAvApplikasjon,
-            saksreferanse = registerJournal.sakId,
-            beskrivelse = produceTask.beskrivelse,
-            tema = produceTask.tema,
-            oppgavetype = produceTask.oppgavetype,
-            behandlingstype = if (produceTask.behandlingstype != "ANY") produceTask.behandlingstype else { null },
-            behandlingstema = if (produceTask.behandlingstema != "ANY") produceTask.behandlingstema else { null },
-            aktivDato = LocalDate.parse(produceTask.aktivDato, DateTimeFormatter.ISO_DATE),
-            fristFerdigstillelse = LocalDate.parse(produceTask.fristFerdigstillelse, DateTimeFormatter.ISO_DATE),
-            prioritet = produceTask.prioritet.name,
-            tildeltEnhetsnr = if (produceTask.tildeltEnhetsnr.isNotEmpty()) { produceTask.tildeltEnhetsnr } else null,
-            tilordnetRessurs = produceTask.metadata["tilordnetRessurs"]
-        )
-
         try {
-            opprettOppgave(oppgaveClient, opprettOppgave, loggingMeta, registerJournal.messageId)
+            opprettOppgave(oppgaveClient, opprettOppgave, loggingMeta, messageId)
         } catch (ex: ServerResponseException) {
             when (ex.response.status) {
                 HttpStatusCode.InternalServerError -> {
-                    log.error("Noe gikk galt ved oppretting av oppgave, error melding: {}, {}", ex.message, fields(loggingMeta))
-                    kafkaRetryPublisher.publishOppgaveToRetryTopic(opprettOppgave, registerJournal.messageId, loggingMeta)
+                    log.error(
+                        "Noe gikk galt ved oppretting av oppgave, error melding: {}, {}",
+                        ex.message,
+                        fields(loggingMeta)
+                    )
+                    kafkaRetryPublisher.publishOppgaveToRetryTopic(opprettOppgave, messageId, loggingMeta)
                 }
                 else -> {
-                    log.error("Noe gikk galt ved oppretting av oppgave, error melding: {}, {}", ex.message, fields(loggingMeta))
+                    log.error(
+                        "Noe gikk galt ved oppretting av oppgave, error melding: {}, {}",
+                        ex.message,
+                        fields(loggingMeta)
+                    )
                     throw ex
                 }
             }
@@ -61,7 +53,12 @@ suspend fun handleRegisterOppgaveRequest(
     }
 }
 
-suspend fun opprettOppgave(oppgaveClient: OppgaveClient, opprettOppgave: OpprettOppgave, loggingMeta: LoggingMeta, messageId: String) {
+suspend fun opprettOppgave(
+    oppgaveClient: OppgaveClient,
+    opprettOppgave: OpprettOppgave,
+    loggingMeta: LoggingMeta,
+    messageId: String
+) {
     val oppgaveResultat = oppgaveClient.opprettOppgave(opprettOppgave, messageId, loggingMeta)
     if (!oppgaveResultat.duplikat) {
         OPPRETT_OPPGAVE_COUNTER.inc()
@@ -74,3 +71,57 @@ suspend fun opprettOppgave(oppgaveClient: OppgaveClient, opprettOppgave: Opprett
         )
     }
 }
+
+fun opprettOppgave(
+    produceTask: ProduserOppgaveKafkaMessage,
+    registerJournal: JournalKafkaMessage
+) = OpprettOppgave(
+    aktoerId = produceTask.aktoerId,
+    opprettetAvEnhetsnr = produceTask.opprettetAvEnhetsnr,
+    journalpostId = registerJournal.journalpostId,
+    behandlesAvApplikasjon = produceTask.behandlesAvApplikasjon,
+    saksreferanse = registerJournal.sakId,
+    beskrivelse = produceTask.beskrivelse,
+    tema = produceTask.tema,
+    oppgavetype = produceTask.oppgavetype,
+    behandlingstype = if (produceTask.behandlingstype != "ANY") produceTask.behandlingstype else {
+        null
+    },
+    behandlingstema = if (produceTask.behandlingstema != "ANY") produceTask.behandlingstema else {
+        null
+    },
+    aktivDato = LocalDate.parse(produceTask.aktivDato, DateTimeFormatter.ISO_DATE),
+    fristFerdigstillelse = LocalDate.parse(produceTask.fristFerdigstillelse, DateTimeFormatter.ISO_DATE),
+    prioritet = produceTask.prioritet.name,
+    tildeltEnhetsnr = if (produceTask.tildeltEnhetsnr.isNotEmpty()) {
+        produceTask.tildeltEnhetsnr
+    } else null,
+    tilordnetRessurs = produceTask.metadata["tilordnetRessurs"]
+)
+
+fun opprettOppgave(
+    produceTask: ProduceTask,
+    registerJournal: RegisterJournal
+) = OpprettOppgave(
+    aktoerId = produceTask.aktoerId,
+    opprettetAvEnhetsnr = produceTask.opprettetAvEnhetsnr,
+    journalpostId = registerJournal.journalpostId,
+    behandlesAvApplikasjon = produceTask.behandlesAvApplikasjon,
+    saksreferanse = registerJournal.sakId,
+    beskrivelse = produceTask.beskrivelse,
+    tema = produceTask.tema,
+    oppgavetype = produceTask.oppgavetype,
+    behandlingstype = if (produceTask.behandlingstype != "ANY") produceTask.behandlingstype else {
+        null
+    },
+    behandlingstema = if (produceTask.behandlingstema != "ANY") produceTask.behandlingstema else {
+        null
+    },
+    aktivDato = LocalDate.parse(produceTask.aktivDato, DateTimeFormatter.ISO_DATE),
+    fristFerdigstillelse = LocalDate.parse(produceTask.fristFerdigstillelse, DateTimeFormatter.ISO_DATE),
+    prioritet = produceTask.prioritet.name,
+    tildeltEnhetsnr = if (produceTask.tildeltEnhetsnr.isNotEmpty()) {
+        produceTask.tildeltEnhetsnr
+    } else null,
+    tilordnetRessurs = produceTask.metadata["tilordnetRessurs"]
+)

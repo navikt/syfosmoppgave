@@ -66,7 +66,7 @@ class OpprettOppgaveRetryServiceTest : Spek({
     val consumerProperties = kafkaConfig.toConsumerConfig("test-consumer", OppgaveKafkaDeserializer::class)
     consumerProperties.let { it[ConsumerConfig.MAX_POLL_RECORDS_CONFIG] = "1" }
     val kafkaConsumer = KafkaConsumer<String, OppgaveRetryKafkaMessage>(consumerProperties, StringDeserializer(), OppgaveKafkaDeserializer())
-    val service = OpprettOppgaveRetryService(kafkaConsumer, applicationState, oppgaveClient, "topic")
+    val service = OpprettOppgaveRetryService(kafkaConsumer, applicationState, oppgaveClient, "topic", "onprem")
 
     describe("Test retry") {
         it("Should read message from kafka and retry opprett oppgave") {

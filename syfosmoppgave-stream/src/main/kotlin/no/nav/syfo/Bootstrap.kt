@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import com.fasterxml.jackson.module.kotlin.readValue
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import io.prometheus.client.hotspot.DefaultExports
 import no.nav.syfo.application.ApplicationServer
@@ -58,8 +59,8 @@ fun createAndStartKafkaStream(env: Environment, applicationState: ApplicationSta
         produserOppgaveStream, { journalOpprettet, produserOppgave ->
             objectMapper.writeValueAsBytes(
                 RegistrerOppgaveKafkaMessage(
-                    produserOppgave = produserOppgave,
-                    journalOpprettet = journalOpprettet
+                    produserOppgave = objectMapper.readValue(produserOppgave),
+                    journalOpprettet = objectMapper.readValue(journalOpprettet)
                 )
             )
         },

@@ -18,7 +18,8 @@ data class Environment(
     val journalCreatedTopic: String = getEnvVar("KAFKA_JOURNAL_CREATED_TOPIC", "aapen-syfo-oppgave-journalOpprettet"),
     val oppgaveTopic: String = getEnvVar("KAFKA_OPPGAVE_TOPIC", "aapen-syfo-oppgave-produserOppgave"),
     val retryOppgaveTopic: String = "privat-syfo-oppgave-retry",
-    val privatRegistrerOppgave: String = "teamsykmelding.privat-registrer-oppgave"
+    val privatRegistrerOppgave: String = "teamsykmelding.privat-registrer-oppgave",
+    val retryOppgaveAivenTopic: String = "teamsykmelding.privat-oppgave-retry"
 ) : KafkaConfig
 
 data class Credentials(

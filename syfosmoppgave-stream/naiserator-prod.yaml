@@ -35,6 +35,7 @@ spec:
       memory: 768Mi
   vault:
     enabled: false
-  ingresses:
-    - "https://syfosmoppgave-stream.nav.no"
   webproxy: true
+  kafka:
+    pool: nav-prod
+    streams: true

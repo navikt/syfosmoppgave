@@ -48,7 +48,7 @@ class OppgaveserviceKtTest : Spek({
             val registerJournal = createRegisterJournal("msgId")
             val produceTask = createProduceTask("msgId")
             runBlocking {
-                handleRegisterOppgaveRequest(oppgaveClient, produceTask, registerJournal, LoggingMeta("", "", ""), kafkaRetryPublisher)
+                handleRegisterOppgaveRequest(oppgaveClient, opprettOppgave(produceTask, registerJournal), registerJournal.messageId, LoggingMeta("", "", ""), kafkaRetryPublisher)
             }
             verify(exactly = 0) { kafkaRetryPublisher.publishOppgaveToRetryTopic(any(), any(), any()) }
         }
@@ -58,7 +58,7 @@ class OppgaveserviceKtTest : Spek({
             val registerJournal = createRegisterJournal("msgId")
             val produceTask = createProduceTask("msgId")
             runBlocking {
-                handleRegisterOppgaveRequest(oppgaveClient, produceTask, registerJournal, LoggingMeta("", "", ""), kafkaRetryPublisher)
+                handleRegisterOppgaveRequest(oppgaveClient, opprettOppgave(produceTask, registerJournal), registerJournal.messageId, LoggingMeta("", "", ""), kafkaRetryPublisher)
             }
             verify(exactly = 1) { kafkaRetryPublisher.publishOppgaveToRetryTopic(any(), any(), any()) }
         }

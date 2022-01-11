@@ -39,6 +39,8 @@ spec:
       - kvPath: serviceuser/data/prod/srvsyfosmoppgave
         mountPath: /secrets/serviceuser
   webproxy: true
+  kafka:
+    pool: nav-prod
   ingresses:
     - "https://syfosmoppgave.nais.adeo.no"
   env:

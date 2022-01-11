@@ -17,7 +17,8 @@ class OpprettOppgaveRetryService(
     private val kafkaConsumer: KafkaConsumer<String, OppgaveRetryKafkaMessage>,
     private val applicationState: ApplicationState,
     private val oppgaveClient: OppgaveClient,
-    private val topic: String
+    private val topic: String,
+    private val kafkaCluster: String,
 ) {
 
     companion object {
@@ -42,7 +43,7 @@ class OpprettOppgaveRetryService(
             records.forEach {
                 val kafkaMessage = it.value()
                 val messageId = it.key()
-                log.info("Running retry for opprett oppgave {}", fields(kafkaMessage.loggingMeta))
+                log.info("$kafkaCluster: Running retry for opprett oppgave {}", fields(kafkaMessage.loggingMeta))
                 opprettOppgave(oppgaveClient, kafkaMessage.opprettOppgave, kafkaMessage.loggingMeta, messageId = messageId)
             }
             if (!records.isEmpty) {
@@ -61,14 +62,14 @@ class OpprettOppgaveRetryService(
             } else {
                 getNextRunTime(OffsetDateTime.now(ZoneOffset.UTC), rerunTimes)
             }
-            log.info("Delaying for $nextRunTime")
+            log.info("$kafkaCluster: Delaying for $nextRunTime")
             delay(nextRunTime)
             try {
-                log.info("Starting opprett oppgave consumer")
+                log.info("$kafkaCluster: Starting opprett oppgave consumer")
                 kafkaConsumer.subscribe(listOf(topic))
                 runConsumer()
             } catch (ex: Exception) {
-                log.error("Error when rerunning opprett oppgave", ex)
+                log.error("$kafkaCluster: Error when rerunning opprett oppgave", ex)
             } finally {
                 kafkaConsumer.unsubscribe()
             }

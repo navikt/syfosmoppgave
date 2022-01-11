@@ -39,6 +39,8 @@ spec:
       - kvPath: serviceuser/data/dev/srvsyfosmoppgave
         mountPath: /secrets/serviceuser
   webproxy: true
+  kafka:
+    pool: nav-dev
   ingresses:
     - "https://syfosmoppgave.nais.preprod.local"
   env:
