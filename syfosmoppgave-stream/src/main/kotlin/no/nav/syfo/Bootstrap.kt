@@ -53,7 +53,7 @@ fun createAndStartKafkaStream(env: Environment, applicationState: ApplicationSta
     val produserOppgaveStream =
         streamBuilder.stream(env.oppgaveProduserOppgave, Consumed.with(Serdes.String(), Serdes.ByteArray()))
 
-    val joinWindow = JoinWindows.of(Duration.ofDays(31))
+    val joinWindow = JoinWindows.of(Duration.ofDays(14))
 
     journalOpprettetStream.join(
         produserOppgaveStream, { journalOpprettet, produserOppgave ->
