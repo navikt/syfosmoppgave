@@ -16,6 +16,7 @@ import no.nav.syfo.model.RegistrerOppgaveKafkaMessage
 import org.apache.kafka.common.serialization.Serdes
 import org.apache.kafka.streams.KafkaStreams
 import org.apache.kafka.streams.StreamsBuilder
+import org.apache.kafka.streams.StreamsConfig
 import org.apache.kafka.streams.kstream.Consumed
 import org.apache.kafka.streams.kstream.JoinWindows
 import org.slf4j.Logger
@@ -48,6 +49,7 @@ fun main() {
 fun createAndStartKafkaStream(env: Environment, applicationState: ApplicationState) {
     val streamBuilder = StreamsBuilder()
     val streamProperties = KafkaUtils.getAivenKafkaConfig().toStreamsConfig(env.applicationName, Serdes.String()::class, Serdes.ByteArray()::class)
+    streamProperties[StreamsConfig.APPLICATION_ID_CONFIG] = env.applicationId
     val journalOpprettetStream =
         streamBuilder.stream(env.oppgaveJournalOpprettet, Consumed.with(Serdes.String(), Serdes.ByteArray()))
     val produserOppgaveStream =
