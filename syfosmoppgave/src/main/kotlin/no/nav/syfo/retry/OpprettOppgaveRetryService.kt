@@ -44,12 +44,11 @@ class OpprettOppgaveRetryService(
                 val kafkaMessage = it.value()
                 val messageId = it.key()
                 log.info("$kafkaCluster: Running retry for opprett oppgave {}", fields(kafkaMessage.loggingMeta))
-                opprettOppgave(oppgaveClient, kafkaMessage.opprettOppgave, kafkaMessage.loggingMeta, messageId = messageId)
+                opprettOppgave(oppgaveClient, kafkaMessage.opprettOppgave, kafkaMessage.loggingMeta, messageId = messageId, kafkaCluster)
             }
             if (!records.isEmpty) {
                 endTime = OffsetDateTime.now(ZoneOffset.UTC).plusMinutes(5)
             }
-            delay(1)
         }
     }
 
