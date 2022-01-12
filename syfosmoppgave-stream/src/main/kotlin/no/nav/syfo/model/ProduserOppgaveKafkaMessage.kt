@@ -1,7 +1,5 @@
 package no.nav.syfo.model
 
-import no.nav.syfo.sak.avro.PrioritetType
-
 data class ProduserOppgaveKafkaMessage(
     val messageId: String,
     val aktoerId: String,
@@ -18,6 +16,5 @@ data class ProduserOppgaveKafkaMessage(
     val mappeId: Int,
     val aktivDato: String,
     val fristFerdigstillelse: String,
-    val prioritet: PrioritetType,
     val metadata: Map<String?, String?>
 )
