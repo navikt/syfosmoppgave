@@ -1,5 +1,9 @@
 package no.nav.syfo.model
 
+enum class PrioritetType {
+    HOY, NORM, LAV
+}
+
 data class ProduserOppgaveKafkaMessage(
     val messageId: String,
     val aktoerId: String,
@@ -16,5 +20,6 @@ data class ProduserOppgaveKafkaMessage(
     val mappeId: Int,
     val aktivDato: String,
     val fristFerdigstillelse: String,
+    val prioritet: PrioritetType,
     val metadata: Map<String?, String?>
 )
