@@ -3,6 +3,10 @@ on:
   push:
     branches:
       - master
+    paths:
+      - 'syfosmoppgave/**'
+      - '.github/workflows/deploy.yml'
+      - 'build.gradle.kts'
 
 env:
   IMAGE: docker.pkg.github.com/${{ github.repository }}/syfosmoppgave:${{ github.sha }}
@@ -61,17 +65,18 @@ jobs:
           ORG_GRADLE_PROJECT_githubPassword: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          ./gradlew test
+          ./gradlew :syfosmoppgave:test
       - name: Build jar
         env:
           ORG_GRADLE_PROJECT_githubUser: x-access-token
           ORG_GRADLE_PROJECT_githubPassword: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          ./gradlew shadowJar -x test
+          ./gradlew :syfosmoppgave:shadowJar -x test
       - name: Build and publish Docker image
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          cd syfosmoppgave
           docker build --tag ${IMAGE} .
           docker login docker.pkg.github.com -u ${GITHUB_REPOSITORY} -p ${GITHUB_TOKEN}
           docker push ${IMAGE}
@@ -87,10 +92,10 @@ jobs:
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY_TEAMSYKMELDING }}
           CLUSTER: dev-fss
-          RESOURCE: naiserator-dev.yaml
+          RESOURCE: syfosmoppgave/naiserator-dev.yaml
       - name: Deploy to Prod
         uses: nais/deploy/actions/deploy@master
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY_TEAMSYKMELDING }}
           CLUSTER: prod-fss
-          RESOURCE: naiserator-prod.yaml
+          RESOURCE: syfosmoppgave/naiserator-prod.yaml
