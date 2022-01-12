@@ -229,7 +229,7 @@ fun createKafkaStream(streamProperties: Properties, env: Environment): KafkaStre
         val kafkaStream = createKafkaStream(streamProperties, env)
 
         kafkaStream.setUncaughtExceptionHandler { err ->
-            log.error("Caught exception in stream: ${err.message}", err)
+            log.error("Onprem: Caught exception in stream: ${err.message}", err)
             kafkaStream.close(Duration.ofSeconds(30))
             applicationState.ready = false
             applicationState.alive = false
@@ -237,13 +237,13 @@ fun createKafkaStream(streamProperties: Properties, env: Environment): KafkaStre
         }
 
         kafkaStream.setStateListener { newState, oldState ->
-            log.info("From state={} to state={}", oldState, newState)
+            log.info("Onprem: From state={} to state={}", oldState, newState)
 
             if (newState == KafkaStreams.State.ERROR) {
                 // if the stream has died there is no reason to keep spinning
-                log.error("Closing stream because it went into error state")
+                log.error("Onprem: Closing stream because it went into error state")
                 kafkaStream.close(Duration.ofSeconds(30))
-                log.error("Restarter applikasjon")
+                log.error("Onprem: Restarter applikasjon")
                 applicationState.ready = false
                 applicationState.alive = false
             }
@@ -305,9 +305,9 @@ fun createKafkaStream(streamProperties: Properties, env: Environment): KafkaStre
                     opprettOppgave(produceTask, registerJournal),
                     registerJournal.messageId,
                     loggingMeta,
-                    kafkaRetryPublisher
+                    kafkaRetryPublisher,
+                    source = "on-prem"
                 )
             }
         }
     }
-    

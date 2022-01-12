@@ -23,18 +23,19 @@ suspend fun handleRegisterOppgaveRequest(
     opprettOppgave: OpprettOppgave,
     messageId: String,
     loggingMeta: LoggingMeta,
-    kafkaRetryPublisher: KafkaRetryPublisher
+    kafkaRetryPublisher: KafkaRetryPublisher,
+    source: String = "aiven"
 ) {
     wrapExceptions(loggingMeta) {
-        log.info("Received a SM2013, going to create oppgave, {}", fields(loggingMeta))
+        log.info("$source: Received a SM2013, going to create oppgave, {}", fields(loggingMeta))
 
         try {
-            opprettOppgave(oppgaveClient, opprettOppgave, loggingMeta, messageId)
+            opprettOppgave(oppgaveClient, opprettOppgave, loggingMeta, messageId, source)
         } catch (ex: ServerResponseException) {
             when (ex.response.status) {
                 HttpStatusCode.InternalServerError -> {
                     log.error(
-                        "Noe gikk galt ved oppretting av oppgave, error melding: {}, {}",
+                        "$source: Noe gikk galt ved oppretting av oppgave, error melding: {}, {}",
                         ex.message,
                         fields(loggingMeta)
                     )
@@ -42,7 +43,7 @@ suspend fun handleRegisterOppgaveRequest(
                 }
                 else -> {
                     log.error(
-                        "Noe gikk galt ved oppretting av oppgave, error melding: {}, {}",
+                        "$source: Noe gikk galt ved oppretting av oppgave, error melding: {}, {}",
                         ex.message,
                         fields(loggingMeta)
                     )
@@ -57,13 +58,14 @@ suspend fun opprettOppgave(
     oppgaveClient: OppgaveClient,
     opprettOppgave: OpprettOppgave,
     loggingMeta: LoggingMeta,
-    messageId: String
+    messageId: String,
+    source: String
 ) {
     val oppgaveResultat = oppgaveClient.opprettOppgave(opprettOppgave, messageId, loggingMeta)
     if (!oppgaveResultat.duplikat) {
         OPPRETT_OPPGAVE_COUNTER.inc()
         log.info(
-            "Opprettet oppgave med {}, {}, {}, {}",
+            "$source: Opprettet oppgave med {}, {}, {}, {}",
             keyValue("oppgaveId", oppgaveResultat.oppgaveId),
             keyValue("sakid", opprettOppgave.saksreferanse),
             keyValue("journalpost", opprettOppgave.journalpostId),
