@@ -28,11 +28,11 @@ spec:
     path: /prometheus
   resources:
     limits:
-      cpu: 200m
-      memory: 1Gi
+      cpu: 500m
+      memory: 1536Mi
     requests:
-      cpu: 50m
-      memory: 768Mi
+      cpu: 100m
+      memory: 1Gi
   vault:
     enabled: false
   webproxy: true

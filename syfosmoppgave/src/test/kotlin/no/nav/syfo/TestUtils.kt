@@ -1,11 +1,10 @@
 package no.nav.syfo
 
-import no.nav.syfo.sak.avro.PrioritetType
-import no.nav.syfo.sak.avro.ProduceTask
-import no.nav.syfo.sak.avro.RegisterJournal
+import no.nav.syfo.model.JournalKafkaMessage
+import no.nav.syfo.model.PrioritetType
+import no.nav.syfo.model.ProduserOppgaveKafkaMessage
 import java.nio.file.Files
 import java.nio.file.Path
-import java.nio.file.Paths
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -15,38 +14,29 @@ fun deleteDir(dir: Path) {
     }
 }
 
-fun cleanupDir(dir: Path, streamApplicationName: String) {
-    deleteDir(dir)
-    Files.createDirectories(dir)
-    Files.createDirectories(dir.resolve(streamApplicationName))
-}
-
-val kafkaStreamsStateDir: Path = Paths.get(System.getProperty("java.io.tmpdir"))
-    .resolve("kafka-stream-integration-tests")
-
-fun createProduceTask(msgId: String) = ProduceTask().apply {
-    messageId = msgId
-    aktoerId = "9127312"
-    tildeltEnhetsnr = "9999"
-    opprettetAvEnhetsnr = "9999"
-    behandlesAvApplikasjon = "FS22"
-    orgnr = "91203712"
-    beskrivelse = "Test oppgave"
-    temagruppe = "GRUPPE"
-    tema = "TEMA"
-    behandlingstema = "BEHANDLINGSTEMA"
-    oppgavetype = "OPPGAVETYPE"
-    behandlingstype = "BEHANDLINGSTYPE"
-    mappeId = 12938
-    aktivDato = DateTimeFormatter.ISO_DATE.format(LocalDate.now())
-    fristFerdigstillelse = DateTimeFormatter.ISO_DATE.format(LocalDate.now().plusDays(10))
-    prioritet = PrioritetType.NORM
+fun createProduceTask(msgId: String) = ProduserOppgaveKafkaMessage(
+    messageId = msgId,
+    aktoerId = "9127312",
+    tildeltEnhetsnr = "9999",
+    opprettetAvEnhetsnr = "9999",
+    behandlesAvApplikasjon = "FS22",
+    orgnr = "91203712",
+    beskrivelse = "Test oppgave",
+    temagruppe = "GRUPPE",
+    tema = "TEMA",
+    behandlingstema = "BEHANDLINGSTEMA",
+    oppgavetype = "OPPGAVETYPE",
+    behandlingstype = "BEHANDLINGSTYPE",
+    mappeId = 12938,
+    aktivDato = DateTimeFormatter.ISO_DATE.format(LocalDate.now()),
+    fristFerdigstillelse = DateTimeFormatter.ISO_DATE.format(LocalDate.now().plusDays(10)),
+    prioritet = PrioritetType.NORM,
     metadata = mapOf()
-}
+)
 
-fun createRegisterJournal(msgId: String) = RegisterJournal().apply {
-    messageId = msgId
-    sakId = "test_sak"
-    journalpostId = "test"
+fun createRegisterJournal(msgId: String) = JournalKafkaMessage(
+    messageId = msgId,
+    sakId = "test_sak",
+    journalpostId = "test",
     journalpostKilde = "test"
-}
+)
