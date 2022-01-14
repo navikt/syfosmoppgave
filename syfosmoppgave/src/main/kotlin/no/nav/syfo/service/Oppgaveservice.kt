@@ -12,8 +12,6 @@ import no.nav.syfo.model.JournalKafkaMessage
 import no.nav.syfo.model.OpprettOppgave
 import no.nav.syfo.model.ProduserOppgaveKafkaMessage
 import no.nav.syfo.retry.KafkaRetryPublisher
-import no.nav.syfo.sak.avro.ProduceTask
-import no.nav.syfo.sak.avro.RegisterJournal
 import no.nav.syfo.wrapExceptions
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -77,33 +75,6 @@ suspend fun opprettOppgave(
 fun opprettOppgave(
     produceTask: ProduserOppgaveKafkaMessage,
     registerJournal: JournalKafkaMessage
-) = OpprettOppgave(
-    aktoerId = produceTask.aktoerId,
-    opprettetAvEnhetsnr = produceTask.opprettetAvEnhetsnr,
-    journalpostId = registerJournal.journalpostId,
-    behandlesAvApplikasjon = produceTask.behandlesAvApplikasjon,
-    saksreferanse = registerJournal.sakId,
-    beskrivelse = produceTask.beskrivelse,
-    tema = produceTask.tema,
-    oppgavetype = produceTask.oppgavetype,
-    behandlingstype = if (produceTask.behandlingstype != "ANY") produceTask.behandlingstype else {
-        null
-    },
-    behandlingstema = if (produceTask.behandlingstema != "ANY") produceTask.behandlingstema else {
-        null
-    },
-    aktivDato = LocalDate.parse(produceTask.aktivDato, DateTimeFormatter.ISO_DATE),
-    fristFerdigstillelse = LocalDate.parse(produceTask.fristFerdigstillelse, DateTimeFormatter.ISO_DATE),
-    prioritet = produceTask.prioritet.name,
-    tildeltEnhetsnr = if (produceTask.tildeltEnhetsnr.isNotEmpty()) {
-        produceTask.tildeltEnhetsnr
-    } else null,
-    tilordnetRessurs = produceTask.metadata["tilordnetRessurs"]
-)
-
-fun opprettOppgave(
-    produceTask: ProduceTask,
-    registerJournal: RegisterJournal
 ) = OpprettOppgave(
     aktoerId = produceTask.aktoerId,
     opprettetAvEnhetsnr = produceTask.opprettetAvEnhetsnr,

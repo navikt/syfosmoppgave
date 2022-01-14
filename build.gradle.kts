@@ -4,8 +4,6 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 group = "no.nav.syfo"
 version = "1.0.0"
 
-val avroVersion = "1.11.0"
-val confluentVersion = "6.2.2"
 val coroutinesVersion = "1.6.0"
 val jacksonVersion = "2.13.1"
 val kafkaVersion = "2.8.0"
@@ -16,7 +14,6 @@ val logbackVersion = "1.2.10"
 val prometheusVersion = "0.14.1"
 val smCommonVersion = "1.a92720c"
 val spekVersion = "2.0.17"
-val syfoAvroSchemasVersion = "785e8a93a3b881e89862035abe539c795c1222dd"
 val testContainerKafkaVersion = "1.16.2"
 val mockVersion = "1.12.1"
 val kotlinVersion = "1.6.0"
@@ -64,15 +61,9 @@ subprojects {
         implementation("io.ktor:ktor-client-auth-basic:$ktorVersion")
         implementation("io.ktor:ktor-client-jackson:$ktorVersion")
 
-        implementation("io.confluent:kafka-avro-serializer:$confluentVersion")
-        implementation("io.confluent:kafka-streams-avro-serde:$confluentVersion")
-        implementation("org.apache.avro:avro:$avroVersion")
-
         implementation("no.nav.helse:syfosm-common-kafka:$smCommonVersion")
         implementation("no.nav.helse:syfosm-common-rest-sts:$smCommonVersion")
         implementation("no.nav.helse:syfosm-common-networking:$smCommonVersion")
-
-        implementation("no.nav.syfo.schemas:syfosmoppgave-avro:$syfoAvroSchemasVersion")
 
         implementation("com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVersion")
         implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonVersion")
