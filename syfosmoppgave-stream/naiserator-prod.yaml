@@ -29,10 +29,10 @@ spec:
   resources:
     limits:
       cpu: 200m
-      memory: 1Gi
+      memory: 1536Mi
     requests:
       cpu: 50m
-      memory: 768Mi
+      memory: 1Gi
   vault:
     enabled: false
   webproxy: true
