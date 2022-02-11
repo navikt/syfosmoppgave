@@ -11,7 +11,7 @@ This project contains creating task to Gsak for the sykmelding2013 message
 
 #### Requirements
 
-* JDK 12
+* JDK 17
 
 ## Getting started
 ### Getting github-package-registry packages NAV-IT
