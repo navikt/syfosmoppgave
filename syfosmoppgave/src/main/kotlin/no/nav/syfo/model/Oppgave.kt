@@ -8,7 +8,6 @@ data class OpprettOppgave(
     val aktoerId: String? = null,
     val journalpostId: String? = null,
     val behandlesAvApplikasjon: String? = null,
-    val saksreferanse: String? = null,
     val tilordnetRessurs: String? = null,
     val beskrivelse: String? = null,
     val tema: String? = null,
@@ -34,7 +33,6 @@ data class Oppgave(
     val tildeltEnhetsnr: String?,
     val aktoerId: String?,
     val journalpostId: String?,
-    val saksreferanse: String?,
     val tema: String?,
     val oppgavetype: String?
 )

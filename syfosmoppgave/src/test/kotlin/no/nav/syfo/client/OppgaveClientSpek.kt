@@ -65,7 +65,7 @@ object OppgaveClientSpek : Spek({
                             listOf(
                                 Oppgave(
                                     1, "9999",
-                                    "12345678910", "jpId", "sakId",
+                                    "12345678910", "jpId",
                                     "SYM", "BEH_EL_SYM"
                                 )
                             )
@@ -122,7 +122,6 @@ fun lagOpprettOppgaveRequest(jpId: String): OpprettOppgave =
         opprettetAvEnhetsnr = "9999",
         journalpostId = jpId,
         behandlesAvApplikasjon = "FS22",
-        saksreferanse = "sakId",
         beskrivelse = "Masse beskrivelse",
         tema = "SYM",
         oppgavetype = "BEH_EL_SYM",
