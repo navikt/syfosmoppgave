@@ -18,7 +18,6 @@ fun getKafkaRetryMessage(): OppgaveRetryKafkaMessage {
             beskrivelse = "beskrivelse",
             fristFerdigstillelse = LocalDate.now().plusDays(3),
             journalpostId = "",
-            saksreferanse = "messageId",
             tema = "team",
             tilordnetRessurs = null
         )

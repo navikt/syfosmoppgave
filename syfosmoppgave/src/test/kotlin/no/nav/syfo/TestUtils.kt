@@ -36,7 +36,6 @@ fun createProduceTask(msgId: String) = ProduserOppgaveKafkaMessage(
 
 fun createRegisterJournal(msgId: String) = JournalKafkaMessage(
     messageId = msgId,
-    sakId = "test_sak",
     journalpostId = "test",
     journalpostKilde = "test"
 )

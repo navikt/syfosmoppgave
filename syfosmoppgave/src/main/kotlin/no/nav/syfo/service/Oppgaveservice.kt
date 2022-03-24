@@ -65,7 +65,6 @@ suspend fun opprettOppgave(
         log.info(
             "$source: Opprettet oppgave med {}, {}, {}, {}",
             keyValue("oppgaveId", oppgaveResultat.oppgaveId),
-            keyValue("sakid", opprettOppgave.saksreferanse),
             keyValue("journalpost", opprettOppgave.journalpostId),
             fields(loggingMeta)
         )
@@ -80,7 +79,6 @@ fun opprettOppgave(
     opprettetAvEnhetsnr = produceTask.opprettetAvEnhetsnr,
     journalpostId = registerJournal.journalpostId,
     behandlesAvApplikasjon = produceTask.behandlesAvApplikasjon,
-    saksreferanse = registerJournal.sakId,
     beskrivelse = produceTask.beskrivelse,
     tema = produceTask.tema,
     oppgavetype = produceTask.oppgavetype,
