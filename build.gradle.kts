@@ -67,13 +67,11 @@ subprojects {
         implementation("io.ktor:ktor-client-content-negotiation:$ktorVersion")
 
         implementation("no.nav.helse:syfosm-common-kafka:$smCommonVersion")
-        implementation("no.nav.helse:syfosm-common-rest-sts:$smCommonVersion")
-        implementation("no.nav.helse:syfosm-common-networking:$smCommonVersion")
 
         implementation("com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVersion")
         implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonVersion")
         implementation("com.fasterxml.jackson.core:jackson-databind:$jacksonPatchVersion")
-        implementation ("com.fasterxml.jackson:jackson-bom:$jacksonBomVersion")
+        implementation("com.fasterxml.jackson:jackson-bom:$jacksonBomVersion")
 
         implementation("ch.qos.logback:logback-classic:$logbackVersion")
         implementation("net.logstash.logback:logstash-logback-encoder:$logstashEncoderVersion")

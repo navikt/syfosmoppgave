@@ -10,9 +10,8 @@ import io.mockk.every
 import io.mockk.mockkClass
 import io.mockk.verify
 import no.nav.syfo.LoggingMeta
-import no.nav.syfo.client.OidcToken
+import no.nav.syfo.azuread.AccessTokenClient
 import no.nav.syfo.client.OppgaveClient
-import no.nav.syfo.client.StsOidcClient
 import no.nav.syfo.createProduceTask
 import no.nav.syfo.createRegisterJournal
 import no.nav.syfo.model.OppgaveResponse
@@ -24,16 +23,16 @@ import no.nav.syfo.util.ResponseData
 
 class OppgaveserviceKtTest : FunSpec({
 
-    val stsOidcClient = mockkClass(StsOidcClient::class)
+    val accessTokenClient = mockkClass(AccessTokenClient::class)
 
     val httpClientTest = HttpClientTest()
 
-    val oppgaveClient = OppgaveClient("url", stsOidcClient, httpClientTest.httpClient)
+    val oppgaveClient = OppgaveClient("url", accessTokenClient, "scope", httpClientTest.httpClient)
     val kafkaRetryPublisher = mockkClass(KafkaRetryPublisher::class)
 
     beforeTest {
         every { kafkaRetryPublisher.publishOppgaveToRetryTopic(any(), any(), any()) } returns Unit
-        coEvery { stsOidcClient.oidcToken() } returns OidcToken("token", "jwt", 10_000L)
+        coEvery { accessTokenClient.getAccessToken(any()) } returns "token"
     }
 
     afterTest {
