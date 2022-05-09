@@ -11,19 +11,25 @@ import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import net.logstash.logback.argument.StructuredArguments.fields
 import no.nav.syfo.LoggingMeta
+import no.nav.syfo.azuread.AccessTokenClient
 import no.nav.syfo.log
 import no.nav.syfo.model.OppgaveResponse
 import no.nav.syfo.model.OppgaveResultat
 import no.nav.syfo.model.OpprettOppgave
 import no.nav.syfo.model.OpprettOppgaveResponse
 
-class OppgaveClient constructor(private val url: String, private val oidcClient: StsOidcClient, private val httpClient: HttpClient) {
+class OppgaveClient(
+    private val url: String,
+    private val accessTokenClient: AccessTokenClient,
+    private val scope: String,
+    private val httpClient: HttpClient
+) {
     private suspend fun opprettOppgave(opprettOppgave: OpprettOppgave, msgId: String): OpprettOppgaveResponse {
         try {
             return httpClient.post(url) {
                 contentType(ContentType.Application.Json)
-                val oidcToken = oidcClient.oidcToken()
-                header("Authorization", "Bearer ${oidcToken.access_token}")
+                val token = accessTokenClient.getAccessToken(scope)
+                header("Authorization", "Bearer $token")
                 header("X-Correlation-ID", msgId)
                 setBody(opprettOppgave)
             }.body<OpprettOppgaveResponse>()
@@ -35,8 +41,8 @@ class OppgaveClient constructor(private val url: String, private val oidcClient:
 
     private suspend fun hentOppgave(opprettOppgave: OpprettOppgave, msgId: String): OppgaveResponse {
         return httpClient.get(url) {
-            val oidcToken = oidcClient.oidcToken()
-            header("Authorization", "Bearer ${oidcToken.access_token}")
+            val token = accessTokenClient.getAccessToken(scope)
+            header("Authorization", "Bearer $token")
             header("X-Correlation-ID", msgId)
             parameter("tema", opprettOppgave.tema)
             parameter("oppgavetype", opprettOppgave.oppgavetype)

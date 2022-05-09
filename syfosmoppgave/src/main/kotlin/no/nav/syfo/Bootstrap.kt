@@ -6,7 +6,9 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import io.ktor.client.HttpClient
+import io.ktor.client.HttpClientConfig
 import io.ktor.client.engine.apache.Apache
+import io.ktor.client.engine.apache.ApacheEngineConfig
 import io.ktor.client.plugins.HttpResponseValidator
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.network.sockets.SocketTimeoutException
@@ -23,8 +25,8 @@ import no.nav.syfo.application.ApplicationServer
 import no.nav.syfo.application.ApplicationState
 import no.nav.syfo.application.createApplicationEngine
 import no.nav.syfo.application.exception.ServiceUnavailableException
+import no.nav.syfo.azuread.AccessTokenClient
 import no.nav.syfo.client.OppgaveClient
-import no.nav.syfo.client.StsOidcClient
 import no.nav.syfo.kafka.aiven.KafkaUtils
 import no.nav.syfo.kafka.toConsumerConfig
 import no.nav.syfo.kafka.toProducerConfig
@@ -38,6 +40,7 @@ import no.nav.syfo.service.handleRegisterOppgaveRequest
 import no.nav.syfo.service.opprettOppgave
 import no.nav.syfo.util.JacksonKafkaDeserializer
 import no.nav.syfo.util.Unbounded
+import org.apache.http.impl.conn.SystemDefaultRoutePlanner
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.apache.kafka.clients.producer.KafkaProducer
@@ -45,6 +48,7 @@ import org.apache.kafka.common.serialization.StringDeserializer
 import org.apache.kafka.common.serialization.StringSerializer
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import java.net.ProxySelector
 import java.time.Duration
 
 val log: Logger = LoggerFactory.getLogger("no.nav.syfo.smoppgave")
@@ -55,7 +59,6 @@ val objectMapper: ObjectMapper = ObjectMapper().registerModule(JavaTimeModule())
 @DelicateCoroutinesApi
 fun main() {
     val env = Environment()
-    val credentials = Credentials()
     val applicationState = ApplicationState()
     val applicationEngine = createApplicationEngine(env, applicationState)
 
@@ -64,7 +67,7 @@ fun main() {
 
     DefaultExports.initialize()
 
-    val httpClient = HttpClient(Apache) {
+    val config: HttpClientConfig<ApacheEngineConfig>.() -> Unit = {
         install(ContentNegotiation) {
             jackson {
                 registerKotlinModule()
@@ -81,9 +84,19 @@ fun main() {
             }
         }
     }
-    val oidcClient =
-        StsOidcClient(credentials.serviceuserUsername, credentials.serviceuserPassword, env.securityTokenServiceUrl)
-    val oppgaveClient = OppgaveClient(env.oppgavebehandlingUrl, oidcClient, httpClient)
+    val proxyConfig: HttpClientConfig<ApacheEngineConfig>.() -> Unit = {
+        config()
+        engine {
+            customizeClient {
+                setRoutePlanner(SystemDefaultRoutePlanner(ProxySelector.getDefault()))
+            }
+        }
+    }
+    val httpClientWithProxy = HttpClient(Apache, proxyConfig)
+    val httpClient = HttpClient(Apache, config)
+
+    val accessTokenClient = AccessTokenClient(env.aadAccessTokenUrl, env.clientId, env.clientSecret, httpClientWithProxy)
+    val oppgaveClient = OppgaveClient(env.oppgavebehandlingUrl, accessTokenClient, env.oppgaveScope, httpClient)
 
     applicationState.ready = true
 

@@ -21,6 +21,7 @@ import io.ktor.server.routing.routing
 import io.mockk.coEvery
 import io.mockk.mockk
 import no.nav.syfo.LoggingMeta
+import no.nav.syfo.azuread.AccessTokenClient
 import no.nav.syfo.model.Oppgave
 import no.nav.syfo.model.OppgaveResponse
 import no.nav.syfo.model.OpprettOppgave
@@ -32,7 +33,7 @@ import java.time.Month
 import java.util.concurrent.TimeUnit
 
 class OppgaveClientSpek : FunSpec({
-    val stsOidcClientMock = mockk<StsOidcClient>()
+    val accessTokenClient = mockk<AccessTokenClient>()
     val httpClient = HttpClient(Apache) {
         install(ContentNegotiation) {
             jackson {
@@ -76,14 +77,14 @@ class OppgaveClientSpek : FunSpec({
         }
     }.start()
 
-    val oppgaveClient = OppgaveClient("$mockHttpServerUrl/oppgave", stsOidcClientMock, httpClient)
+    val oppgaveClient = OppgaveClient("$mockHttpServerUrl/oppgave", accessTokenClient, "scope", httpClient)
 
     afterSpec {
         mockServer.stop(TimeUnit.SECONDS.toMillis(10), TimeUnit.SECONDS.toMillis(10))
     }
 
     beforeSpec {
-        coEvery { stsOidcClientMock.oidcToken() } returns OidcToken("token", "type", 300L)
+        coEvery { accessTokenClient.getAccessToken(any()) } returns "token"
     }
 
     context("OppgaveClient oppretter oppgave når det ikke finnes fra før") {

@@ -35,9 +35,6 @@ spec:
       memory: 768Mi
   vault:
     enabled: true
-    paths:
-      - kvPath: serviceuser/data/prod/srvsyfosmoppgave
-        mountPath: /secrets/serviceuser
   webproxy: true
   azure:
     application:
@@ -50,3 +47,5 @@ spec:
   env:
     - name: OPPGAVEBEHANDLING_URL
       value: https://oppgave.nais.adeo.no/api/v1/oppgaver
+    - name: OPPGAVE_SCOPE
+      value: api://prod-fss.oppgavehandtering.oppgave/.default
