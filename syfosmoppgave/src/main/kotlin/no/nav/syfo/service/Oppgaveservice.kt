@@ -1,6 +1,6 @@
 package no.nav.syfo.service
 
-import io.ktor.client.features.ServerResponseException
+import io.ktor.client.plugins.ServerResponseException
 import io.ktor.http.HttpStatusCode
 import net.logstash.logback.argument.StructuredArguments.fields
 import net.logstash.logback.argument.StructuredArguments.keyValue

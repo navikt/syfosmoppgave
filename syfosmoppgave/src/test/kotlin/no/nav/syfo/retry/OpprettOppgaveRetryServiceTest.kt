@@ -1,12 +1,12 @@
 package no.nav.syfo.retry
 
+import io.kotest.core.spec.style.FunSpec
 import io.mockk.clearAllMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockkClass
 import io.mockk.mockkStatic
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.runBlocking
 import no.nav.syfo.application.ApplicationState
 import no.nav.syfo.client.OppgaveClient
 import no.nav.syfo.kafka.toConsumerConfig
@@ -19,14 +19,12 @@ import org.apache.kafka.clients.producer.ProducerConfig
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.apache.kafka.common.serialization.StringDeserializer
 import org.apache.kafka.common.serialization.StringSerializer
-import org.spekframework.spek2.Spek
-import org.spekframework.spek2.style.specification.describe
 import org.testcontainers.containers.KafkaContainer
 import org.testcontainers.containers.Network
 import org.testcontainers.utility.DockerImageName
 import java.util.Properties
 
-class OpprettOppgaveRetryServiceTest : Spek({
+class OpprettOppgaveRetryServiceTest : FunSpec({
 
     val kafka = KafkaContainer(DockerImageName.parse(KAFKA_IMAGE_NAME).withTag(KAFKA_IMAGE_VERSION)).withNetwork(Network.newNetwork())
     kafka.start()
@@ -46,14 +44,14 @@ class OpprettOppgaveRetryServiceTest : Spek({
 
     val applicationState = ApplicationState(true, true)
     val oppgaveClient = mockkClass(OppgaveClient::class)
-    beforeEachTest {
+    beforeTest {
         mockkStatic("kotlinx.coroutines.DelayKt")
         coEvery { delay(any<Long>()) } returns Unit
         applicationState.alive = true
         applicationState.ready = true
     }
 
-    afterEachTest {
+    afterTest {
         clearAllMocks()
     }
     val kafkaConfig = setupKafkaConfig()
@@ -68,8 +66,8 @@ class OpprettOppgaveRetryServiceTest : Spek({
     val kafkaConsumer = KafkaConsumer<String, OppgaveRetryKafkaMessage>(consumerProperties, StringDeserializer(), OppgaveKafkaDeserializer())
     val service = OpprettOppgaveRetryService(kafkaConsumer, applicationState, oppgaveClient, "topic", "onprem")
 
-    describe("Test retry") {
-        it("Should read message from kafka and retry opprett oppgave") {
+    context("Test retry") {
+        test("Should read message from kafka and retry opprett oppgave") {
             coEvery { oppgaveClient.opprettOppgave(any(), any(), any()) } answers {
                 applicationState.ready = false
                 applicationState.alive = false
@@ -78,22 +76,20 @@ class OpprettOppgaveRetryServiceTest : Spek({
 
             kafkaProducer.send(ProducerRecord("topic", "messageId", getKafkaRetryMessage()))
 
-            runBlocking {
-                service.start()
-            }
+            service.start()
 
             coVerify(exactly = 1) { oppgaveClient.opprettOppgave(any(), any(), any()) }
         }
-        it("Should retry failed") {
+        test("Should retry failed") {
             coEvery { oppgaveClient.opprettOppgave(any(), any(), any()) } throws RuntimeException("error") andThenAnswer {
                 applicationState.ready = false
                 applicationState.alive = false
                 OppgaveResultat(1, false)
             }
             kafkaProducer.send(ProducerRecord("topic", "messageId", getKafkaRetryMessage()))
-            runBlocking {
-                service.start()
-            }
+
+            service.start()
+
             coVerify(exactly = 2) { oppgaveClient.opprettOppgave(any(), any(), any()) }
         }
     }

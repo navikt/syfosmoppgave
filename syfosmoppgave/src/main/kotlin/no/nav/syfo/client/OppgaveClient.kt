@@ -1,10 +1,12 @@
 package no.nav.syfo.client
 
 import io.ktor.client.HttpClient
+import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.request.parameter
 import io.ktor.client.request.post
+import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import net.logstash.logback.argument.StructuredArguments.fields
@@ -18,13 +20,13 @@ import no.nav.syfo.model.OpprettOppgaveResponse
 class OppgaveClient constructor(private val url: String, private val oidcClient: StsOidcClient, private val httpClient: HttpClient) {
     private suspend fun opprettOppgave(opprettOppgave: OpprettOppgave, msgId: String): OpprettOppgaveResponse {
         try {
-            return httpClient.post<OpprettOppgaveResponse>(url) {
+            return httpClient.post(url) {
                 contentType(ContentType.Application.Json)
                 val oidcToken = oidcClient.oidcToken()
                 header("Authorization", "Bearer ${oidcToken.access_token}")
                 header("X-Correlation-ID", msgId)
-                body = opprettOppgave
-            }
+                setBody(opprettOppgave)
+            }.body<OpprettOppgaveResponse>()
         } catch (ex: Exception) {
             log.error("Could not OpprettOppgave for \naktorID: ${opprettOppgave.aktoerId}\njournalPostid=${opprettOppgave.journalpostId}\n$opprettOppgave", ex)
             throw ex
@@ -32,7 +34,7 @@ class OppgaveClient constructor(private val url: String, private val oidcClient:
     }
 
     private suspend fun hentOppgave(opprettOppgave: OpprettOppgave, msgId: String): OppgaveResponse {
-        return httpClient.get<OppgaveResponse>(url) {
+        return httpClient.get(url) {
             val oidcToken = oidcClient.oidcToken()
             header("Authorization", "Bearer ${oidcToken.access_token}")
             header("X-Correlation-ID", msgId)
@@ -44,7 +46,7 @@ class OppgaveClient constructor(private val url: String, private val oidcClient:
             parameter("sorteringsrekkefolge", "ASC")
             parameter("sorteringsfelt", "FRIST")
             parameter("limit", "10")
-        }
+        }.body<OppgaveResponse>()
     }
 
     suspend fun opprettOppgave(opprettOppgave: OpprettOppgave, msgId: String, loggingMeta: LoggingMeta): OppgaveResultat {

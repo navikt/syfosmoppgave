@@ -39,6 +39,10 @@ spec:
       - kvPath: serviceuser/data/prod/srvsyfosmoppgave
         mountPath: /secrets/serviceuser
   webproxy: true
+  azure:
+    application:
+      enabled: true
+      tenant: nav.no
   kafka:
     pool: nav-prod
   ingresses:
