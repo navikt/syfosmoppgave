@@ -60,13 +60,13 @@ fun createAndStartKafkaStream(env: Environment, applicationState: ApplicationSta
 
     journalOpprettetStream.join(
         produserOppgaveStream, { journalOpprettet, produserOppgave ->
-            objectMapper.writeValueAsBytes(
-                RegistrerOppgaveKafkaMessage(
-                    produserOppgave = objectMapper.readValue(produserOppgave),
-                    journalOpprettet = objectMapper.readValue(journalOpprettet)
-                )
+        objectMapper.writeValueAsBytes(
+            RegistrerOppgaveKafkaMessage(
+                produserOppgave = objectMapper.readValue(produserOppgave),
+                journalOpprettet = objectMapper.readValue(journalOpprettet)
             )
-        },
+        )
+    },
         joinWindow
     ).to(env.privatRegistrerOppgave)
 

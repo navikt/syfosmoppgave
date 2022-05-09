@@ -1,16 +1,15 @@
 package no.nav.syfo.retry.util
 
+import io.kotest.core.spec.style.FunSpec
 import org.amshove.kluent.shouldBeEqualTo
-import org.spekframework.spek2.Spek
-import org.spekframework.spek2.style.specification.describe
 import java.time.Duration
 import java.time.OffsetDateTime
 import java.time.OffsetTime
 import java.time.ZoneOffset
 
-class TimeDelayHelperKtTest : Spek({
-    describe("Test delay time") {
-        it("should get same day delay") {
+class TimeDelayHelperKtTest : FunSpec({
+    context("Test delay time") {
+        test("should get same day delay") {
             val rerunTimes = listOf(
                 OffsetTime.of(3, 0, 0, 0, ZoneOffset.UTC),
                 OffsetTime.of(12, 0, 0, 0, ZoneOffset.UTC)
@@ -21,7 +20,7 @@ class TimeDelayHelperKtTest : Spek({
             val delayTime = getNextRunTime(dateTime, rerunTimes)
             delayTime shouldBeEqualTo correctDelayTime
         }
-        it("should get next day delay") {
+        test("should get next day delay") {
             val rerunTimes = listOf(
                 OffsetTime.of(3, 0, 0, 0, ZoneOffset.UTC),
                 OffsetTime.of(12, 0, 0, 0, ZoneOffset.UTC)

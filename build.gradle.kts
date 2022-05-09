@@ -4,25 +4,27 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 group = "no.nav.syfo"
 version = "1.0.0"
 
-val coroutinesVersion = "1.6.0"
+val coroutinesVersion = "1.6.1"
 val jacksonVersion = "2.13.2"
-val kafkaVersion = "2.8.0"
+val jacksonPatchVersion = "2.13.2.2"
+val jacksonBomVersion = "2.13.2.20220328"
+val kafkaVersion = "3.1.0"
 val kluentVersion = "1.68"
-val ktorVersion = "1.6.8"
-val logstashEncoderVersion = "7.0.1"
+val ktorVersion = "2.0.0"
+val logstashEncoderVersion = "7.1.1"
 val logbackVersion = "1.2.11"
 val prometheusVersion = "0.15.0"
-val smCommonVersion = "1.a92720c"
-val spekVersion = "2.0.17"
-val testContainerKafkaVersion = "1.16.2"
+val smCommonVersion = "1.c55f4d2"
+val kotestVersion = "5.2.3"
+val testContainerKafkaVersion = "1.17.1"
 val mockVersion = "1.12.3"
-val kotlinVersion = "1.6.0"
+val kotlinVersion = "1.6.20"
 
 plugins {
-    id("org.jmailen.kotlinter") version "3.6.0"
-    kotlin("jvm") version "1.6.0"
-    id("com.diffplug.spotless") version "5.16.0"
-    id("com.github.johnrengelman.shadow") version "7.0.0"
+    id("org.jmailen.kotlinter") version "3.10.0"
+    kotlin("jvm") version "1.6.20"
+    id("com.diffplug.spotless") version "6.5.0"
+    id("com.github.johnrengelman.shadow") version "7.1.2"
 }
 
 val githubUser: String by project
@@ -54,12 +56,15 @@ subprojects {
         implementation("io.prometheus:simpleclient_hotspot:$prometheusVersion")
         implementation("io.prometheus:simpleclient_common:$prometheusVersion")
 
+        implementation("io.ktor:ktor-server-core:$ktorVersion")
         implementation("io.ktor:ktor-server-netty:$ktorVersion")
-        implementation("io.ktor:ktor-jackson:$ktorVersion")
-
+        implementation("io.ktor:ktor-server-content-negotiation:$ktorVersion")
+        implementation("io.ktor:ktor-server-call-id:$ktorVersion")
+        implementation("io.ktor:ktor-server-status-pages:$ktorVersion")
+        implementation("io.ktor:ktor-serialization-jackson:$ktorVersion")
+        implementation("io.ktor:ktor-client-core:$ktorVersion")
         implementation("io.ktor:ktor-client-apache:$ktorVersion")
-        implementation("io.ktor:ktor-client-auth-basic:$ktorVersion")
-        implementation("io.ktor:ktor-client-jackson:$ktorVersion")
+        implementation("io.ktor:ktor-client-content-negotiation:$ktorVersion")
 
         implementation("no.nav.helse:syfosm-common-kafka:$smCommonVersion")
         implementation("no.nav.helse:syfosm-common-rest-sts:$smCommonVersion")
@@ -67,6 +72,8 @@ subprojects {
 
         implementation("com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVersion")
         implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonVersion")
+        implementation("com.fasterxml.jackson.core:jackson-databind:$jacksonPatchVersion")
+        implementation ("com.fasterxml.jackson:jackson-bom:$jacksonBomVersion")
 
         implementation("ch.qos.logback:logback-classic:$logbackVersion")
         implementation("net.logstash.logback:logstash-logback-encoder:$logstashEncoderVersion")
@@ -76,16 +83,10 @@ subprojects {
 
         testImplementation("io.mockk:mockk:$mockVersion")
         testImplementation("org.amshove.kluent:kluent:$kluentVersion")
-        testImplementation("org.spekframework.spek2:spek-dsl-jvm:$spekVersion")
+        testImplementation("io.kotest:kotest-runner-junit5:$kotestVersion")
         testImplementation("io.ktor:ktor-client-mock:$ktorVersion")
         testImplementation("io.ktor:ktor-server-test-host:$ktorVersion")
         testImplementation("org.testcontainers:kafka:$testContainerKafkaVersion")
-
-        testRuntimeOnly("org.spekframework.spek2:spek-runtime-jvm:$spekVersion")
-        testRuntimeOnly("org.spekframework.spek2:spek-runner-junit5:$spekVersion") {
-            exclude(group = "org.jetbrains.kotlin")
-        }
-
     }
 
     tasks {
