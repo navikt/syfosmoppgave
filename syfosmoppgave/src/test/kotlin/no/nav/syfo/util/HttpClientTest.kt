@@ -44,5 +44,6 @@ class HttpClientTest {
                 }
             }
         }
+        expectSuccess = true
     }
 }

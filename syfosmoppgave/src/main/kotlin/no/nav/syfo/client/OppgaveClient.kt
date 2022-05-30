@@ -32,7 +32,7 @@ class OppgaveClient(
                 header("Authorization", "Bearer $token")
                 header("X-Correlation-ID", msgId)
                 setBody(opprettOppgave)
-            }.body<OpprettOppgaveResponse>()
+            }.body()
         } catch (ex: Exception) {
             log.error("Could not OpprettOppgave for \naktorID: ${opprettOppgave.aktoerId}\njournalPostid=${opprettOppgave.journalpostId}\n$opprettOppgave", ex)
             throw ex
