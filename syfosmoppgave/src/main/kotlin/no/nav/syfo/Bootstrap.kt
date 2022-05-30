@@ -63,7 +63,6 @@ fun main() {
     val applicationEngine = createApplicationEngine(env, applicationState)
 
     val applicationServer = ApplicationServer(applicationEngine, applicationState)
-    applicationServer.start()
 
     DefaultExports.initialize()
 
@@ -83,6 +82,7 @@ fun main() {
                 }
             }
         }
+        expectSuccess = true
     }
     val proxyConfig: HttpClientConfig<ApacheEngineConfig>.() -> Unit = {
         config()
@@ -98,9 +98,9 @@ fun main() {
     val accessTokenClient = AccessTokenClient(env.aadAccessTokenUrl, env.clientId, env.clientSecret, httpClientWithProxy)
     val oppgaveClient = OppgaveClient(env.oppgavebehandlingUrl, accessTokenClient, env.oppgaveScope, httpClient)
 
-    applicationState.ready = true
-
     setupAndRunAiven(env, applicationState, oppgaveClient)
+
+    applicationServer.start()
 }
 
 @DelicateCoroutinesApi

@@ -40,10 +40,10 @@ fun main() {
         env,
         applicationState
     )
+    createAndStartKafkaStream(env, applicationState)
+
     val applicationServer = ApplicationServer(applicationEngine, applicationState)
     applicationServer.start()
-    applicationState.ready = true
-    createAndStartKafkaStream(env, applicationState)
 }
 
 fun createAndStartKafkaStream(env: Environment, applicationState: ApplicationState) {
@@ -56,7 +56,7 @@ fun createAndStartKafkaStream(env: Environment, applicationState: ApplicationSta
     val produserOppgaveStream =
         streamBuilder.stream(env.oppgaveProduserOppgave, Consumed.with(Serdes.String(), Serdes.ByteArray()))
 
-    val joinWindow = JoinWindows.of(Duration.ofDays(14))
+    val joinWindow = JoinWindows.ofTimeDifferenceWithNoGrace(Duration.ofDays(14))
 
     journalOpprettetStream.join(
         produserOppgaveStream, { journalOpprettet, produserOppgave ->
