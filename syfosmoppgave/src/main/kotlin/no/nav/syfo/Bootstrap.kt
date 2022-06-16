@@ -40,7 +40,6 @@ import no.nav.syfo.service.handleRegisterOppgaveRequest
 import no.nav.syfo.service.opprettOppgave
 import no.nav.syfo.util.JacksonKafkaDeserializer
 import no.nav.syfo.util.Unbounded
-import org.apache.http.impl.conn.SystemDefaultRoutePlanner
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.apache.kafka.clients.producer.KafkaProducer
@@ -48,7 +47,6 @@ import org.apache.kafka.common.serialization.StringDeserializer
 import org.apache.kafka.common.serialization.StringSerializer
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import java.net.ProxySelector
 import java.time.Duration
 
 val log: Logger = LoggerFactory.getLogger("no.nav.syfo.smoppgave")
@@ -84,18 +82,9 @@ fun main() {
         }
         expectSuccess = true
     }
-    val proxyConfig: HttpClientConfig<ApacheEngineConfig>.() -> Unit = {
-        config()
-        engine {
-            customizeClient {
-                setRoutePlanner(SystemDefaultRoutePlanner(ProxySelector.getDefault()))
-            }
-        }
-    }
-    val httpClientWithProxy = HttpClient(Apache, proxyConfig)
     val httpClient = HttpClient(Apache, config)
 
-    val accessTokenClient = AccessTokenClient(env.aadAccessTokenUrl, env.clientId, env.clientSecret, httpClientWithProxy)
+    val accessTokenClient = AccessTokenClient(env.aadAccessTokenUrl, env.clientId, env.clientSecret, httpClient)
     val oppgaveClient = OppgaveClient(env.oppgavebehandlingUrl, accessTokenClient, env.oppgaveScope, httpClient)
 
     setupAndRunAiven(env, applicationState, oppgaveClient)
