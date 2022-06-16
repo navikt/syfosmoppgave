@@ -35,17 +35,21 @@ spec:
       memory: 768Mi
   vault:
     enabled: true
-  webproxy: true
+  webproxy: false
   azure:
     application:
       enabled: true
       tenant: nav.no
+  accessPolicy:
+    outbound:
+      external:
+        - host: oppgave.prod-fss-pub.nais.io
   kafka:
     pool: nav-prod
   ingresses:
-    - "https://syfosmoppgave.nais.adeo.no"
+    - "https://syfosmoppgave.intern.nav.no"
   env:
     - name: OPPGAVEBEHANDLING_URL
-      value: https://oppgave.nais.adeo.no/api/v1/oppgaver
+      value: https://oppgave.prod-fss-pub.nais.io/api/v1/oppgaver
     - name: OPPGAVE_SCOPE
       value: api://prod-fss.oppgavehandtering.oppgave/.default
