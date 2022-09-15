@@ -6,7 +6,7 @@ This project contains creating task to Gsak for the sykmelding2013 message
 * Kotlin
 * Ktor
 * Gradle
-* Spek
+* Kotest
 * Kafka
 
 #### Requirements
@@ -15,7 +15,7 @@ This project contains creating task to Gsak for the sykmelding2013 message
 
 ## Getting started
 ### Getting github-package-registry packages NAV-IT
-Some packages used in this repo is uploaded to the Github Package Registry which requires authentication. It can, for example, be solved like this in Gradle:
+Some packages used in this repo is uploaded to the GitHub Package Registry which requires authentication. It can, for example, be solved like this in Gradle:
 ```
 val githubUser: String by project
 val githubPassword: String by project
