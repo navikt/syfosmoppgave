@@ -8,19 +8,19 @@ val coroutinesVersion = "1.6.4"
 val jacksonVersion = "2.13.3"
 val kafkaVersion = "3.2.3"
 val kluentVersion = "1.68"
-val ktorVersion = "2.1.1"
+val ktorVersion = "2.1.2"
 val logstashEncoderVersion = "7.1.1"
-val logbackVersion = "1.4.0"
+val logbackVersion = "1.4.4"
 val prometheusVersion = "0.15.0"
 val smCommonVersion = "1.069b5f9"
 val kotestVersion = "5.4.2"
 val testContainerKafkaVersion = "1.17.1"
 val mockVersion = "1.12.7"
-val kotlinVersion = "1.7.10"
+val kotlinVersion = "1.7.20"
 
 plugins {
     id("org.jmailen.kotlinter") version "3.10.0"
-    kotlin("jvm") version "1.7.10"
+    kotlin("jvm") version "1.7.20"
     id("com.diffplug.spotless") version "6.5.0"
     id("com.github.johnrengelman.shadow") version "7.1.2"
 }
@@ -97,7 +97,6 @@ subprojects {
 
         withType<KotlinCompile> {
             kotlinOptions.jvmTarget = "17"
-            kotlinOptions.freeCompilerArgs = listOf("-Xnormalize-constructor-calls=enable")
         }
 
         withType<Test> {
