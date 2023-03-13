@@ -50,11 +50,23 @@ or the command line:
 ./gradlew -PgithubUser=x-access-token -PgithubPassword=[token]
 ```
 #### Compile and package application
-To build locally and run the integration tests you can simply run `./gradlew shadowJar` or  on windows 
+To build locally and run the integration tests you can simply run
+``` bash 
+./gradlew shadowJar
+```
+or on windows 
 `gradlew.bat shadowJar`
 
 #### Creating a docker image
-Creating a docker image should be as simple as `docker build -t syfosmoppgave .`
+Creating a docker image should be as simple as
+``` bash 
+docker build -t syfosmoppgave .
+```
+
+#### Running a docker image
+``` bash
+docker run --rm -it -p 8080:8080 syfosmoppgave
+```
 
 ### Upgrading the gradle wrapper
 Find the newest version of gradle here: https://gradle.org/releases/ Then run this command:
@@ -65,7 +77,7 @@ Find the newest version of gradle here: https://gradle.org/releases/ Then run th
 
 This project is maintained by navikt/teamsykmelding
 
-Questions and/or feature requests? Please create an [issue](https://github.com/navikt/syfosmoppgave/issues).
+Questions and/or feature requests? Please create an [issue](https://github.com/navikt/syfosmoppgave/issues)
 
 If you work in [@navikt](https://github.com/navikt) you can reach us at the Slack
-channel [#team-sykmelding](https://nav-it.slack.com/archives/CMA3XV997).
+channel [#team-sykmelding](https://nav-it.slack.com/archives/CMA3XV997)

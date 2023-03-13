@@ -46,8 +46,6 @@ spec:
         - host: oppgave.prod-fss-pub.nais.io
   kafka:
     pool: nav-prod
-  ingresses:
-    - "https://syfosmoppgave.intern.nav.no"
   env:
     - name: OPPGAVEBEHANDLING_URL
       value: https://oppgave.prod-fss-pub.nais.io/api/v1/oppgaver
