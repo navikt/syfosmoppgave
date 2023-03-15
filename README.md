@@ -50,23 +50,24 @@ or the command line:
 ./gradlew -PgithubUser=x-access-token -PgithubPassword=[token]
 ```
 #### Compile and package application
+##### syfosmoppgave
 To build locally and run the integration tests you can simply run
 ``` bash 
+cd syfosmoppgave
 ./gradlew shadowJar
 ```
 or on windows 
 `gradlew.bat shadowJar`
 
-#### Creating a docker image
-Creating a docker image should be as simple as
+##### syfosmoppgave-stream
+To build locally and run the integration tests you can simply run
 ``` bash 
-docker build -t syfosmoppgave .
+cd syfosmoppgave-stream
+./gradlew shadowJar
 ```
+or on windows
+`gradlew.bat shadowJar`
 
-#### Running a docker image
-``` bash
-docker run --rm -it -p 8080:8080 syfosmoppgave
-```
 
 ### Upgrading the gradle wrapper
 Find the newest version of gradle here: https://gradle.org/releases/ Then run this command:
