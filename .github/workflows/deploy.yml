@@ -78,9 +78,11 @@ jobs:
         id: docker-build-push
         with:
           team: teamsykmelding
-          dockerfile: syfosmoppgave/Dockerfile
           identity_provider: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}
           project_id: ${{ vars.NAIS_MANAGEMENT_PROJECT_ID }}
+
+    outputs:
+      image: ${{ steps.docker-build-push.outputs.image }}
   deploy:
     name: Deploy to dev and prod
     runs-on: ubuntu-latest
@@ -94,11 +96,11 @@ jobs:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY_TEAMSYKMELDING }}
           CLUSTER: dev-gcp
           RESOURCE: syfosmoppgave/naiserator-dev.yaml
-          VAR: image=${{ steps.docker-build-push.outputs.image }}
+          VAR: image=${{ needs.build.outputs.image }}
       - name: Deploy to Prod
         uses: nais/deploy/actions/deploy@master
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY_TEAMSYKMELDING }}
           CLUSTER: prod-gcp
           RESOURCE: syfosmoppgave/naiserator-prod.yaml
-          VAR: image=${{ steps.docker-build-push.outputs.image }}
+          VAR: image=${{ needs.build.outputs.image }}
