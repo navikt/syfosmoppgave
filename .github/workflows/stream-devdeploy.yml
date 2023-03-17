@@ -55,11 +55,10 @@ jobs:
           dockerfile: syfosmoppgave-stream/Dockerfile
           identity_provider: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}
           project_id: ${{ vars.NAIS_MANAGEMENT_PROJECT_ID }}
-
       - name: Deploy to Preprod
         uses: nais/deploy/actions/deploy@master
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY_TEAMSYKMELDING }}
           CLUSTER: dev-gcp
           RESOURCE: syfosmoppgave-stream/naiserator-dev.yaml
-          VAR: image=${{ steps.stream-docker-build-push.outputs.image }}
+          VAR: stream-image=${{ steps.stream-docker-build-push.outputs.image }}
