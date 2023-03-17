@@ -47,12 +47,14 @@ jobs:
           ORG_GRADLE_PROJECT_githubPassword: ${{ secrets.GITHUB_TOKEN }}
         run: |
           ./gradlew :syfosmoppgave-stream:shadowJar -x test
-      - name: stream-docker-build-push
+      - name: docker-build-push
         uses: nais/docker-build-push@v0
-        id: stream-docker-build-push
+        id: docker-build-push
         with:
           team: teamsykmelding
-          dockerfile: syfosmoppgave-stream/Dockerfile
+          dockerfile: ./syfosmoppgave-stream/Dockerfile
+          docker_context: syfosmoppgave-stream
+          image_suffix: syfosmoppgave-stream
           identity_provider: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}
           project_id: ${{ vars.NAIS_MANAGEMENT_PROJECT_ID }}
       - name: Deploy to Preprod
@@ -61,4 +63,4 @@ jobs:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY_TEAMSYKMELDING }}
           CLUSTER: dev-gcp
           RESOURCE: syfosmoppgave-stream/naiserator-dev.yaml
-          VAR: stream-image=${{ steps.stream-docker-build-push.outputs.image }}
+          VAR: image=${{ steps.docker-build-push.outputs.image }}
