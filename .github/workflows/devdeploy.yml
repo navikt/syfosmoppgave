@@ -66,7 +66,9 @@ jobs:
         id: docker-build-push
         with:
           team: teamsykmelding
-          dockerfile: syfosmoppgave/Dockerfile
+          dockerfile: ./syfosmoppgave/Dockerfile
+          docker_context: syfosmoppgave
+          image_suffix: syfosmoppgave
           identity_provider: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}
           project_id: ${{ vars.NAIS_MANAGEMENT_PROJECT_ID }}
 
