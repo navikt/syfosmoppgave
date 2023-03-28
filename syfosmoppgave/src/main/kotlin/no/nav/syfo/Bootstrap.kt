@@ -51,6 +51,7 @@ import org.slf4j.LoggerFactory
 import java.time.Duration
 
 val log: Logger = LoggerFactory.getLogger("no.nav.syfo.smoppgave")
+val securelog: Logger = LoggerFactory.getLogger("securelog")
 val objectMapper: ObjectMapper = ObjectMapper().registerModule(JavaTimeModule()).registerKotlinModule()
     .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
     .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
