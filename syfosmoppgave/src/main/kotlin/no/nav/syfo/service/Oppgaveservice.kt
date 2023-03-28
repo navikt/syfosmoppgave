@@ -63,7 +63,7 @@ suspend fun opprettOppgave(
     if (!oppgaveResultat.duplikat) {
         OPPRETT_OPPGAVE_COUNTER.inc()
         log.info(
-            "$source: Opprettet oppgave med {}, {}, {}, {}",
+            "$source: Opprettet oppgave med {}, {}, {}",
             keyValue("oppgaveId", oppgaveResultat.oppgaveId),
             keyValue("journalpost", opprettOppgave.journalpostId),
             fields(loggingMeta)

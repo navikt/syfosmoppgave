@@ -48,6 +48,6 @@ spec:
     pool: nav-dev
   env:
     - name: OPPGAVEBEHANDLING_URL
-      value: https://oppgave.dev-fss-pub.nais.io/api/v1/oppgaver
+      value: https://oppgave-q1.dev-fss-pub.nais.io/api/v1/oppgaver
     - name: OPPGAVE_SCOPE
-      value: api://dev-fss.oppgavehandtering.oppgave/.default
+      value: api://dev-fss.oppgavehandtering.oppgave-q1/.default
