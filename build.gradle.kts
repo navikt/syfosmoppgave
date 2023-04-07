@@ -16,11 +16,11 @@ val smCommonVersion = "1.9df1108"
 val kotestVersion = "5.4.2"
 val testContainerKafkaVersion = "1.17.1"
 val mockVersion = "1.12.7"
-val kotlinVersion = "1.8.10"
+val kotlinVersion = "1.8.20"
 
 plugins {
     id("org.jmailen.kotlinter") version "3.10.0"
-    kotlin("jvm") version "1.8.10"
+    kotlin("jvm") version "1.8.20"
     id("com.github.johnrengelman.shadow") version "8.1.0"
 }
 
