@@ -21,7 +21,7 @@ val kotlinVersion = "1.8.20"
 plugins {
     id("org.jmailen.kotlinter") version "3.10.0"
     kotlin("jvm") version "1.8.20"
-    id("com.github.johnrengelman.shadow") version "8.1.0"
+    id("com.github.johnrengelman.shadow") version "8.1.1"
 }
 
 val githubUser: String by project
