@@ -14,7 +14,7 @@ val logbackVersion = "1.4.4"
 val prometheusVersion = "0.15.0"
 val smCommonVersion = "1.9df1108"
 val kotestVersion = "5.4.2"
-val testContainerKafkaVersion = "1.17.1"
+val testContainerKafkaVersion = "1.18.0"
 val mockVersion = "1.12.7"
 val kotlinVersion = "1.8.20"
 
