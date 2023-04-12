@@ -9,7 +9,7 @@ data class Environment(
     val aadAccessTokenUrl: String = getEnvVar("AZURE_OPENID_CONFIG_TOKEN_ENDPOINT"),
     val clientId: String = getEnvVar("AZURE_APP_CLIENT_ID"),
     val clientSecret: String = getEnvVar("AZURE_APP_CLIENT_SECRET"),
-    val oppgaveScope: String = getEnvVar("OPPGAVE_SCOPE")
+    val oppgaveScope: String = getEnvVar("OPPGAVE_SCOPE"),
 )
 
 fun getEnvVar(varName: String, defaultValue: String? = null) =

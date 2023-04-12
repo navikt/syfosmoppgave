@@ -6,7 +6,7 @@ data class Environment(
     val oppgaveJournalOpprettet: String = "teamsykmelding.oppgave-journal-opprettet",
     val oppgaveProduserOppgave: String = "teamsykmelding.oppgave-produser-oppgave",
     val privatRegistrerOppgave: String = "teamsykmelding.privat-registrer-oppgave",
-    val applicationId: String = getEnvVar("KAFKA_STREAMS_APPLICATION_ID")
+    val applicationId: String = getEnvVar("KAFKA_STREAMS_APPLICATION_ID"),
 )
 
 fun getEnvVar(varName: String, defaultValue: String? = null) =

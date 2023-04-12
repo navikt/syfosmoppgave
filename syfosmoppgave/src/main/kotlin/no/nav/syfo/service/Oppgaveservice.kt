@@ -22,7 +22,7 @@ suspend fun handleRegisterOppgaveRequest(
     messageId: String,
     loggingMeta: LoggingMeta,
     kafkaRetryPublisher: KafkaRetryPublisher,
-    source: String = "aiven"
+    source: String = "aiven",
 ) {
     wrapExceptions(loggingMeta) {
         log.info("$source: Received a SM2013, going to create oppgave, {}", fields(loggingMeta))
@@ -35,7 +35,7 @@ suspend fun handleRegisterOppgaveRequest(
                     log.error(
                         "$source: Noe gikk galt ved oppretting av oppgave, error melding: {}, {}",
                         ex.message,
-                        fields(loggingMeta)
+                        fields(loggingMeta),
                     )
                     kafkaRetryPublisher.publishOppgaveToRetryTopic(opprettOppgave, messageId, loggingMeta)
                 }
@@ -43,7 +43,7 @@ suspend fun handleRegisterOppgaveRequest(
                     log.error(
                         "$source: Noe gikk galt ved oppretting av oppgave, error melding: {}, {}",
                         ex.message,
-                        fields(loggingMeta)
+                        fields(loggingMeta),
                     )
                     throw ex
                 }
@@ -57,7 +57,7 @@ suspend fun opprettOppgave(
     opprettOppgave: OpprettOppgave,
     loggingMeta: LoggingMeta,
     messageId: String,
-    source: String
+    source: String,
 ) {
     val oppgaveResultat = oppgaveClient.opprettOppgave(opprettOppgave, messageId, loggingMeta)
     if (!oppgaveResultat.duplikat) {
@@ -66,14 +66,14 @@ suspend fun opprettOppgave(
             "$source: Opprettet oppgave med {}, {}, {}",
             keyValue("oppgaveId", oppgaveResultat.oppgaveId),
             keyValue("journalpost", opprettOppgave.journalpostId),
-            fields(loggingMeta)
+            fields(loggingMeta),
         )
     }
 }
 
 fun opprettOppgave(
     produceTask: ProduserOppgaveKafkaMessage,
-    registerJournal: JournalKafkaMessage
+    registerJournal: JournalKafkaMessage,
 ) = OpprettOppgave(
     aktoerId = produceTask.aktoerId,
     opprettetAvEnhetsnr = produceTask.opprettetAvEnhetsnr,
@@ -82,10 +82,14 @@ fun opprettOppgave(
     beskrivelse = produceTask.beskrivelse,
     tema = produceTask.tema,
     oppgavetype = produceTask.oppgavetype,
-    behandlingstype = if (produceTask.behandlingstype != "ANY") produceTask.behandlingstype else {
+    behandlingstype = if (produceTask.behandlingstype != "ANY") {
+        produceTask.behandlingstype
+    } else {
         null
     },
-    behandlingstema = if (produceTask.behandlingstema != "ANY") produceTask.behandlingstema else {
+    behandlingstema = if (produceTask.behandlingstema != "ANY") {
+        produceTask.behandlingstema
+    } else {
         null
     },
     aktivDato = LocalDate.parse(produceTask.aktivDato, DateTimeFormatter.ISO_DATE),
@@ -93,6 +97,8 @@ fun opprettOppgave(
     prioritet = produceTask.prioritet.name,
     tildeltEnhetsnr = if (produceTask.tildeltEnhetsnr.isNotEmpty()) {
         produceTask.tildeltEnhetsnr
-    } else null,
-    tilordnetRessurs = produceTask.metadata["tilordnetRessurs"]
+    } else {
+        null
+    },
+    tilordnetRessurs = produceTask.metadata["tilordnetRessurs"],
 )

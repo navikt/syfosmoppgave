@@ -38,7 +38,7 @@ fun main() {
     val applicationState = ApplicationState()
     val applicationEngine = createApplicationEngine(
         env,
-        applicationState
+        applicationState,
     )
     createAndStartKafkaStream(env, applicationState)
 
@@ -59,15 +59,16 @@ fun createAndStartKafkaStream(env: Environment, applicationState: ApplicationSta
     val joinWindow = JoinWindows.ofTimeDifferenceWithNoGrace(Duration.ofDays(14))
 
     journalOpprettetStream.join(
-        produserOppgaveStream, { journalOpprettet, produserOppgave ->
-        objectMapper.writeValueAsBytes(
-            RegistrerOppgaveKafkaMessage(
-                produserOppgave = objectMapper.readValue(produserOppgave),
-                journalOpprettet = objectMapper.readValue(journalOpprettet)
+        produserOppgaveStream,
+        { journalOpprettet, produserOppgave ->
+            objectMapper.writeValueAsBytes(
+                RegistrerOppgaveKafkaMessage(
+                    produserOppgave = objectMapper.readValue(produserOppgave),
+                    journalOpprettet = objectMapper.readValue(journalOpprettet),
+                ),
             )
-        )
-    },
-        joinWindow
+        },
+        joinWindow,
     ).to(env.privatRegistrerOppgave)
 
     val kafkaStream = KafkaStreams(streamBuilder.build(), streamProperties)
@@ -90,7 +91,7 @@ fun createAndStartKafkaStream(env: Environment, applicationState: ApplicationSta
 
 private fun closeStream(
     kafkaStream: KafkaStreams,
-    applicationState: ApplicationState
+    applicationState: ApplicationState,
 ) {
     kafkaStream.close(Duration.ofSeconds(30))
     log.error("Closing stream because it went into error state")

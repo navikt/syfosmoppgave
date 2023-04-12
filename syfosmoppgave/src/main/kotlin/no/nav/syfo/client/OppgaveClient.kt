@@ -23,7 +23,7 @@ class OppgaveClient(
     private val url: String,
     private val accessTokenClient: AccessTokenClient,
     private val scope: String,
-    private val httpClient: HttpClient
+    private val httpClient: HttpClient,
 ) {
     private suspend fun opprettOppgave(opprettOppgave: OpprettOppgave, msgId: String): OpprettOppgaveResponse {
         try {

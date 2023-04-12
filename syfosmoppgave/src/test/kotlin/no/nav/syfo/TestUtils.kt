@@ -31,11 +31,11 @@ fun createProduceTask(msgId: String) = ProduserOppgaveKafkaMessage(
     aktivDato = DateTimeFormatter.ISO_DATE.format(LocalDate.now()),
     fristFerdigstillelse = DateTimeFormatter.ISO_DATE.format(LocalDate.now().plusDays(10)),
     prioritet = PrioritetType.NORM,
-    metadata = mapOf()
+    metadata = mapOf(),
 )
 
 fun createRegisterJournal(msgId: String) = JournalKafkaMessage(
     messageId = msgId,
     journalpostId = "test",
-    journalpostKilde = "test"
+    journalpostKilde = "test",
 )

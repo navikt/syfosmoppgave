@@ -116,24 +116,26 @@ fun setupAndRunAiven(env: Environment, applicationState: ApplicationState, oppga
         aivenProperties.toConsumerConfig(
             "${env.applicationName}-consumer",
             keyDeserializer = StringDeserializer::class,
-            valueDeserializer = OppgaveKafkaDeserializer::class
-        ).also { it[ConsumerConfig.AUTO_OFFSET_RESET_CONFIG] = "none" }
+            valueDeserializer = OppgaveKafkaDeserializer::class,
+        ).also { it[ConsumerConfig.AUTO_OFFSET_RESET_CONFIG] = "none" },
     )
     val aivenRegistrerOppgaveConsumer = KafkaConsumer(
         aivenProperties.toConsumerConfig(
-            "${env.applicationName}-consumer", valueDeserializer = JacksonKafkaDeserializer::class
+            "${env.applicationName}-consumer",
+            valueDeserializer = JacksonKafkaDeserializer::class,
         ).also {
             it[ConsumerConfig.AUTO_OFFSET_RESET_CONFIG] = "none"
         },
-        StringDeserializer(), JacksonKafkaDeserializer(RegistrerOppgaveKafkaMessage::class)
+        StringDeserializer(),
+        JacksonKafkaDeserializer(RegistrerOppgaveKafkaMessage::class),
     )
 
     val aivenRetryProducer = KafkaProducer<String, OppgaveRetryKafkaMessage>(
         KafkaUtils.getAivenKafkaConfig().toProducerConfig(
             "${env.applicationName}-retry-producer",
             keySerializer = StringSerializer::class,
-            valueSerializer = OppgaveKafkaSerializer::class
-        )
+            valueSerializer = OppgaveKafkaSerializer::class,
+        ),
     )
     val aivenRetryPublisher = KafkaRetryPublisher(aivenRetryProducer, env.retryOppgaveAivenTopic)
 
@@ -143,7 +145,11 @@ fun setupAndRunAiven(env: Environment, applicationState: ApplicationState, oppga
     }
     createListener(applicationState) {
         OpprettOppgaveRetryService(
-            aivenRetryConsumer, applicationState, oppgaveClient, env.retryOppgaveAivenTopic, "aiven"
+            aivenRetryConsumer,
+            applicationState,
+            oppgaveClient,
+            env.retryOppgaveAivenTopic,
+            "aiven",
         ).start()
     }
 }
@@ -151,7 +157,7 @@ fun setupAndRunAiven(env: Environment, applicationState: ApplicationState, oppga
 @DelicateCoroutinesApi
 fun createListener(
     applicationState: ApplicationState,
-    action: suspend CoroutineScope.() -> Unit
+    action: suspend CoroutineScope.() -> Unit,
 ): Job = GlobalScope.launch(Dispatchers.Unbounded) {
     try {
         action()
@@ -167,7 +173,7 @@ suspend fun blockingApplicationLogicAiven(
     applicationState: ApplicationState,
     kafkaConsumer: KafkaConsumer<String, RegistrerOppgaveKafkaMessage>,
     oppgaveClient: OppgaveClient,
-    kafkaRetryPublisher: KafkaRetryPublisher
+    kafkaRetryPublisher: KafkaRetryPublisher,
 ) {
     while (applicationState.ready) {
         kafkaConsumer.poll(Duration.ofSeconds(10)).forEach {
@@ -175,14 +181,16 @@ suspend fun blockingApplicationLogicAiven(
             val journalOpprettet = it.value().journalOpprettet
 
             val loggingMeta = LoggingMeta(
-                orgNr = produserOppgave.orgnr, msgId = journalOpprettet.messageId, sykmeldingId = it.key()
+                orgNr = produserOppgave.orgnr,
+                msgId = journalOpprettet.messageId,
+                sykmeldingId = it.key(),
             )
             handleRegisterOppgaveRequest(
                 oppgaveClient,
                 opprettOppgave(produserOppgave, journalOpprettet),
                 journalOpprettet.messageId,
                 loggingMeta,
-                kafkaRetryPublisher
+                kafkaRetryPublisher,
             )
         }
     }

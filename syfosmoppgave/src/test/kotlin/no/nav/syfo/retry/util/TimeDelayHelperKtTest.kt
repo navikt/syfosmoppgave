@@ -12,7 +12,7 @@ class TimeDelayHelperKtTest : FunSpec({
         test("should get same day delay") {
             val rerunTimes = listOf(
                 OffsetTime.of(3, 0, 0, 0, ZoneOffset.UTC),
-                OffsetTime.of(12, 0, 0, 0, ZoneOffset.UTC)
+                OffsetTime.of(12, 0, 0, 0, ZoneOffset.UTC),
             )
 
             val dateTime = OffsetDateTime.of(2020, 1, 1, 11, 0, 0, 0, ZoneOffset.UTC)
@@ -23,7 +23,7 @@ class TimeDelayHelperKtTest : FunSpec({
         test("should get next day delay") {
             val rerunTimes = listOf(
                 OffsetTime.of(3, 0, 0, 0, ZoneOffset.UTC),
-                OffsetTime.of(12, 0, 0, 0, ZoneOffset.UTC)
+                OffsetTime.of(12, 0, 0, 0, ZoneOffset.UTC),
             )
 
             val dateTime = OffsetDateTime.of(2020, 1, 1, 13, 0, 0, 0, ZoneOffset.UTC)

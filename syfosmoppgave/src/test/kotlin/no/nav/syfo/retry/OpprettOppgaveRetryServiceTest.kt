@@ -57,7 +57,8 @@ class OpprettOppgaveRetryServiceTest : FunSpec({
     val kafkaConfig = setupKafkaConfig()
 
     val kafkaProducerProperties = kafkaConfig.toProducerConfig(
-        "test-producer", OppgaveKafkaSerializer::class
+        "test-producer",
+        OppgaveKafkaSerializer::class,
     )
     val kafkaProducer = KafkaProducer<String, OppgaveRetryKafkaMessage>(kafkaProducerProperties)
 

@@ -19,7 +19,7 @@ fun getKafkaRetryMessage(): OppgaveRetryKafkaMessage {
             fristFerdigstillelse = LocalDate.now().plusDays(3),
             journalpostId = "",
             tema = "team",
-            tilordnetRessurs = null
-        )
+            tilordnetRessurs = null,
+        ),
     )
 }

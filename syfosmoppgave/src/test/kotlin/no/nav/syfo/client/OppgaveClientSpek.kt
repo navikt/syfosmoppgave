@@ -60,12 +60,15 @@ class OppgaveClientSpek : FunSpec({
                             1,
                             listOf(
                                 Oppgave(
-                                    1, "9999",
-                                    "12345678910", "jpId",
-                                    "SYM", "BEH_EL_SYM"
-                                )
-                            )
-                        )
+                                    1,
+                                    "9999",
+                                    "12345678910",
+                                    "jpId",
+                                    "SYM",
+                                    "BEH_EL_SYM",
+                                ),
+                            ),
+                        ),
                     )
                     call.request.queryParameters["journalpostId"] == "nyJpId" -> call.respond(OppgaveResponse(0, emptyList()))
                     else -> call.respond(HttpStatusCode.InternalServerError)
@@ -115,5 +118,5 @@ fun lagOpprettOppgaveRequest(jpId: String): OpprettOppgave =
         oppgavetype = "BEH_EL_SYM",
         aktivDato = LocalDate.of(2019, Month.JANUARY, 12),
         fristFerdigstillelse = LocalDate.of(2019, Month.JANUARY, 14),
-        prioritet = "NORM"
+        prioritet = "NORM",
     )

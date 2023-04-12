@@ -30,7 +30,7 @@ class OpprettOppgaveRetryService(
             OffsetTime.of(9, 0, 0, 0, ZoneOffset.UTC),
             OffsetTime.of(12, 0, 0, 0, ZoneOffset.UTC),
             OffsetTime.of(15, 0, 0, 0, ZoneOffset.UTC),
-            OffsetTime.of(21, 0, 0, 0, ZoneOffset.UTC)
+            OffsetTime.of(21, 0, 0, 0, ZoneOffset.UTC),
         )
     }
 

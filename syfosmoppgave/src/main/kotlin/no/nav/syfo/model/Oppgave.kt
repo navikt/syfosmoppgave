@@ -16,16 +16,16 @@ data class OpprettOppgave(
     val behandlingstema: String? = null,
     val aktivDato: LocalDate,
     val fristFerdigstillelse: LocalDate? = null,
-    val prioritet: String
+    val prioritet: String,
 )
 
 data class OpprettOppgaveResponse(
-    val id: Int
+    val id: Int,
 )
 
 data class OppgaveResponse(
     val antallTreffTotalt: Int,
-    val oppgaver: List<Oppgave>
+    val oppgaver: List<Oppgave>,
 )
 
 data class Oppgave(
@@ -34,10 +34,10 @@ data class Oppgave(
     val aktoerId: String?,
     val journalpostId: String?,
     val tema: String?,
-    val oppgavetype: String?
+    val oppgavetype: String?,
 )
 
 data class OppgaveResultat(
     val oppgaveId: Int,
-    val duplikat: Boolean
+    val duplikat: Boolean,
 )
