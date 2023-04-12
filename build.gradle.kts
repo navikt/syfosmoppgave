@@ -15,7 +15,7 @@ val prometheusVersion = "0.16.0"
 val smCommonVersion = "1.9df1108"
 val kotestVersion = "5.5.5"
 val testContainerKafkaVersion = "1.18.0"
-val mockVersion = "1.13.4"
+val mockVersion = "1.13.5"
 val kotlinVersion = "1.8.20"
 
 plugins {
