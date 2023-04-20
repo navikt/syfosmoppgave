@@ -3,7 +3,7 @@ on:
   push:
     branches:
       - '**'
-      - '!master'
+      - '!main'
     paths:
       - 'syfosmoppgave/**'
       - '.github/workflows/devdeploy.yml'
@@ -69,7 +69,7 @@ jobs:
       - name: Deploy to Preprod
         uses: nais/deploy/actions/deploy@master
         env:
-          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY_TEAMSYKMELDING }}
+          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: dev-gcp
           RESOURCE: syfosmoppgave/naiserator-dev.yaml
           VAR: image=${{ needs.build.outputs.image }}

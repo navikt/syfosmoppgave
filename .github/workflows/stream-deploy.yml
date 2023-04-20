@@ -2,7 +2,7 @@ name: Strean dev and prod
 on:
   push:
     branches:
-      - master
+      - main
     paths:
       - 'syfosmoppgave-stream/**'
       - '.github/workflows/stream-deploy.yml'
@@ -59,14 +59,14 @@ jobs:
       - name: Deploy to Preprod
         uses: nais/deploy/actions/deploy@master
         env:
-          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY_TEAMSYKMELDING }}
+          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: dev-gcp
           RESOURCE: syfosmoppgave-stream/naiserator-dev.yaml
           VAR: image=${{ steps.docker-build-push.outputs.image }}
       - name: Deploy to Prod
         uses: nais/deploy/actions/deploy@master
         env:
-          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY_TEAMSYKMELDING }}
+          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: prod-gcp
           RESOURCE: syfosmoppgave-stream/naiserator-prod.yaml
           VAR: image=${{ steps.docker-build-push.outputs.image }}
