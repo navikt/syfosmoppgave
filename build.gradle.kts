@@ -16,7 +16,7 @@ val smCommonVersion = "1.9df1108"
 val kotestVersion = "5.6.1"
 val testContainerKafkaVersion = "1.18.0"
 val mockVersion = "1.13.5"
-val kotlinVersion = "1.8.20"
+val kotlinVersion = "1.8.21"
 
 plugins {
     id("org.jmailen.kotlinter") version "3.14.0"
