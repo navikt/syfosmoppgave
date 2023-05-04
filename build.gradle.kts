@@ -12,11 +12,12 @@ val ktorVersion = "2.3.0"
 val logstashEncoderVersion = "7.3"
 val logbackVersion = "1.4.7"
 val prometheusVersion = "0.16.0"
-val smCommonVersion = "1.9df1108"
+val smCommonVersion = "1.0.1"
 val kotestVersion = "5.6.1"
 val testContainerKafkaVersion = "1.18.0"
 val mockVersion = "1.13.5"
 val kotlinVersion = "1.8.21"
+val commonsCodecVersion = "1.15"
 
 plugins {
     id("org.jmailen.kotlinter") version "3.14.0"
@@ -54,6 +55,9 @@ dependencies {
     implementation("io.ktor:ktor-serialization-jackson:$ktorVersion")
     implementation("io.ktor:ktor-client-core:$ktorVersion")
     implementation("io.ktor:ktor-client-apache:$ktorVersion")
+    // override transient version 1.11 from io.ktor:ktor-client-apache due to security vulnerability
+    // https://devhub.checkmarx.com/cve-details/Cxeb68d52e-5509/
+    implementation("commons-codec:commons-codec:$commonsCodecVersion")
     implementation("io.ktor:ktor-client-content-negotiation:$ktorVersion")
 
     implementation("no.nav.helse:syfosm-common-kafka:$smCommonVersion")
@@ -65,7 +69,6 @@ dependencies {
     implementation("net.logstash.logback:logstash-logback-encoder:$logstashEncoderVersion")
 
     implementation("org.apache.kafka:kafka_2.12:$kafkaVersion")
-    implementation("org.apache.kafka:kafka-streams:$kafkaVersion")
 
     testImplementation("io.mockk:mockk:$mockVersion")
     testImplementation("org.amshove.kluent:kluent:$kluentVersion")
