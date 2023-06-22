@@ -17,7 +17,7 @@ val kotestVersion = "5.6.2"
 val testContainerKafkaVersion = "1.18.3"
 val mockVersion = "1.13.5"
 val kotlinVersion = "1.8.22"
-val commonsCodecVersion = "1.15"
+val commonsCodecVersion = "1.16.0"
 
 plugins {
     id("org.jmailen.kotlinter") version "3.15.0"
