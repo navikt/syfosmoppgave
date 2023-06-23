@@ -20,6 +20,10 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.routing
 import io.mockk.coEvery
 import io.mockk.mockk
+import java.net.ServerSocket
+import java.time.LocalDate
+import java.time.Month
+import java.util.concurrent.TimeUnit
 import no.nav.syfo.LoggingMeta
 import no.nav.syfo.azuread.AccessTokenClient
 import no.nav.syfo.model.Oppgave
@@ -27,84 +31,91 @@ import no.nav.syfo.model.OppgaveResponse
 import no.nav.syfo.model.OpprettOppgave
 import no.nav.syfo.model.OpprettOppgaveResponse
 import org.amshove.kluent.shouldBeEqualTo
-import java.net.ServerSocket
-import java.time.LocalDate
-import java.time.Month
-import java.util.concurrent.TimeUnit
 
-class OppgaveClientSpek : FunSpec({
-    val accessTokenClient = mockk<AccessTokenClient>()
-    val httpClient = HttpClient(Apache) {
-        install(ContentNegotiation) {
-            jackson {
-                registerKotlinModule()
-                registerModule(JavaTimeModule())
-                configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
-                configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-            }
-        }
-    }
-    val loggingMetadata = LoggingMeta("sykmeldingId", "123", "hendelsesId")
-
-    val mockHttpServerPort = ServerSocket(0).use { it.localPort }
-    val mockHttpServerUrl = "http://localhost:$mockHttpServerPort"
-    val mockServer = embeddedServer(Netty, mockHttpServerPort) {
-        install(io.ktor.server.plugins.contentnegotiation.ContentNegotiation) {
-            jackson {}
-        }
-        routing {
-            get("/oppgave") {
-                when {
-                    call.request.queryParameters["journalpostId"] == "jpId" -> call.respond(
-                        OppgaveResponse(
-                            1,
-                            listOf(
-                                Oppgave(
-                                    1,
-                                    "9999",
-                                    "12345678910",
-                                    "jpId",
-                                    "SYM",
-                                    "BEH_EL_SYM",
-                                ),
-                            ),
-                        ),
-                    )
-                    call.request.queryParameters["journalpostId"] == "nyJpId" -> call.respond(OppgaveResponse(0, emptyList()))
-                    else -> call.respond(HttpStatusCode.InternalServerError)
+class OppgaveClientSpek :
+    FunSpec({
+        val accessTokenClient = mockk<AccessTokenClient>()
+        val httpClient =
+            HttpClient(Apache) {
+                install(ContentNegotiation) {
+                    jackson {
+                        registerKotlinModule()
+                        registerModule(JavaTimeModule())
+                        configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
+                        configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+                    }
                 }
             }
-            post("/oppgave") {
-                call.respond(OpprettOppgaveResponse(42))
+        val loggingMetadata = LoggingMeta("sykmeldingId", "123", "hendelsesId")
+
+        val mockHttpServerPort = ServerSocket(0).use { it.localPort }
+        val mockHttpServerUrl = "http://localhost:$mockHttpServerPort"
+        val mockServer =
+            embeddedServer(Netty, mockHttpServerPort) {
+                    install(io.ktor.server.plugins.contentnegotiation.ContentNegotiation) {
+                        jackson {}
+                    }
+                    routing {
+                        get("/oppgave") {
+                            when {
+                                call.request.queryParameters["journalpostId"] == "jpId" ->
+                                    call.respond(
+                                        OppgaveResponse(
+                                            1,
+                                            listOf(
+                                                Oppgave(
+                                                    1,
+                                                    "9999",
+                                                    "12345678910",
+                                                    "jpId",
+                                                    "SYM",
+                                                    "BEH_EL_SYM",
+                                                ),
+                                            ),
+                                        ),
+                                    )
+                                call.request.queryParameters["journalpostId"] == "nyJpId" ->
+                                    call.respond(OppgaveResponse(0, emptyList()))
+                                else -> call.respond(HttpStatusCode.InternalServerError)
+                            }
+                        }
+                        post("/oppgave") { call.respond(OpprettOppgaveResponse(42)) }
+                    }
+                }
+                .start()
+
+        val oppgaveClient =
+            OppgaveClient("$mockHttpServerUrl/oppgave", accessTokenClient, "scope", httpClient)
+
+        afterSpec { mockServer.stop(TimeUnit.SECONDS.toMillis(10), TimeUnit.SECONDS.toMillis(10)) }
+
+        beforeSpec { coEvery { accessTokenClient.getAccessToken(any()) } returns "token" }
+
+        context("OppgaveClient oppretter oppgave når det ikke finnes fra før") {
+            test("Oppretter ikke oppgave hvis det finnes fra før") {
+                val oppgave =
+                    oppgaveClient.opprettOppgave(
+                        lagOpprettOppgaveRequest("jpId"),
+                        "sykmeldingId",
+                        loggingMetadata
+                    )
+
+                oppgave.oppgaveId shouldBeEqualTo 1
+                oppgave.duplikat shouldBeEqualTo true
+            }
+            test("Oppretter oppgave hvis det ikke finnes fra før") {
+                val oppgave =
+                    oppgaveClient.opprettOppgave(
+                        lagOpprettOppgaveRequest("nyJpId"),
+                        "sykmeldingId",
+                        loggingMetadata
+                    )
+
+                oppgave.oppgaveId shouldBeEqualTo 42
+                oppgave.duplikat shouldBeEqualTo false
             }
         }
-    }.start()
-
-    val oppgaveClient = OppgaveClient("$mockHttpServerUrl/oppgave", accessTokenClient, "scope", httpClient)
-
-    afterSpec {
-        mockServer.stop(TimeUnit.SECONDS.toMillis(10), TimeUnit.SECONDS.toMillis(10))
-    }
-
-    beforeSpec {
-        coEvery { accessTokenClient.getAccessToken(any()) } returns "token"
-    }
-
-    context("OppgaveClient oppretter oppgave når det ikke finnes fra før") {
-        test("Oppretter ikke oppgave hvis det finnes fra før") {
-            val oppgave = oppgaveClient.opprettOppgave(lagOpprettOppgaveRequest("jpId"), "sykmeldingId", loggingMetadata)
-
-            oppgave.oppgaveId shouldBeEqualTo 1
-            oppgave.duplikat shouldBeEqualTo true
-        }
-        test("Oppretter oppgave hvis det ikke finnes fra før") {
-            val oppgave = oppgaveClient.opprettOppgave(lagOpprettOppgaveRequest("nyJpId"), "sykmeldingId", loggingMetadata)
-
-            oppgave.oppgaveId shouldBeEqualTo 42
-            oppgave.duplikat shouldBeEqualTo false
-        }
-    }
-})
+    })
 
 fun lagOpprettOppgaveRequest(jpId: String): OpprettOppgave =
     OpprettOppgave(

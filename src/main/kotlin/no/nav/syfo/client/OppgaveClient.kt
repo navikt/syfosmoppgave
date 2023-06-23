@@ -25,48 +25,72 @@ class OppgaveClient(
     private val scope: String,
     private val httpClient: HttpClient,
 ) {
-    private suspend fun opprettOppgave(opprettOppgave: OpprettOppgave, msgId: String): OpprettOppgaveResponse {
+    private suspend fun opprettOppgave(
+        opprettOppgave: OpprettOppgave,
+        msgId: String
+    ): OpprettOppgaveResponse {
         try {
-            return httpClient.post(url) {
-                contentType(ContentType.Application.Json)
-                val token = accessTokenClient.getAccessToken(scope)
-                header("Authorization", "Bearer $token")
-                header("X-Correlation-ID", msgId)
-                setBody(opprettOppgave)
-            }.body()
+            return httpClient
+                .post(url) {
+                    contentType(ContentType.Application.Json)
+                    val token = accessTokenClient.getAccessToken(scope)
+                    header("Authorization", "Bearer $token")
+                    header("X-Correlation-ID", msgId)
+                    setBody(opprettOppgave)
+                }
+                .body()
         } catch (ex: Exception) {
-            log.error("Could not OpprettOppgave for journalPostid=${opprettOppgave.journalpostId}", ex)
+            log.error(
+                "Could not OpprettOppgave for journalPostid=${opprettOppgave.journalpostId}",
+                ex
+            )
             securelog.info("opprettOppgave: $opprettOppgave")
             throw ex
         }
     }
 
-    private suspend fun hentOppgave(opprettOppgave: OpprettOppgave, msgId: String): OppgaveResponse {
+    private suspend fun hentOppgave(
+        opprettOppgave: OpprettOppgave,
+        msgId: String
+    ): OppgaveResponse {
         try {
-            return httpClient.get(url) {
-                val token = accessTokenClient.getAccessToken(scope)
-                header("Authorization", "Bearer $token")
-                header("X-Correlation-ID", msgId)
-                parameter("tema", opprettOppgave.tema)
-                parameter("oppgavetype", opprettOppgave.oppgavetype)
-                parameter("journalpostId", opprettOppgave.journalpostId)
-                parameter("aktoerId", opprettOppgave.aktoerId)
-                parameter("statuskategori", "AAPEN")
-                parameter("sorteringsrekkefolge", "ASC")
-                parameter("sorteringsfelt", "FRIST")
-                parameter("limit", "10")
-            }.body<OppgaveResponse>()
+            return httpClient
+                .get(url) {
+                    val token = accessTokenClient.getAccessToken(scope)
+                    header("Authorization", "Bearer $token")
+                    header("X-Correlation-ID", msgId)
+                    parameter("tema", opprettOppgave.tema)
+                    parameter("oppgavetype", opprettOppgave.oppgavetype)
+                    parameter("journalpostId", opprettOppgave.journalpostId)
+                    parameter("aktoerId", opprettOppgave.aktoerId)
+                    parameter("statuskategori", "AAPEN")
+                    parameter("sorteringsrekkefolge", "ASC")
+                    parameter("sorteringsfelt", "FRIST")
+                    parameter("limit", "10")
+                }
+                .body<OppgaveResponse>()
         } catch (ex: Exception) {
-            log.error("Could not hentOppgave for \njournalPostid=${opprettOppgave.journalpostId}", ex)
+            log.error(
+                "Could not hentOppgave for \njournalPostid=${opprettOppgave.journalpostId}",
+                ex
+            )
             securelog.info("opprettOppgave: $opprettOppgave")
             throw ex
         }
     }
 
-    suspend fun opprettOppgave(opprettOppgave: OpprettOppgave, msgId: String, loggingMeta: LoggingMeta): OppgaveResultat {
+    suspend fun opprettOppgave(
+        opprettOppgave: OpprettOppgave,
+        msgId: String,
+        loggingMeta: LoggingMeta
+    ): OppgaveResultat {
         val oppgaveResponse = hentOppgave(opprettOppgave, msgId)
         if (oppgaveResponse.antallTreffTotalt > 0) {
-            log.info("Det finnes allerede en åpen oppgave for journalpost {} på brukeren, {}", opprettOppgave.journalpostId, fields(loggingMeta))
+            log.info(
+                "Det finnes allerede en åpen oppgave for journalpost {} på brukeren, {}",
+                opprettOppgave.journalpostId,
+                fields(loggingMeta)
+            )
             return OppgaveResultat(oppgaveResponse.oppgaver.first().id, true)
         }
         log.info("Oppretter oppgave {}", fields(loggingMeta))

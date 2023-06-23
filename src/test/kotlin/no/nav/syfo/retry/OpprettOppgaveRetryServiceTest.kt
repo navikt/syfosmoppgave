@@ -6,6 +6,7 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockkClass
 import io.mockk.mockkStatic
+import java.util.Properties
 import kotlinx.coroutines.delay
 import no.nav.syfo.application.ApplicationState
 import no.nav.syfo.client.OppgaveClient
@@ -22,76 +23,94 @@ import org.apache.kafka.common.serialization.StringSerializer
 import org.testcontainers.containers.KafkaContainer
 import org.testcontainers.containers.Network
 import org.testcontainers.utility.DockerImageName
-import java.util.Properties
 
-class OpprettOppgaveRetryServiceTest : FunSpec({
-
-    val kafka = KafkaContainer(DockerImageName.parse(KAFKA_IMAGE_NAME).withTag(KAFKA_IMAGE_VERSION)).withNetwork(Network.newNetwork())
-    kafka.start()
-    fun setupKafkaConfig(): Properties {
-        val kafkaConfig = Properties()
-        kafkaConfig.let {
-            it["bootstrap.servers"] = kafka.bootstrapServers
-            it[ConsumerConfig.GROUP_ID_CONFIG] = "groupId"
-            it[ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG] = StringDeserializer::class.java
-            it[ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG] = OppgaveKafkaDeserializer::class.java
-            it[ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG] = OppgaveKafkaSerializer::class.java
-            it[ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG] = StringSerializer::class.java
-            it[ConsumerConfig.AUTO_OFFSET_RESET_CONFIG] = "earliest"
-        }
-        return kafkaConfig
-    }
-
-    val applicationState = ApplicationState(true, true)
-    val oppgaveClient = mockkClass(OppgaveClient::class)
-    beforeTest {
-        mockkStatic("kotlinx.coroutines.DelayKt")
-        coEvery { delay(any<Long>()) } returns Unit
-        applicationState.alive = true
-        applicationState.ready = true
-    }
-
-    afterTest {
-        clearAllMocks()
-    }
-    val kafkaConfig = setupKafkaConfig()
-
-    val kafkaProducerProperties = kafkaConfig.toProducerConfig(
-        "test-producer",
-        OppgaveKafkaSerializer::class,
-    )
-    val kafkaProducer = KafkaProducer<String, OppgaveRetryKafkaMessage>(kafkaProducerProperties)
-
-    val consumerProperties = kafkaConfig.toConsumerConfig("test-consumer", OppgaveKafkaDeserializer::class)
-    consumerProperties.let { it[ConsumerConfig.MAX_POLL_RECORDS_CONFIG] = "1" }
-    val kafkaConsumer = KafkaConsumer<String, OppgaveRetryKafkaMessage>(consumerProperties, StringDeserializer(), OppgaveKafkaDeserializer())
-    val service = OpprettOppgaveRetryService(kafkaConsumer, applicationState, oppgaveClient, "topic", "onprem")
-
-    context("Test retry") {
-        test("Should read message from kafka and retry opprett oppgave") {
-            coEvery { oppgaveClient.opprettOppgave(any(), any(), any()) } answers {
-                applicationState.ready = false
-                applicationState.alive = false
-                OppgaveResultat(1, false)
+class OpprettOppgaveRetryServiceTest :
+    FunSpec({
+        val kafka =
+            KafkaContainer(DockerImageName.parse(KAFKA_IMAGE_NAME).withTag(KAFKA_IMAGE_VERSION))
+                .withNetwork(Network.newNetwork())
+        kafka.start()
+        fun setupKafkaConfig(): Properties {
+            val kafkaConfig = Properties()
+            kafkaConfig.let {
+                it["bootstrap.servers"] = kafka.bootstrapServers
+                it[ConsumerConfig.GROUP_ID_CONFIG] = "groupId"
+                it[ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG] = StringDeserializer::class.java
+                it[ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG] =
+                    OppgaveKafkaDeserializer::class.java
+                it[ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG] =
+                    OppgaveKafkaSerializer::class.java
+                it[ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG] = StringSerializer::class.java
+                it[ConsumerConfig.AUTO_OFFSET_RESET_CONFIG] = "earliest"
             }
-
-            kafkaProducer.send(ProducerRecord("topic", "messageId", getKafkaRetryMessage()))
-
-            service.start()
-
-            coVerify(exactly = 1) { oppgaveClient.opprettOppgave(any(), any(), any()) }
+            return kafkaConfig
         }
-        test("Should retry failed") {
-            coEvery { oppgaveClient.opprettOppgave(any(), any(), any()) } throws RuntimeException("error") andThenAnswer {
-                applicationState.ready = false
-                applicationState.alive = false
-                OppgaveResultat(1, false)
+
+        val applicationState = ApplicationState(true, true)
+        val oppgaveClient = mockkClass(OppgaveClient::class)
+        beforeTest {
+            mockkStatic("kotlinx.coroutines.DelayKt")
+            coEvery { delay(any<Long>()) } returns Unit
+            applicationState.alive = true
+            applicationState.ready = true
+        }
+
+        afterTest { clearAllMocks() }
+        val kafkaConfig = setupKafkaConfig()
+
+        val kafkaProducerProperties =
+            kafkaConfig.toProducerConfig(
+                "test-producer",
+                OppgaveKafkaSerializer::class,
+            )
+        val kafkaProducer = KafkaProducer<String, OppgaveRetryKafkaMessage>(kafkaProducerProperties)
+
+        val consumerProperties =
+            kafkaConfig.toConsumerConfig("test-consumer", OppgaveKafkaDeserializer::class)
+        consumerProperties.let { it[ConsumerConfig.MAX_POLL_RECORDS_CONFIG] = "1" }
+        val kafkaConsumer =
+            KafkaConsumer<String, OppgaveRetryKafkaMessage>(
+                consumerProperties,
+                StringDeserializer(),
+                OppgaveKafkaDeserializer()
+            )
+        val service =
+            OpprettOppgaveRetryService(
+                kafkaConsumer,
+                applicationState,
+                oppgaveClient,
+                "topic",
+                "onprem"
+            )
+
+        context("Test retry") {
+            test("Should read message from kafka and retry opprett oppgave") {
+                coEvery { oppgaveClient.opprettOppgave(any(), any(), any()) } answers
+                    {
+                        applicationState.ready = false
+                        applicationState.alive = false
+                        OppgaveResultat(1, false)
+                    }
+
+                kafkaProducer.send(ProducerRecord("topic", "messageId", getKafkaRetryMessage()))
+
+                service.start()
+
+                coVerify(exactly = 1) { oppgaveClient.opprettOppgave(any(), any(), any()) }
             }
-            kafkaProducer.send(ProducerRecord("topic", "messageId", getKafkaRetryMessage()))
+            test("Should retry failed") {
+                coEvery { oppgaveClient.opprettOppgave(any(), any(), any()) } throws
+                    RuntimeException("error") andThenAnswer
+                    {
+                        applicationState.ready = false
+                        applicationState.alive = false
+                        OppgaveResultat(1, false)
+                    }
+                kafkaProducer.send(ProducerRecord("topic", "messageId", getKafkaRetryMessage()))
 
-            service.start()
+                service.start()
 
-            coVerify(exactly = 2) { oppgaveClient.opprettOppgave(any(), any(), any()) }
+                coVerify(exactly = 2) { oppgaveClient.opprettOppgave(any(), any(), any()) }
+            }
         }
-    }
-})
+    })

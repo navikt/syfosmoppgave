@@ -1,7 +1,9 @@
 package no.nav.syfo.model
 
 enum class PrioritetType {
-    HOY, NORM, LAV
+    HOY,
+    NORM,
+    LAV
 }
 
 data class ProduserOppgaveKafkaMessage(

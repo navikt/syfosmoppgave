@@ -15,7 +15,11 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.http.headersOf
 import io.ktor.serialization.jackson.jackson
 
-data class ResponseData(val content: String, val httpStatusCode: HttpStatusCode, val headers: Headers = headersOf("Content-Type", listOf("application/json")))
+data class ResponseData(
+    val content: String,
+    val httpStatusCode: HttpStatusCode,
+    val headers: Headers = headersOf("Content-Type", listOf("application/json"))
+)
 
 class HttpClientTest {
 
@@ -25,25 +29,30 @@ class HttpClientTest {
         responseHandlers[httpMethod] = responseData
     }
 
-    val httpClient = HttpClient(MockEngine) {
-        install(ContentNegotiation) {
-            jackson {
-                registerKotlinModule()
-                registerModule(JavaTimeModule())
-                configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
-                configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-            }
-        }
-        engine {
-            addHandler { request ->
-                if (responseHandlers.containsKey(request.method)) {
-                    val responseData = responseHandlers[request.method]!!
-                    respond(responseData.content, responseData.httpStatusCode, responseData.headers)
-                } else {
-                    respondError(HttpStatusCode.NotFound)
+    val httpClient =
+        HttpClient(MockEngine) {
+            install(ContentNegotiation) {
+                jackson {
+                    registerKotlinModule()
+                    registerModule(JavaTimeModule())
+                    configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
+                    configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
                 }
             }
+            engine {
+                addHandler { request ->
+                    if (responseHandlers.containsKey(request.method)) {
+                        val responseData = responseHandlers[request.method]!!
+                        respond(
+                            responseData.content,
+                            responseData.httpStatusCode,
+                            responseData.headers
+                        )
+                    } else {
+                        respondError(HttpStatusCode.NotFound)
+                    }
+                }
+            }
+            expectSuccess = true
         }
-        expectSuccess = true
-    }
 }

@@ -21,7 +21,8 @@ class OppgaveKafkaSerializer : Serializer<OppgaveRetryKafkaMessage> {
         }
     }
 
-    override fun serialize(topic: String?, data: OppgaveRetryKafkaMessage): ByteArray = objectMapper.writeValueAsBytes(data)
+    override fun serialize(topic: String?, data: OppgaveRetryKafkaMessage): ByteArray =
+        objectMapper.writeValueAsBytes(data)
 
     // no need to close anything
     override fun close() {}

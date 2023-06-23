@@ -15,6 +15,7 @@ import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.network.sockets.SocketTimeoutException
 import io.ktor.serialization.jackson.jackson
 import io.prometheus.client.hotspot.DefaultExports
+import java.time.Duration
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
@@ -48,13 +49,15 @@ import org.apache.kafka.common.serialization.StringDeserializer
 import org.apache.kafka.common.serialization.StringSerializer
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import java.time.Duration
 
 val log: Logger = LoggerFactory.getLogger("no.nav.syfo.smoppgave")
 val securelog: Logger = LoggerFactory.getLogger("securelog")
-val objectMapper: ObjectMapper = ObjectMapper().registerModule(JavaTimeModule()).registerKotlinModule()
-    .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
-    .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+val objectMapper: ObjectMapper =
+    ObjectMapper()
+        .registerModule(JavaTimeModule())
+        .registerKotlinModule()
+        .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
+        .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
 
 @DelicateCoroutinesApi
 fun main() {
@@ -78,7 +81,8 @@ fun main() {
         HttpResponseValidator {
             handleResponseExceptionWithRequest { exception, _ ->
                 when (exception) {
-                    is SocketTimeoutException -> throw ServiceUnavailableException(exception.message)
+                    is SocketTimeoutException ->
+                        throw ServiceUnavailableException(exception.message)
                 }
             }
         }
@@ -90,7 +94,9 @@ fun main() {
             }
             retryIf(maxRetries) { request, response ->
                 if (response.status.value.let { it in 500..599 }) {
-                    log.warn("Retrying for status code ${response.status.value}, for url ${request.url}")
+                    log.warn(
+                        "Retrying for status code ${response.status.value}, for url ${request.url}"
+                    )
                     true
                 } else {
                     false
@@ -101,8 +107,10 @@ fun main() {
     }
     val httpClient = HttpClient(Apache, config)
 
-    val accessTokenClient = AccessTokenClient(env.aadAccessTokenUrl, env.clientId, env.clientSecret, httpClient)
-    val oppgaveClient = OppgaveClient(env.oppgavebehandlingUrl, accessTokenClient, env.oppgaveScope, httpClient)
+    val accessTokenClient =
+        AccessTokenClient(env.aadAccessTokenUrl, env.clientId, env.clientSecret, httpClient)
+    val oppgaveClient =
+        OppgaveClient(env.oppgavebehandlingUrl, accessTokenClient, env.oppgaveScope, httpClient)
 
     setupAndRunAiven(env, applicationState, oppgaveClient)
 
@@ -110,47 +118,63 @@ fun main() {
 }
 
 @DelicateCoroutinesApi
-fun setupAndRunAiven(env: Environment, applicationState: ApplicationState, oppgaveClient: OppgaveClient) {
+fun setupAndRunAiven(
+    env: Environment,
+    applicationState: ApplicationState,
+    oppgaveClient: OppgaveClient
+) {
     val aivenProperties = KafkaUtils.getAivenKafkaConfig()
-    val aivenRetryConsumer = KafkaConsumer<String, OppgaveRetryKafkaMessage>(
-        aivenProperties.toConsumerConfig(
-            "${env.applicationName}-consumer",
-            keyDeserializer = StringDeserializer::class,
-            valueDeserializer = OppgaveKafkaDeserializer::class,
-        ).also { it[ConsumerConfig.AUTO_OFFSET_RESET_CONFIG] = "none" },
-    )
-    val aivenRegistrerOppgaveConsumer = KafkaConsumer(
-        aivenProperties.toConsumerConfig(
-            "${env.applicationName}-consumer",
-            valueDeserializer = JacksonKafkaDeserializer::class,
-        ).also {
-            it[ConsumerConfig.AUTO_OFFSET_RESET_CONFIG] = "none"
-        },
-        StringDeserializer(),
-        JacksonKafkaDeserializer(RegistrerOppgaveKafkaMessage::class),
-    )
+    val aivenRetryConsumer =
+        KafkaConsumer<String, OppgaveRetryKafkaMessage>(
+            aivenProperties
+                .toConsumerConfig(
+                    "${env.applicationName}-consumer",
+                    keyDeserializer = StringDeserializer::class,
+                    valueDeserializer = OppgaveKafkaDeserializer::class,
+                )
+                .also { it[ConsumerConfig.AUTO_OFFSET_RESET_CONFIG] = "none" },
+        )
+    val aivenRegistrerOppgaveConsumer =
+        KafkaConsumer(
+            aivenProperties
+                .toConsumerConfig(
+                    "${env.applicationName}-consumer",
+                    valueDeserializer = JacksonKafkaDeserializer::class,
+                )
+                .also { it[ConsumerConfig.AUTO_OFFSET_RESET_CONFIG] = "none" },
+            StringDeserializer(),
+            JacksonKafkaDeserializer(RegistrerOppgaveKafkaMessage::class),
+        )
 
-    val aivenRetryProducer = KafkaProducer<String, OppgaveRetryKafkaMessage>(
-        KafkaUtils.getAivenKafkaConfig().toProducerConfig(
-            "${env.applicationName}-retry-producer",
-            keySerializer = StringSerializer::class,
-            valueSerializer = OppgaveKafkaSerializer::class,
-        ),
-    )
+    val aivenRetryProducer =
+        KafkaProducer<String, OppgaveRetryKafkaMessage>(
+            KafkaUtils.getAivenKafkaConfig()
+                .toProducerConfig(
+                    "${env.applicationName}-retry-producer",
+                    keySerializer = StringSerializer::class,
+                    valueSerializer = OppgaveKafkaSerializer::class,
+                ),
+        )
     val aivenRetryPublisher = KafkaRetryPublisher(aivenRetryProducer, env.retryOppgaveAivenTopic)
 
     createListener(applicationState) {
         aivenRegistrerOppgaveConsumer.subscribe(listOf(env.privatRegistrerOppgave))
-        blockingApplicationLogicAiven(applicationState, aivenRegistrerOppgaveConsumer, oppgaveClient, aivenRetryPublisher)
+        blockingApplicationLogicAiven(
+            applicationState,
+            aivenRegistrerOppgaveConsumer,
+            oppgaveClient,
+            aivenRetryPublisher
+        )
     }
     createListener(applicationState) {
         OpprettOppgaveRetryService(
-            aivenRetryConsumer,
-            applicationState,
-            oppgaveClient,
-            env.retryOppgaveAivenTopic,
-            "aiven",
-        ).start()
+                aivenRetryConsumer,
+                applicationState,
+                oppgaveClient,
+                env.retryOppgaveAivenTopic,
+                "aiven",
+            )
+            .start()
     }
 }
 
@@ -158,16 +182,21 @@ fun setupAndRunAiven(env: Environment, applicationState: ApplicationState, oppga
 fun createListener(
     applicationState: ApplicationState,
     action: suspend CoroutineScope.() -> Unit,
-): Job = GlobalScope.launch(Dispatchers.Unbounded) {
-    try {
-        action()
-    } catch (e: TrackableException) {
-        log.error("En uhåndtert feil oppstod, applikasjonen restarter {}", fields(e.loggingMeta), e.cause)
-    } finally {
-        applicationState.alive = false
-        applicationState.ready = false
+): Job =
+    GlobalScope.launch(Dispatchers.Unbounded) {
+        try {
+            action()
+        } catch (e: TrackableException) {
+            log.error(
+                "En uhåndtert feil oppstod, applikasjonen restarter {}",
+                fields(e.loggingMeta),
+                e.cause
+            )
+        } finally {
+            applicationState.alive = false
+            applicationState.ready = false
+        }
     }
-}
 
 suspend fun blockingApplicationLogicAiven(
     applicationState: ApplicationState,
@@ -180,11 +209,12 @@ suspend fun blockingApplicationLogicAiven(
             val produserOppgave = it.value().produserOppgave
             val journalOpprettet = it.value().journalOpprettet
 
-            val loggingMeta = LoggingMeta(
-                orgNr = produserOppgave.orgnr,
-                msgId = journalOpprettet.messageId,
-                sykmeldingId = it.key(),
-            )
+            val loggingMeta =
+                LoggingMeta(
+                    orgNr = produserOppgave.orgnr,
+                    msgId = journalOpprettet.messageId,
+                    sykmeldingId = it.key(),
+                )
             handleRegisterOppgaveRequest(
                 oppgaveClient,
                 opprettOppgave(produserOppgave, journalOpprettet),

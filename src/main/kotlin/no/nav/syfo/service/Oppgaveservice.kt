@@ -2,6 +2,8 @@ package no.nav.syfo.service
 
 import io.ktor.client.plugins.ServerResponseException
 import io.ktor.http.HttpStatusCode
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import net.logstash.logback.argument.StructuredArguments.fields
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.syfo.LoggingMeta
@@ -13,8 +15,6 @@ import no.nav.syfo.model.OpprettOppgave
 import no.nav.syfo.model.ProduserOppgaveKafkaMessage
 import no.nav.syfo.retry.KafkaRetryPublisher
 import no.nav.syfo.wrapExceptions
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
 
 suspend fun handleRegisterOppgaveRequest(
     oppgaveClient: OppgaveClient,
@@ -37,7 +37,11 @@ suspend fun handleRegisterOppgaveRequest(
                         ex.message,
                         fields(loggingMeta),
                     )
-                    kafkaRetryPublisher.publishOppgaveToRetryTopic(opprettOppgave, messageId, loggingMeta)
+                    kafkaRetryPublisher.publishOppgaveToRetryTopic(
+                        opprettOppgave,
+                        messageId,
+                        loggingMeta
+                    )
                 }
                 else -> {
                     log.error(
@@ -74,31 +78,36 @@ suspend fun opprettOppgave(
 fun opprettOppgave(
     produceTask: ProduserOppgaveKafkaMessage,
     registerJournal: JournalKafkaMessage,
-) = OpprettOppgave(
-    aktoerId = produceTask.aktoerId,
-    opprettetAvEnhetsnr = produceTask.opprettetAvEnhetsnr,
-    journalpostId = registerJournal.journalpostId,
-    behandlesAvApplikasjon = produceTask.behandlesAvApplikasjon,
-    beskrivelse = produceTask.beskrivelse,
-    tema = produceTask.tema,
-    oppgavetype = produceTask.oppgavetype,
-    behandlingstype = if (produceTask.behandlingstype != "ANY") {
-        produceTask.behandlingstype
-    } else {
-        null
-    },
-    behandlingstema = if (produceTask.behandlingstema != "ANY") {
-        produceTask.behandlingstema
-    } else {
-        null
-    },
-    aktivDato = LocalDate.parse(produceTask.aktivDato, DateTimeFormatter.ISO_DATE),
-    fristFerdigstillelse = LocalDate.parse(produceTask.fristFerdigstillelse, DateTimeFormatter.ISO_DATE),
-    prioritet = produceTask.prioritet.name,
-    tildeltEnhetsnr = if (produceTask.tildeltEnhetsnr.isNotEmpty()) {
-        produceTask.tildeltEnhetsnr
-    } else {
-        null
-    },
-    tilordnetRessurs = produceTask.metadata["tilordnetRessurs"],
-)
+) =
+    OpprettOppgave(
+        aktoerId = produceTask.aktoerId,
+        opprettetAvEnhetsnr = produceTask.opprettetAvEnhetsnr,
+        journalpostId = registerJournal.journalpostId,
+        behandlesAvApplikasjon = produceTask.behandlesAvApplikasjon,
+        beskrivelse = produceTask.beskrivelse,
+        tema = produceTask.tema,
+        oppgavetype = produceTask.oppgavetype,
+        behandlingstype =
+            if (produceTask.behandlingstype != "ANY") {
+                produceTask.behandlingstype
+            } else {
+                null
+            },
+        behandlingstema =
+            if (produceTask.behandlingstema != "ANY") {
+                produceTask.behandlingstema
+            } else {
+                null
+            },
+        aktivDato = LocalDate.parse(produceTask.aktivDato, DateTimeFormatter.ISO_DATE),
+        fristFerdigstillelse =
+            LocalDate.parse(produceTask.fristFerdigstillelse, DateTimeFormatter.ISO_DATE),
+        prioritet = produceTask.prioritet.name,
+        tildeltEnhetsnr =
+            if (produceTask.tildeltEnhetsnr.isNotEmpty()) {
+                produceTask.tildeltEnhetsnr
+            } else {
+                null
+            },
+        tilordnetRessurs = produceTask.metadata["tilordnetRessurs"],
+    )
