@@ -10,6 +10,7 @@ data class Environment(
     val clientId: String = getEnvVar("AZURE_APP_CLIENT_ID"),
     val clientSecret: String = getEnvVar("AZURE_APP_CLIENT_SECRET"),
     val oppgaveScope: String = getEnvVar("OPPGAVE_SCOPE"),
+    val cluster: String = getEnvVar("NAIS_CLUSTER_NAME"),
 )
 
 fun getEnvVar(varName: String, defaultValue: String? = null) =
