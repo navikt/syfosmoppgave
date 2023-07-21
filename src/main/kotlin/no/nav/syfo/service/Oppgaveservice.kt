@@ -2,6 +2,7 @@ package no.nav.syfo.service
 
 import io.ktor.client.plugins.ServerResponseException
 import io.ktor.http.HttpStatusCode
+import java.lang.Exception
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import net.logstash.logback.argument.StructuredArguments.fields
@@ -56,6 +57,12 @@ suspend fun handleRegisterOppgaveRequest(
                         log.warn("skipping in dev")
                     }
                 }
+            }
+        } catch (ex: Exception) {
+            if (cluster != "dev-gcp") {
+                throw ex
+            } else {
+                log.warn("skipping in dev")
             }
         }
     }
