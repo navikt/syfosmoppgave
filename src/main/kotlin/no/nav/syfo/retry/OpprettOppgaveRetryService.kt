@@ -10,6 +10,7 @@ import no.nav.syfo.application.ApplicationState
 import no.nav.syfo.client.OppgaveClient
 import no.nav.syfo.retry.util.getNextRunTime
 import no.nav.syfo.service.opprettOppgave
+import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.slf4j.LoggerFactory
 
@@ -19,6 +20,7 @@ class OpprettOppgaveRetryService(
     private val oppgaveClient: OppgaveClient,
     private val topic: String,
     private val kafkaCluster: String,
+    private val naisCluster: String,
 ) {
 
     companion object {
@@ -41,24 +43,31 @@ class OpprettOppgaveRetryService(
         var endTime = OffsetDateTime.now(ZoneOffset.UTC).plusMinutes(runtimeMinutes)
         while (applicationState.ready && OffsetDateTime.now(ZoneOffset.UTC).isBefore(endTime)) {
             val records = kafkaConsumer.poll(Duration.ofMillis(1000))
-            records.forEach {
-                val kafkaMessage = it.value()
-                val messageId = it.key()
-                log.info(
-                    "$kafkaCluster: Running retry for opprett oppgave {}",
-                    fields(kafkaMessage.loggingMeta)
-                )
-                opprettOppgave(
-                    oppgaveClient,
-                    kafkaMessage.opprettOppgave,
-                    kafkaMessage.loggingMeta,
-                    messageId = messageId,
-                    kafkaCluster
-                )
-            }
+            records.forEach { processRecord(it) }
             if (!records.isEmpty) {
                 endTime = OffsetDateTime.now(ZoneOffset.UTC).plusMinutes(5)
             }
+        }
+    }
+
+    private suspend fun processRecord(it: ConsumerRecord<String, OppgaveRetryKafkaMessage>) {
+        try {
+            val kafkaMessage = it.value()
+            val messageId = it.key()
+            log.info(
+                "$kafkaCluster: Running retry for opprett oppgave {}",
+                fields(kafkaMessage.loggingMeta),
+            )
+            opprettOppgave(
+                oppgaveClient,
+                kafkaMessage.opprettOppgave,
+                kafkaMessage.loggingMeta,
+                messageId = messageId,
+                kafkaCluster,
+            )
+        } catch (e: Exception) {
+            if (naisCluster != "dev-gcp") (throw e)
+            else (log.error("Error running retry-service, skipping item in dev-gcp"))
         }
     }
 

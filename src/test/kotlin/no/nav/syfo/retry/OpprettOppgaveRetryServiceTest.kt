@@ -80,7 +80,8 @@ class OpprettOppgaveRetryServiceTest :
                 applicationState,
                 oppgaveClient,
                 "topic",
-                "onprem"
+                "onprem",
+                "dev-gcp"
             )
 
         context("Test retry") {

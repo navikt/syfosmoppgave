@@ -95,7 +95,7 @@ fun main() {
             retryIf(maxRetries) { request, response ->
                 if (response.status.value.let { it in 500..599 }) {
                     log.warn(
-                        "Retrying for status code ${response.status.value}, for url ${request.url}"
+                        "Retrying for status code ${response.status.value}, for url ${request.url}",
                     )
                     true
                 } else {
@@ -163,7 +163,7 @@ fun setupAndRunAiven(
             applicationState,
             aivenRegistrerOppgaveConsumer,
             oppgaveClient,
-            aivenRetryPublisher
+            aivenRetryPublisher,
         )
     }
     createListener(applicationState) {
@@ -173,6 +173,7 @@ fun setupAndRunAiven(
                 oppgaveClient,
                 env.retryOppgaveAivenTopic,
                 "aiven",
+                env.cluster,
             )
             .start()
     }
@@ -190,7 +191,7 @@ fun createListener(
             log.error(
                 "En uhåndtert feil oppstod, applikasjonen restarter {}",
                 fields(e.loggingMeta),
-                e.cause
+                e.cause,
             )
         } finally {
             applicationState.alive = false
