@@ -22,6 +22,7 @@ suspend fun handleRegisterOppgaveRequest(
     messageId: String,
     loggingMeta: LoggingMeta,
     kafkaRetryPublisher: KafkaRetryPublisher,
+    cluster: String,
     source: String = "aiven",
 ) {
     wrapExceptions(loggingMeta) {
@@ -49,7 +50,11 @@ suspend fun handleRegisterOppgaveRequest(
                         ex.message,
                         fields(loggingMeta),
                     )
-                    throw ex
+                    if (cluster != "dev-gcp") {
+                        throw ex
+                    } else {
+                        log.warn("skipping in dev")
+                    }
                 }
             }
         }

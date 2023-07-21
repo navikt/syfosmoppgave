@@ -63,7 +63,8 @@ class OppgaveserviceKtTest :
                     opprettOppgave(produceTask, registerJournal),
                     registerJournal.messageId,
                     LoggingMeta("", "", ""),
-                    kafkaRetryPublisher
+                    kafkaRetryPublisher,
+                    "test"
                 )
 
                 verify(exactly = 0) {
@@ -91,7 +92,8 @@ class OppgaveserviceKtTest :
                     opprettOppgave(produceTask, registerJournal),
                     registerJournal.messageId,
                     LoggingMeta("", "", ""),
-                    kafkaRetryPublisher
+                    kafkaRetryPublisher,
+                    "test"
                 )
 
                 verify(exactly = 1) {

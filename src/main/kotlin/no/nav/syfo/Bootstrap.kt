@@ -123,10 +123,9 @@ fun setupAndRunAiven(
     applicationState: ApplicationState,
     oppgaveClient: OppgaveClient
 ) {
-    val aivenProperties = KafkaUtils.getAivenKafkaConfig()
     val aivenRetryConsumer =
         KafkaConsumer<String, OppgaveRetryKafkaMessage>(
-            aivenProperties
+            KafkaUtils.getAivenKafkaConfig("retry-consumer")
                 .toConsumerConfig(
                     "${env.applicationName}-consumer",
                     keyDeserializer = StringDeserializer::class,
@@ -136,7 +135,7 @@ fun setupAndRunAiven(
         )
     val aivenRegistrerOppgaveConsumer =
         KafkaConsumer(
-            aivenProperties
+            KafkaUtils.getAivenKafkaConfig("oppgave-consumer")
                 .toConsumerConfig(
                     "${env.applicationName}-consumer",
                     valueDeserializer = JacksonKafkaDeserializer::class,
@@ -148,7 +147,7 @@ fun setupAndRunAiven(
 
     val aivenRetryProducer =
         KafkaProducer<String, OppgaveRetryKafkaMessage>(
-            KafkaUtils.getAivenKafkaConfig()
+            KafkaUtils.getAivenKafkaConfig("retry-producer")
                 .toProducerConfig(
                     "${env.applicationName}-retry-producer",
                     keySerializer = StringSerializer::class,
@@ -164,6 +163,7 @@ fun setupAndRunAiven(
             aivenRegistrerOppgaveConsumer,
             oppgaveClient,
             aivenRetryPublisher,
+            env.cluster
         )
     }
     createListener(applicationState) {
@@ -204,6 +204,7 @@ suspend fun blockingApplicationLogicAiven(
     kafkaConsumer: KafkaConsumer<String, RegistrerOppgaveKafkaMessage>,
     oppgaveClient: OppgaveClient,
     kafkaRetryPublisher: KafkaRetryPublisher,
+    cluster: String
 ) {
     while (applicationState.ready) {
         kafkaConsumer.poll(Duration.ofSeconds(10)).forEach {
@@ -222,6 +223,7 @@ suspend fun blockingApplicationLogicAiven(
                 journalOpprettet.messageId,
                 loggingMeta,
                 kafkaRetryPublisher,
+                cluster = cluster,
             )
         }
     }
