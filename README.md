@@ -59,15 +59,6 @@ cd syfosmoppgave
 or on windows 
 `gradlew.bat shadowJar`
 
-##### syfosmoppgave-stream
-To build locally and run the integration tests you can simply run
-``` bash 
-cd syfosmoppgave-stream
-./gradlew shadowJar
-```
-or on windows
-`gradlew.bat shadowJar`
-
 
 ### Upgrading the gradle wrapper
 Find the newest version of gradle here: https://gradle.org/releases/ Then run this command:
