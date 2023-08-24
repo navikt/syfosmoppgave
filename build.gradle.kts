@@ -16,7 +16,7 @@ val smCommonVersion = "1.0.11"
 val kotestVersion = "5.6.2"
 val testContainerKafkaVersion = "1.19.0"
 val mockVersion = "1.13.7"
-val kotlinVersion = "1.9.0"
+val kotlinVersion = "1.9.10"
 val commonsCodecVersion = "1.16.0"
 val ktfmtVersion = "0.44"
 
