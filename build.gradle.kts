@@ -6,13 +6,13 @@ version = "1.0.0"
 
 val coroutinesVersion = "1.7.3"
 val jacksonVersion = "2.15.2"
-val kafkaVersion = "3.4.0"
+val kafkaVersion = "3.5.1"
 val kluentVersion = "1.73"
-val ktorVersion = "2.3.3"
+val ktorVersion = "2.3.4"
 val logstashEncoderVersion = "7.4"
 val logbackVersion = "1.4.11"
 val prometheusVersion = "0.16.0"
-val smCommonVersion = "1.0.11"
+val smCommonVersion = "1.0.14"
 val kotestVersion = "5.6.2"
 val testContainerKafkaVersion = "1.19.0"
 val mockVersion = "1.13.7"
@@ -22,10 +22,9 @@ val ktfmtVersion = "0.44"
 
 
 plugins {
-    id("com.diffplug.spotless") version "6.20.0"
+    id("com.diffplug.spotless") version "6.21.0"
     kotlin("jvm") version "1.9.10"
     id("com.github.johnrengelman.shadow") version "8.1.1"
-    id("org.cyclonedx.bom") version "1.7.4"
 }
 
 val githubUser: String by project
