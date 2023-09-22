@@ -1,6 +1,3 @@
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-
-
 group = "no.nav.syfo"
 version = "1.0.0"
 
@@ -12,7 +9,7 @@ val ktorVersion = "2.3.4"
 val logstashEncoderVersion = "7.4"
 val logbackVersion = "1.4.11"
 val prometheusVersion = "0.16.0"
-val smCommonVersion = "1.0.14"
+val smCommonVersion = "2.0.0"
 val kotestVersion = "5.7.2"
 val testContainerKafkaVersion = "1.19.0"
 val mockVersion = "1.13.7"
@@ -22,22 +19,20 @@ val ktfmtVersion = "0.44"
 
 
 plugins {
+    id("application")
     id("com.diffplug.spotless") version "6.21.0"
     kotlin("jvm") version "1.9.10"
     id("com.github.johnrengelman.shadow") version "8.1.1"
 }
 
-val githubUser: String by project
-val githubPassword: String by project
+application {
+    mainClass.set("no.nav.syfo.BootstrapKt")
+}
 
 repositories {
     mavenCentral()
     maven {
-        url = uri("https://maven.pkg.github.com/navikt/syfosm-common")
-        credentials {
-            username = githubUser
-            password = githubPassword
-        }
+        url = uri("https://github-package-registry-mirror.gc.nav.no/cached/maven-release")
     }
     maven(url = "https://packages.confluent.io/maven/")
 }
@@ -57,9 +52,12 @@ dependencies {
     implementation("io.ktor:ktor-serialization-jackson:$ktorVersion")
     implementation("io.ktor:ktor-client-core:$ktorVersion")
     implementation("io.ktor:ktor-client-apache:$ktorVersion")
-    // override transient version 1.11 from io.ktor:ktor-client-apache due to security vulnerability
-    // https://devhub.checkmarx.com/cve-details/Cxeb68d52e-5509/
-    implementation("commons-codec:commons-codec:$commonsCodecVersion")
+
+    constraints {
+        implementation("commons-codec:commons-codec:$commonsCodecVersion") {
+            because("override transient from io.ktor:ktor-client-apache due to security vulnerability https://devhub.checkmarx.com/cve-details/Cxeb68d52e-5509/")
+        }
+    }
     implementation("io.ktor:ktor-client-content-negotiation:$ktorVersion")
 
     implementation("no.nav.helse:syfosm-common-kafka:$smCommonVersion")
@@ -75,28 +73,28 @@ dependencies {
     testImplementation("io.mockk:mockk:$mockVersion")
     testImplementation("org.amshove.kluent:kluent:$kluentVersion")
     testImplementation("io.kotest:kotest-runner-junit5:$kotestVersion")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     testImplementation("io.ktor:ktor-client-mock:$ktorVersion")
     testImplementation("io.ktor:ktor-server-test-host:$ktorVersion")
     testImplementation("org.testcontainers:kafka:$testContainerKafkaVersion")
 }
 
 tasks {
-    withType<Jar> {
-        manifest.attributes["Main-Class"] = "no.nav.syfo.BootstrapKt"
-    }
 
-    create("printVersion") {
-
-        doLast {
-            println(project.version)
+    shadowJar {
+        archiveBaseName.set("app")
+        archiveClassifier.set("")
+        isZip64 = true
+        manifest {
+            attributes(
+                mapOf(
+                    "Main-Class" to "no.nav.syfo.BootstrapKt",
+                ),
+            )
         }
     }
 
-    withType<KotlinCompile> {
-        kotlinOptions.jvmTarget = "17"
-    }
-
-    withType<Test> {
+    test {
         useJUnitPlatform {
         }
         testLogging {

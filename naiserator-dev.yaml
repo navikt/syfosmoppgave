@@ -28,14 +28,10 @@ spec:
     path: /prometheus
   resources:
     limits:
-      cpu: 500m
       memory: 1Gi
     requests:
       cpu: 100m
       memory: 768Mi
-  vault:
-    enabled: true
-  webproxy: false
   azure:
     application:
       enabled: true
