@@ -16,7 +16,7 @@ val mockVersion = "1.13.8"
 val kotlinVersion = "1.9.10"
 val commonsCodecVersion = "1.16.0"
 val ktfmtVersion = "0.44"
-
+val snappyJavaVersion = "1.1.10.5"
 
 plugins {
     id("application")
@@ -69,6 +69,11 @@ dependencies {
     implementation("net.logstash.logback:logstash-logback-encoder:$logstashEncoderVersion")
 
     implementation("org.apache.kafka:kafka_2.12:$kafkaVersion")
+    constraints {
+        implementation("org.xerial.snappy:snappy-java:$snappyJavaVersion") {
+            because("override transient from org.apache.kafka:kafka_2.12")
+        }
+    }
 
     testImplementation("io.mockk:mockk:$mockVersion")
     testImplementation("org.amshove.kluent:kluent:$kluentVersion")
