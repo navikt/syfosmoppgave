@@ -11,7 +11,7 @@ This project contains creating task to Gsak for the sykmelding2013 message
 
 #### Requirements
 
-* JDK 17
+* JDK 21
 
 ## Getting started
 #### Compile and package application

@@ -9,7 +9,6 @@ val ktorVersion = "2.3.12"
 val logstashEncoderVersion = "8.0"
 val logbackVersion = "1.5.6"
 val prometheusVersion = "0.16.0"
-val smCommonVersion = "2.0.8"
 val kotestVersion = "5.9.1"
 val testContainerKafkaVersion = "1.20.1"
 val mockVersion = "1.13.12"
@@ -60,7 +59,6 @@ dependencies {
     }
     implementation("io.ktor:ktor-client-content-negotiation:$ktorVersion")
 
-    implementation("no.nav.helse:syfosm-common-kafka:$smCommonVersion")
 
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVersion")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonVersion")
