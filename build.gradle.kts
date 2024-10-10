@@ -5,13 +5,13 @@ val coroutinesVersion = "1.9.0"
 val jacksonVersion = "2.18.0"
 val kafkaVersion = "3.8.0"
 val kluentVersion = "1.73"
-val ktorVersion = "2.3.12"
+val ktorVersion = "3.0.0"
 val logstashEncoderVersion = "8.0"
-val logbackVersion = "1.5.8"
+val logbackVersion = "1.5.9"
 val prometheusVersion = "0.16.0"
 val kotestVersion = "5.9.1"
 val testContainerKafkaVersion = "1.20.2"
-val mockVersion = "1.13.12"
+val mockVersion = "1.13.13"
 val kotlinVersion = "2.0.20"
 val commonsCodecVersion = "1.17.1"
 val ktfmtVersion = "0.44"
@@ -22,7 +22,7 @@ plugins {
     id("application")
     id("com.diffplug.spotless") version "6.25.0"
     kotlin("jvm") version "2.0.20"
-    id("com.gradleup.shadow") version "8.3.2"
+    id("com.gradleup.shadow") version "8.3.3"
 }
 
 application {
