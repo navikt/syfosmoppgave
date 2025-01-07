@@ -1,26 +1,26 @@
 group = "no.nav.syfo"
 version = "1.0.0"
 
-val coroutinesVersion = "1.9.0"
+val coroutinesVersion = "1.10.1"
 val jacksonVersion = "2.18.2"
 val kafkaVersion = "3.9.0"
 val kluentVersion = "1.73"
-val ktorVersion = "3.0.1"
+val ktorVersion = "3.0.3"
 val logstashEncoderVersion = "8.0"
-val logbackVersion = "1.5.12"
+val logbackVersion = "1.5.16"
 val prometheusVersion = "0.16.0"
 val kotestVersion = "5.9.1"
 val testContainerKafkaVersion = "1.20.4"
-val mockVersion = "1.13.13"
+val mockVersion = "1.13.14"
 val kotlinVersion = "2.1.0"
-val commonsCodecVersion = "1.17.1"
+val commonsCodecVersion = "1.17.2"
 val ktfmtVersion = "0.44"
 val snappyJavaVersion = "1.1.10.7"
 val commonsCompressVersion = "1.27.1"
 
 plugins {
     id("application")
-    id("com.diffplug.spotless") version "6.25.0"
+    id("com.diffplug.spotless") version "7.0.0"
     kotlin("jvm") version "2.1.0"
     id("com.gradleup.shadow") version "8.3.5"
 }
