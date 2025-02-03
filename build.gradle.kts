@@ -12,8 +12,8 @@ val prometheusVersion = "0.16.0"
 val kotestVersion = "5.9.1"
 val testContainerKafkaVersion = "1.20.4"
 val mockVersion = "1.13.16"
-val kotlinVersion = "2.1.0"
-val commonsCodecVersion = "1.17.2"
+val kotlinVersion = "2.1.10"
+val commonsCodecVersion = "1.18.0"
 val ktfmtVersion = "0.44"
 val snappyJavaVersion = "1.1.10.7"
 val commonsCompressVersion = "1.27.1"
@@ -21,8 +21,8 @@ val commonsCompressVersion = "1.27.1"
 plugins {
     id("application")
     id("com.diffplug.spotless") version "7.0.2"
-    kotlin("jvm") version "2.1.0"
-    id("com.gradleup.shadow") version "8.3.5"
+    kotlin("jvm") version "2.1.10"
+    id("com.gradleup.shadow") version "8.3.6"
 }
 
 application {
