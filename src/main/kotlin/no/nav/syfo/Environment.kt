@@ -11,6 +11,8 @@ data class Environment(
     val clientSecret: String = getEnvVar("AZURE_APP_CLIENT_SECRET"),
     val oppgaveScope: String = getEnvVar("OPPGAVE_SCOPE"),
     val cluster: String = getEnvVar("NAIS_CLUSTER_NAME"),
+    val jwkKeysUrlV2: String = getEnvVar("AZURE_OPENID_CONFIG_JWKS_URI"),
+    val jwtIssuerV2: String = getEnvVar("AZURE_OPENID_CONFIG_ISSUER"),
 )
 
 fun getEnvVar(varName: String, defaultValue: String? = null) =

@@ -1,5 +1,6 @@
 package no.nav.syfo
 
+import com.auth0.jwk.JwkProviderBuilder
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
@@ -14,8 +15,11 @@ import io.ktor.client.plugins.HttpResponseValidator
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.network.sockets.SocketTimeoutException
 import io.ktor.serialization.jackson.jackson
+import io.ktor.server.application.install
 import io.prometheus.client.hotspot.DefaultExports
+import java.net.URI
 import java.time.Duration
+import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
@@ -28,6 +32,7 @@ import no.nav.syfo.application.ApplicationState
 import no.nav.syfo.application.createApplicationEngine
 import no.nav.syfo.application.exception.ServiceUnavailableException
 import no.nav.syfo.azuread.AccessTokenClient
+import no.nav.syfo.azuread.setupAuth
 import no.nav.syfo.client.OppgaveClient
 import no.nav.syfo.kafka.aiven.KafkaUtils
 import no.nav.syfo.kafka.toConsumerConfig
@@ -63,9 +68,6 @@ val objectMapper: ObjectMapper =
 fun main() {
     val env = Environment()
     val applicationState = ApplicationState()
-    val applicationEngine = createApplicationEngine(env, applicationState)
-
-    val applicationServer = ApplicationServer(applicationEngine, applicationState)
 
     DefaultExports.initialize()
 
@@ -111,6 +113,26 @@ fun main() {
         AccessTokenClient(env.aadAccessTokenUrl, env.clientId, env.clientSecret, httpClient)
     val oppgaveClient =
         OppgaveClient(env.oppgavebehandlingUrl, accessTokenClient, env.oppgaveScope, httpClient)
+
+    val applicationEngine = createApplicationEngine(env, applicationState, oppgaveClient)
+    applicationEngine.application.install(
+        io.ktor.server.plugins.contentnegotiation.ContentNegotiation
+    ) {
+        jackson {
+            registerKotlinModule()
+            registerModule(JavaTimeModule())
+            configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
+            configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+        }
+    }
+    applicationEngine.application.setupAuth(
+        JwkProviderBuilder(URI.create(env.jwkKeysUrlV2).toURL())
+            .cached(10, java.time.Duration.ofHours(24))
+            .rateLimited(10, 1, TimeUnit.MINUTES)
+            .build(),
+        env
+    )
+    val applicationServer = ApplicationServer(applicationEngine, applicationState)
 
     setupAndRunAiven(env, applicationState, oppgaveClient)
 

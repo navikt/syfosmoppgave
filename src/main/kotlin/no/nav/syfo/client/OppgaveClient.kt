@@ -49,10 +49,7 @@ class OppgaveClient(
         }
     }
 
-    private suspend fun hentOppgave(
-        opprettOppgave: OpprettOppgave,
-        msgId: String
-    ): OppgaveResponse {
+    suspend fun hentOppgave(opprettOppgave: OpprettOppgave, msgId: String): OppgaveResponse {
         try {
             return httpClient
                 .get(url) {

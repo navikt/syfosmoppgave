@@ -45,6 +45,10 @@ spec:
       enabled: true
       tenant: trygdeetaten.no
   accessPolicy:
+    inbound:
+      rules:
+        - application: macgyver
+        - application: syfosminfotrygd
     outbound:
       external:
         - host: oppgave-q1.dev-fss-pub.nais.io

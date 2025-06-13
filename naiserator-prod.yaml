@@ -45,6 +45,10 @@ spec:
       enabled: true
       tenant: nav.no
   accessPolicy:
+    inbound:
+      rules:
+        - application: macgyver
+        - application: syfosminfotrygd
     outbound:
       external:
         - host: oppgave.prod-fss-pub.nais.io
