@@ -87,6 +87,7 @@ class OppgaveClient(
             return httpClient
                 .patch("$url/$oppgaveId") {
                     val token = accessTokenClient.getAccessToken(scope)
+                    contentType(ContentType.Application.Json)
                     header("Authorization", "Bearer $token")
                     header("X-Correlation-ID", msgId)
                     setBody(FeilregistrerOppgaveRequest(versjon = versjon))
