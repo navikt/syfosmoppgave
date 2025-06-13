@@ -14,6 +14,7 @@ import net.logstash.logback.argument.StructuredArguments.fields
 import no.nav.syfo.LoggingMeta
 import no.nav.syfo.azuread.AccessTokenClient
 import no.nav.syfo.log
+import no.nav.syfo.model.Oppgave
 import no.nav.syfo.model.OppgaveResponse
 import no.nav.syfo.model.OppgaveResultat
 import no.nav.syfo.model.OpprettOppgave
@@ -82,7 +83,7 @@ class OppgaveClient(
         }
     }
 
-    suspend fun feilregistrerOppgave(oppgaveId: Int, versjon : Int, msgId: String) : OppgaveResponse{
+    suspend fun feilregistrerOppgave(oppgaveId: Int, versjon : Int, msgId: String) : Oppgave {
         try {
             return httpClient
                 .patch("$url/$oppgaveId") {
@@ -92,7 +93,7 @@ class OppgaveClient(
                     header("X-Correlation-ID", msgId)
                     setBody(FeilregistrerOppgaveRequest(versjon = versjon))
                 }
-                .body<OppgaveResponse>()
+                .body<Oppgave>()
         } catch (ex: Exception) {
             log.error(
                 "Could not feilregistrere oppgave for oppgaveId: $oppgaveId",
