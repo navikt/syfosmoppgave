@@ -28,6 +28,11 @@ data class OppgaveResponse(
     val oppgaver: List<Oppgave>,
 )
 
+data class Bruker(
+    val ident: String?,
+    val type: String?,
+)
+
 data class Oppgave(
     val id: Int,
     val tildeltEnhetsnr: String?,
@@ -35,6 +40,26 @@ data class Oppgave(
     val journalpostId: String?,
     val tema: String?,
     val oppgavetype: String?,
+    val endretAvEnhetsnr: String?,
+    val opprettetAvEnhetsnr: String?,
+    val behandlesAvApplikasjon: String?,
+    val orgnr: String?,
+    val tilordnetRessurs: String?,
+    val beskrivelse: String?,
+    val behandlingstema: String?,
+    val behandlingstype: String?,
+    val versjon: Int?,
+    val mappeId: Int?,
+    val opprettetAv: String?,
+    val endretAv: String?,
+    val prioritet: String?,
+    val status: String?,
+    val fristFerdigstillelse: String?,
+    val aktivDato: String?,
+    val opprettetTidspunkt: String?,
+    val ferdigstiltTidspunkt: String?,
+    val endretTidspunkt: String?,
+    val bruker: Bruker?
 )
 
 data class OppgaveResultat(

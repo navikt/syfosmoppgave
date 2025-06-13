@@ -5,6 +5,7 @@ import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.request.parameter
+import io.ktor.client.request.patch
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
@@ -18,6 +19,11 @@ import no.nav.syfo.model.OppgaveResultat
 import no.nav.syfo.model.OpprettOppgave
 import no.nav.syfo.model.OpprettOppgaveResponse
 import no.nav.syfo.securelog
+
+data class FeilregistrerOppgaveRequest(
+    val status: String = "FEILREGISTRERT",
+    val versjon: Int,
+)
 
 class OppgaveClient(
     private val url: String,
@@ -72,6 +78,25 @@ class OppgaveClient(
                 ex
             )
             securelog.info("opprettOppgave: $opprettOppgave")
+            throw ex
+        }
+    }
+
+    suspend fun feilregistrerOppgave(oppgaveId: Int, versjon : Int, msgId: String) : OppgaveResponse{
+        try {
+            return httpClient
+                .patch("$url/$oppgaveId") {
+                    val token = accessTokenClient.getAccessToken(scope)
+                    header("Authorization", "Bearer $token")
+                    header("X-Correlation-ID", msgId)
+                    setBody(FeilregistrerOppgaveRequest(versjon = versjon))
+                }
+                .body<OppgaveResponse>()
+        } catch (ex: Exception) {
+            log.error(
+                "Could not feilregistrere oppgave for oppgaveId: $oppgaveId",
+                ex
+            )
             throw ex
         }
     }
