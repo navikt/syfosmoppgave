@@ -56,7 +56,7 @@ class OppgaveClient(
         }
     }
 
-    suspend fun hentOppgave(opprettOppgave: OpprettOppgave, msgId: String): OppgaveResponse {
+    suspend fun hentOppgave(opprettOppgave: OpprettOppgave, msgId: String, statusKategori: String = "AAPEN"): OppgaveResponse {
         try {
             return httpClient
                 .get(url) {
@@ -67,7 +67,7 @@ class OppgaveClient(
                     parameter("oppgavetype", opprettOppgave.oppgavetype)
                     parameter("journalpostId", opprettOppgave.journalpostId)
                     parameter("aktoerId", opprettOppgave.aktoerId)
-                    parameter("statuskategori", "AAPEN")
+                    parameter("statuskategori", statusKategori)
                     parameter("sorteringsrekkefolge", "ASC")
                     parameter("sorteringsfelt", "FRIST")
                     parameter("limit", "10")

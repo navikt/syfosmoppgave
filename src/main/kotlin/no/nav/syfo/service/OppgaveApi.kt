@@ -7,19 +7,28 @@ import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.post
 import no.nav.syfo.client.OppgaveClient
+import no.nav.syfo.model.JournalKafkaMessage
 import no.nav.syfo.model.Oppgave
+import no.nav.syfo.model.ProduserOppgaveKafkaMessage
 import no.nav.syfo.model.RegistrerOppgaveKafkaMessage
 data class FeilregistrerOppgaveRequest(val oppgaveId: Int, val version: Int, val msgId: String)
+data class OppgaveApiRequest(
+    val produserOppgave: ProduserOppgaveKafkaMessage,
+    val journalOpprettet: JournalKafkaMessage,
+    val statusKategori: String? = null,
+)
+
 fun Route.registerOppgaveApi(oppgaveClient: OppgaveClient) {
 
     authenticate {
         post("/api/oppgave") {
-            val request = call.receive<RegistrerOppgaveKafkaMessage>()
+            val request = call.receive<OppgaveApiRequest>()
 
             val oppgaveResponse =
                 oppgaveClient.hentOppgave(
                     opprettOppgave(request.produserOppgave, request.journalOpprettet),
-                    request.produserOppgave.messageId
+                    request.produserOppgave.messageId,
+                    request.statusKategori ?: "AAPEN"
                 )
 
             call.respond(oppgaveResponse)
