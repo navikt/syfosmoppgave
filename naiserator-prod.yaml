@@ -10,7 +10,9 @@ spec:
   replicas:
     min: 2
     max: 4
-    cpuThresholdPercentage: 90
+    scalingStrategy:
+      cpu:
+        thresholdPercentage: 90
   port: 8080
   liveness:
     path: /is_alive
@@ -35,11 +37,9 @@ spec:
         - id: loki
         - id: elastic
   resources:
-    limits:
-      memory: 1Gi
     requests:
       cpu: 50m
-      memory: 550Mi
+      memory: 650Mi
   azure:
     application:
       enabled: true
