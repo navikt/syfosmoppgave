@@ -52,12 +52,13 @@ spec:
         - application: macgyver
         - application: syfosminfotrygd
     outbound:
+      rules:
+        - application: logging
+          namespace: nais-system
       external:
         - host: oppgave.prod-fss-pub.nais.io
   kafka:
     pool: nav-prod
-  secureLogs:
-    enabled: true
   env:
     - name: OPPGAVEBEHANDLING_URL
       value: https://oppgave.prod-fss-pub.nais.io/api/v1/oppgaver
