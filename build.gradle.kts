@@ -1,28 +1,28 @@
 group = "no.nav.syfo"
 version = "1.0.0"
 
-val coroutinesVersion = "1.10.1"
-val jacksonVersion = "2.18.3"
-val kafkaVersion = "3.9.0"
+val coroutinesVersion = "1.10.2"
+val jacksonVersion = "2.20.1"
+val kafkaVersion = "3.9.1"
 val kluentVersion = "1.73"
-val ktorVersion = "3.1.1"
-val logstashEncoderVersion = "8.0"
-val logbackVersion = "1.5.17"
+val ktorVersion = "3.3.3"
+val logstashEncoderVersion = "9.0"
+val logbackVersion = "1.5.25"
 val prometheusVersion = "0.16.0"
-val kotestVersion = "5.9.1"
-val testContainerKafkaVersion = "1.20.6"
-val mockVersion = "1.13.17"
-val kotlinVersion = "2.1.10"
-val commonsCodecVersion = "1.18.0"
+val kotestVersion = "6.0.7"
+val testContainerKafkaVersion = "1.21.4"
+val mockVersion = "1.14.7"
+val kotlinVersion = "2.3.0"
+val commonsCodecVersion = "1.19.0"
 val ktfmtVersion = "0.44"
-val snappyJavaVersion = "1.1.10.7"
-val commonsCompressVersion = "1.27.1"
+val snappyJavaVersion = "1.1.10.8"
+val commonsCompressVersion = "1.28.0"
 
 plugins {
     id("application")
     id("com.diffplug.spotless") version "7.0.2"
-    kotlin("jvm") version "2.1.10"
-    id("com.gradleup.shadow") version "8.3.6"
+    kotlin("jvm") version "2.3.0"
+    id("com.gradleup.shadow") version "9.3.1"
 }
 
 application {
