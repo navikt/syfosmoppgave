@@ -1,11 +1,10 @@
 group = "no.nav.syfo"
 version = "1.0.0"
 
-val coroutinesVersion = "1.10.1"
-val jacksonVersion = "2.18.3"
+val jacksonVersion = "2.20.2"
 val kafkaVersion = "3.9.0"
 val kluentVersion = "1.73"
-val ktorVersion = "3.1.1"
+val ktorVersion = "3.4.0"
 val logstashEncoderVersion = "8.0"
 val logbackVersion = "1.5.17"
 val prometheusVersion = "0.16.0"
@@ -13,7 +12,6 @@ val kotestVersion = "5.9.1"
 val testContainerKafkaVersion = "1.20.6"
 val mockVersion = "1.13.17"
 val kotlinVersion = "2.1.10"
-val commonsCodecVersion = "1.18.0"
 val ktfmtVersion = "0.44"
 val snappyJavaVersion = "1.1.10.7"
 val commonsCompressVersion = "1.27.1"
@@ -21,7 +19,7 @@ val commonsCompressVersion = "1.27.1"
 plugins {
     id("application")
     id("com.diffplug.spotless") version "7.0.2"
-    kotlin("jvm") version "2.1.10"
+    kotlin("jvm") version "2.2.20"
     id("com.gradleup.shadow") version "8.3.6"
 }
 
@@ -40,7 +38,6 @@ repositories {
 dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion")
 
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion")
     implementation("io.prometheus:simpleclient_hotspot:$prometheusVersion")
     implementation("io.prometheus:simpleclient_common:$prometheusVersion")
 
@@ -54,12 +51,6 @@ dependencies {
     implementation("io.ktor:ktor-client-apache:$ktorVersion")
     implementation("io.ktor:ktor-server-auth:${ktorVersion}")
     implementation("io.ktor:ktor-server-auth-jwt:${ktorVersion}")
-    implementation("io.ktor:ktor-server-content-negotiation:${ktorVersion}")
-    constraints {
-        implementation("commons-codec:commons-codec:$commonsCodecVersion") {
-            because("override transient from io.ktor:ktor-client-apache due to security vulnerability https://devhub.checkmarx.com/cve-details/Cxeb68d52e-5509/")
-        }
-    }
     implementation("io.ktor:ktor-client-content-negotiation:$ktorVersion")
 
 
