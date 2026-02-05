@@ -56,7 +56,11 @@ class OppgaveClient(
         }
     }
 
-    suspend fun hentOppgave(opprettOppgave: OpprettOppgave, msgId: String, statusKategori: String = "AAPEN"): OppgaveResponse {
+    suspend fun hentOppgave(
+        opprettOppgave: OpprettOppgave,
+        msgId: String,
+        statusKategori: String = "AAPEN"
+    ): OppgaveResponse {
         try {
             return httpClient
                 .get(url) {
@@ -83,7 +87,7 @@ class OppgaveClient(
         }
     }
 
-    suspend fun feilregistrerOppgave(oppgaveId: Int, versjon : Int, msgId: String) : Oppgave {
+    suspend fun feilregistrerOppgave(oppgaveId: Int, versjon: Int, msgId: String): Oppgave {
         try {
             return httpClient
                 .patch("$url/$oppgaveId") {
@@ -95,10 +99,7 @@ class OppgaveClient(
                 }
                 .body<Oppgave>()
         } catch (ex: Exception) {
-            log.error(
-                "Could not feilregistrere oppgave for oppgaveId: $oppgaveId",
-                ex
-            )
+            log.error("Could not feilregistrere oppgave for oppgaveId: $oppgaveId", ex)
             throw ex
         }
     }
