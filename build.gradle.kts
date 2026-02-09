@@ -6,15 +6,13 @@ val kafkaVersion = "3.9.0"
 val kluentVersion = "1.73"
 val ktorVersion = "3.4.0"
 val logstashEncoderVersion = "8.0"
-val logbackVersion = "1.5.17"
+val logbackVersion = "1.5.26"
 val prometheusVersion = "0.16.0"
 val kotestVersion = "5.9.1"
-val testContainerKafkaVersion = "1.20.6"
+val testcontainerVersion = "2.0.1"
 val mockVersion = "1.13.17"
 val kotlinVersion = "2.1.10"
 val ktfmtVersion = "0.44"
-val snappyJavaVersion = "1.1.10.7"
-val commonsCompressVersion = "1.27.1"
 
 plugins {
     id("application")
@@ -60,12 +58,7 @@ dependencies {
     implementation("ch.qos.logback:logback-classic:$logbackVersion")
     implementation("net.logstash.logback:logstash-logback-encoder:$logstashEncoderVersion")
 
-    implementation("org.apache.kafka:kafka_2.12:$kafkaVersion")
-    constraints {
-        implementation("org.xerial.snappy:snappy-java:$snappyJavaVersion") {
-            because("override transient from org.apache.kafka:kafka_2.12")
-        }
-    }
+    implementation("org.apache.kafka:kafka-clients:$kafkaVersion")
 
     testImplementation("io.mockk:mockk:$mockVersion")
     testImplementation("org.amshove.kluent:kluent:$kluentVersion")
@@ -73,12 +66,7 @@ dependencies {
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     testImplementation("io.ktor:ktor-client-mock:$ktorVersion")
     testImplementation("io.ktor:ktor-server-test-host:$ktorVersion")
-    testImplementation("org.testcontainers:kafka:$testContainerKafkaVersion")
-    constraints {
-        testImplementation("org.apache.commons:commons-compress:$commonsCompressVersion") {
-            because("overrides vulnerable dependency from org.testcontainers:kafka")
-        }
-    }
+    testImplementation("org.testcontainers:testcontainers-kafka:$testcontainerVersion")
 }
 
 tasks {
