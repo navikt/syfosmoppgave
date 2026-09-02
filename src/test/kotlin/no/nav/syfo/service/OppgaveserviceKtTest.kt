@@ -14,9 +14,9 @@ import no.nav.syfo.azuread.AccessTokenClient
 import no.nav.syfo.client.OppgaveClient
 import no.nav.syfo.createProduceTask
 import no.nav.syfo.createRegisterJournal
+import no.nav.syfo.jsonMapper
 import no.nav.syfo.model.OppgaveResponse
 import no.nav.syfo.model.OpprettOppgaveResponse
-import no.nav.syfo.objectMapper
 import no.nav.syfo.retry.KafkaRetryPublisher
 import no.nav.syfo.util.HttpClientTest
 import no.nav.syfo.util.ResponseData
@@ -43,17 +43,17 @@ class OppgaveserviceKtTest :
                 httpClientTest.setResponseData(
                     HttpMethod.Get,
                     ResponseData(
-                        objectMapper.writeValueAsString(OppgaveResponse(0, emptyList())),
-                        HttpStatusCode.OK
-                    )
+                        jsonMapper.writeValueAsString(OppgaveResponse(0, emptyList())),
+                        HttpStatusCode.OK,
+                    ),
                 )
                 httpClientTest.setResponseData(
                     HttpMethod.Post,
                     ResponseData(
-                        objectMapper.writeValueAsString(OpprettOppgaveResponse(0)),
+                        jsonMapper.writeValueAsString(OpprettOppgaveResponse(0)),
                         HttpStatusCode.OK,
-                        headersOf("Content-Type", "application/json")
-                    )
+                        headersOf("Content-Type", "application/json"),
+                    ),
                 )
                 val registerJournal = createRegisterJournal("msgId")
                 val produceTask = createProduceTask("msgId")
@@ -64,7 +64,7 @@ class OppgaveserviceKtTest :
                     registerJournal.messageId,
                     LoggingMeta("", "", ""),
                     kafkaRetryPublisher,
-                    "test"
+                    "test",
                 )
 
                 verify(exactly = 0) {
@@ -75,14 +75,14 @@ class OppgaveserviceKtTest :
                 httpClientTest.setResponseData(
                     HttpMethod.Get,
                     ResponseData(
-                        objectMapper.writeValueAsString(OppgaveResponse(0, emptyList())),
+                        jsonMapper.writeValueAsString(OppgaveResponse(0, emptyList())),
                         HttpStatusCode.OK,
-                        headersOf("Content-Type", "application/json")
-                    )
+                        headersOf("Content-Type", "application/json"),
+                    ),
                 )
                 httpClientTest.setResponseData(
                     HttpMethod.Post,
-                    ResponseData("", HttpStatusCode.InternalServerError, headersOf())
+                    ResponseData("", HttpStatusCode.InternalServerError, headersOf()),
                 )
                 val registerJournal = createRegisterJournal("msgId")
                 val produceTask = createProduceTask("msgId")
@@ -93,7 +93,7 @@ class OppgaveserviceKtTest :
                     registerJournal.messageId,
                     LoggingMeta("", "", ""),
                     kafkaRetryPublisher,
-                    "test"
+                    "test",
                 )
 
                 verify(exactly = 1) {

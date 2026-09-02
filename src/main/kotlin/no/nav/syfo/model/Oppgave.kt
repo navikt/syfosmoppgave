@@ -19,19 +19,11 @@ data class OpprettOppgave(
     val prioritet: String,
 )
 
-data class OpprettOppgaveResponse(
-    val id: Int,
-)
+data class OpprettOppgaveResponse(val id: Int)
 
-data class OppgaveResponse(
-    val antallTreffTotalt: Int,
-    val oppgaver: List<Oppgave>,
-)
+data class OppgaveResponse(val antallTreffTotalt: Int, val oppgaver: List<Oppgave>)
 
-data class Bruker(
-    val ident: String?,
-    val type: String?,
-)
+data class Bruker(val ident: String?, val type: String?)
 
 data class Oppgave(
     val id: Int,
@@ -59,10 +51,7 @@ data class Oppgave(
     val opprettetTidspunkt: String?,
     val ferdigstiltTidspunkt: String?,
     val endretTidspunkt: String?,
-    val bruker: Bruker?
+    val bruker: Bruker?,
 )
 
-data class OppgaveResultat(
-    val oppgaveId: Int,
-    val duplikat: Boolean,
-)
+data class OppgaveResultat(val oppgaveId: Int, val duplikat: Boolean)

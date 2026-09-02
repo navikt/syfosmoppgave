@@ -21,10 +21,7 @@ import no.nav.syfo.model.OpprettOppgave
 import no.nav.syfo.model.OpprettOppgaveResponse
 import no.nav.syfo.securelog
 
-data class FeilregistrerOppgaveRequest(
-    val status: String = "FEILREGISTRERT",
-    val versjon: Int,
-)
+data class FeilregistrerOppgaveRequest(val status: String = "FEILREGISTRERT", val versjon: Int)
 
 class OppgaveClient(
     private val url: String,
@@ -34,7 +31,7 @@ class OppgaveClient(
 ) {
     private suspend fun opprettOppgave(
         opprettOppgave: OpprettOppgave,
-        msgId: String
+        msgId: String,
     ): OpprettOppgaveResponse {
         try {
             return httpClient
@@ -49,7 +46,7 @@ class OppgaveClient(
         } catch (ex: Exception) {
             log.error(
                 "Could not OpprettOppgave for journalPostid=${opprettOppgave.journalpostId}",
-                ex
+                ex,
             )
             securelog.info("opprettOppgave: $opprettOppgave")
             throw ex
@@ -59,7 +56,7 @@ class OppgaveClient(
     suspend fun hentOppgave(
         opprettOppgave: OpprettOppgave,
         msgId: String,
-        statusKategori: String = "AAPEN"
+        statusKategori: String = "AAPEN",
     ): OppgaveResponse {
         try {
             return httpClient
@@ -80,7 +77,7 @@ class OppgaveClient(
         } catch (ex: Exception) {
             log.error(
                 "Could not hentOppgave for \njournalPostid=${opprettOppgave.journalpostId}",
-                ex
+                ex,
             )
             securelog.info("opprettOppgave: $opprettOppgave")
             throw ex
@@ -107,14 +104,14 @@ class OppgaveClient(
     suspend fun opprettOppgave(
         opprettOppgave: OpprettOppgave,
         msgId: String,
-        loggingMeta: LoggingMeta
+        loggingMeta: LoggingMeta,
     ): OppgaveResultat {
         val oppgaveResponse = hentOppgave(opprettOppgave, msgId)
         if (oppgaveResponse.antallTreffTotalt > 0) {
             log.info(
                 "Det finnes allerede en åpen oppgave for journalpost {} på brukeren, {}",
                 opprettOppgave.journalpostId,
-                fields(loggingMeta)
+                fields(loggingMeta),
             )
             return OppgaveResultat(oppgaveResponse.oppgaver.first().id, true)
         }

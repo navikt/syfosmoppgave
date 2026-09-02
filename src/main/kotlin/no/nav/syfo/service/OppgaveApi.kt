@@ -27,7 +27,7 @@ fun Route.registerOppgaveApi(oppgaveClient: OppgaveClient) {
                 oppgaveClient.hentOppgave(
                     opprettOppgave(request.produserOppgave, request.journalOpprettet),
                     request.produserOppgave.messageId,
-                    request.statusKategori ?: "AAPEN"
+                    request.statusKategori ?: "AAPEN",
                 )
 
             call.respond(oppgaveResponse)
@@ -39,7 +39,7 @@ fun Route.registerOppgaveApi(oppgaveClient: OppgaveClient) {
                 oppgaveClient.feilregistrerOppgave(
                     request.oppgaveId,
                     request.version,
-                    request.msgId
+                    request.msgId,
                 )
             )
         }
