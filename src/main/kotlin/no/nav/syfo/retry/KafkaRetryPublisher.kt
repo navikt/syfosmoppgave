@@ -10,12 +10,12 @@ import org.apache.kafka.clients.producer.ProducerRecord
 
 class KafkaRetryPublisher(
     private val kafkaRetryProducer: KafkaProducer<String, OppgaveRetryKafkaMessage>,
-    private val retryTopic: String
+    private val retryTopic: String,
 ) {
     fun publishOppgaveToRetryTopic(
         opprettOppgave: OpprettOppgave,
         messageId: String,
-        loggingMeta: LoggingMeta
+        loggingMeta: LoggingMeta,
     ) {
         val kafkaMessage = OppgaveRetryKafkaMessage(loggingMeta, opprettOppgave)
         try {
@@ -26,7 +26,7 @@ class KafkaRetryPublisher(
             log.error(
                 "Error sending to retry topic for message {} {}",
                 messageId,
-                fields(loggingMeta)
+                fields(loggingMeta),
             )
             throw ex
         }

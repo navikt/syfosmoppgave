@@ -42,7 +42,7 @@ suspend fun handleRegisterOppgaveRequest(
                     kafkaRetryPublisher.publishOppgaveToRetryTopic(
                         opprettOppgave,
                         messageId,
-                        loggingMeta
+                        loggingMeta,
                     )
                 }
                 else -> {
@@ -87,10 +87,7 @@ suspend fun opprettOppgave(
     }
 }
 
-fun opprettOppgave(
-    produceTask: ProduserOppgaveKafkaMessage,
-    registerJournal: JournalKafkaMessage,
-) =
+fun opprettOppgave(produceTask: ProduserOppgaveKafkaMessage, registerJournal: JournalKafkaMessage) =
     OpprettOppgave(
         aktoerId = produceTask.aktoerId,
         opprettetAvEnhetsnr = produceTask.opprettetAvEnhetsnr,

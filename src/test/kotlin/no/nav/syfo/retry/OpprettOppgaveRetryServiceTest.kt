@@ -59,10 +59,7 @@ class OpprettOppgaveRetryServiceTest :
         val kafkaConfig = setupKafkaConfig()
 
         val kafkaProducerProperties =
-            kafkaConfig.toProducerConfig(
-                "test-producer",
-                OppgaveKafkaSerializer::class,
-            )
+            kafkaConfig.toProducerConfig("test-producer", OppgaveKafkaSerializer::class)
         val kafkaProducer = KafkaProducer<String, OppgaveRetryKafkaMessage>(kafkaProducerProperties)
 
         val consumerProperties =
@@ -72,7 +69,7 @@ class OpprettOppgaveRetryServiceTest :
             KafkaConsumer<String, OppgaveRetryKafkaMessage>(
                 consumerProperties,
                 StringDeserializer(),
-                OppgaveKafkaDeserializer()
+                OppgaveKafkaDeserializer(),
             )
         val service =
             OpprettOppgaveRetryService(
@@ -81,7 +78,7 @@ class OpprettOppgaveRetryServiceTest :
                 oppgaveClient,
                 "topic",
                 "onprem",
-                "dev-gcp"
+                "dev-gcp",
             )
 
         context("Test retry") {

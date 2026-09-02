@@ -1,16 +1,11 @@
 package no.nav.syfo.client
 
-import com.fasterxml.jackson.databind.DeserializationFeature
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import io.kotest.core.spec.style.FunSpec
 import io.ktor.client.HttpClient
-import io.ktor.client.engine.apache.Apache
+import io.ktor.client.engine.apache5.Apache5
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.http.HttpStatusCode
-import io.ktor.serialization.jackson.jackson
-import io.ktor.server.application.call
+import io.ktor.serialization.jackson3.jackson
 import io.ktor.server.application.install
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
@@ -35,17 +30,7 @@ import org.amshove.kluent.shouldBeEqualTo
 class OppgaveClientSpek :
     FunSpec({
         val accessTokenClient = mockk<AccessTokenClient>()
-        val httpClient =
-            HttpClient(Apache) {
-                install(ContentNegotiation) {
-                    jackson {
-                        registerKotlinModule()
-                        registerModule(JavaTimeModule())
-                        configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
-                        configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-                    }
-                }
-            }
+        val httpClient = HttpClient(Apache5) { install(ContentNegotiation) { jackson {} } }
         val loggingMetadata = LoggingMeta("sykmeldingId", "123", "hendelsesId")
 
         val mockHttpServerPort = ServerSocket(0).use { it.localPort }
@@ -90,9 +75,9 @@ class OppgaveClientSpek :
                                                     null,
                                                     null,
                                                     null,
-                                                ),
+                                                )
                                             ),
-                                        ),
+                                        )
                                     )
                                 call.request.queryParameters["journalpostId"] == "nyJpId" ->
                                     call.respond(OppgaveResponse(0, emptyList()))
@@ -117,7 +102,7 @@ class OppgaveClientSpek :
                     oppgaveClient.opprettOppgave(
                         lagOpprettOppgaveRequest("jpId"),
                         "sykmeldingId",
-                        loggingMetadata
+                        loggingMetadata,
                     )
 
                 oppgave.oppgaveId shouldBeEqualTo 1
@@ -128,7 +113,7 @@ class OppgaveClientSpek :
                     oppgaveClient.opprettOppgave(
                         lagOpprettOppgaveRequest("nyJpId"),
                         "sykmeldingId",
-                        loggingMetadata
+                        loggingMetadata,
                     )
 
                 oppgave.oppgaveId shouldBeEqualTo 42

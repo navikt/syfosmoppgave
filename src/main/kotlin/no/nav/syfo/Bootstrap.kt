@@ -1,20 +1,15 @@
 package no.nav.syfo
 
 import com.auth0.jwk.JwkProviderBuilder
-import com.fasterxml.jackson.databind.DeserializationFeature
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import io.ktor.client.HttpClient
 import io.ktor.client.HttpClientConfig
-import io.ktor.client.engine.apache.Apache
-import io.ktor.client.engine.apache.ApacheEngineConfig
+import io.ktor.client.engine.apache5.Apache5
+import io.ktor.client.engine.apache5.Apache5EngineConfig
 import io.ktor.client.plugins.HttpRequestRetry
 import io.ktor.client.plugins.HttpResponseValidator
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.network.sockets.SocketTimeoutException
-import io.ktor.serialization.jackson.jackson
+import io.ktor.serialization.jackson3.jackson
 import io.ktor.server.application.install
 import io.prometheus.client.hotspot.DefaultExports
 import java.net.URI
@@ -54,15 +49,12 @@ import org.apache.kafka.common.serialization.StringDeserializer
 import org.apache.kafka.common.serialization.StringSerializer
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import tools.jackson.databind.json.JsonMapper
+import tools.jackson.module.kotlin.jacksonMapperBuilder
 
 val log: Logger = LoggerFactory.getLogger("no.nav.syfo.smoppgave")
 val securelog: Logger = LoggerFactory.getLogger("securelog")
-val objectMapper: ObjectMapper =
-    ObjectMapper()
-        .registerModule(JavaTimeModule())
-        .registerKotlinModule()
-        .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
-        .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+val jsonMapper: JsonMapper = jacksonMapperBuilder().build()
 
 @DelicateCoroutinesApi
 fun main() {
@@ -71,15 +63,8 @@ fun main() {
 
     DefaultExports.initialize()
 
-    val config: HttpClientConfig<ApacheEngineConfig>.() -> Unit = {
-        install(ContentNegotiation) {
-            jackson {
-                registerKotlinModule()
-                registerModule(JavaTimeModule())
-                configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
-                configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-            }
-        }
+    val config: HttpClientConfig<Apache5EngineConfig>.() -> Unit = {
+        install(ContentNegotiation) { jackson {} }
         HttpResponseValidator {
             handleResponseExceptionWithRequest { exception, _ ->
                 when (exception) {
@@ -97,7 +82,7 @@ fun main() {
             retryIf(maxRetries) { request, response ->
                 if (response.status.value.let { it in 500..599 }) {
                     log.warn(
-                        "Retrying for status code ${response.status.value}, for url ${request.url}",
+                        "Retrying for status code ${response.status.value}, for url ${request.url}"
                     )
                     true
                 } else {
@@ -107,7 +92,7 @@ fun main() {
         }
         expectSuccess = true
     }
-    val httpClient = HttpClient(Apache, config)
+    val httpClient = HttpClient(Apache5, config)
 
     val accessTokenClient =
         AccessTokenClient(env.aadAccessTokenUrl, env.clientId, env.clientSecret, httpClient)
@@ -118,19 +103,14 @@ fun main() {
     applicationEngine.application.install(
         io.ktor.server.plugins.contentnegotiation.ContentNegotiation
     ) {
-        jackson {
-            registerKotlinModule()
-            registerModule(JavaTimeModule())
-            configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
-            configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-        }
+        jackson {}
     }
     applicationEngine.application.setupAuth(
         JwkProviderBuilder(URI.create(env.jwkKeysUrlV2).toURL())
             .cached(10, java.time.Duration.ofHours(24))
             .rateLimited(10, 1, TimeUnit.MINUTES)
             .build(),
-        env
+        env,
     )
     val applicationServer = ApplicationServer(applicationEngine, applicationState)
 
@@ -143,7 +123,7 @@ fun main() {
 fun setupAndRunAiven(
     env: Environment,
     applicationState: ApplicationState,
-    oppgaveClient: OppgaveClient
+    oppgaveClient: OppgaveClient,
 ) {
     val aivenRetryConsumer =
         KafkaConsumer<String, OppgaveRetryKafkaMessage>(
@@ -153,7 +133,7 @@ fun setupAndRunAiven(
                     keyDeserializer = StringDeserializer::class,
                     valueDeserializer = OppgaveKafkaDeserializer::class,
                 )
-                .also { it[ConsumerConfig.AUTO_OFFSET_RESET_CONFIG] = "none" },
+                .also { it[ConsumerConfig.AUTO_OFFSET_RESET_CONFIG] = "none" }
         )
     val aivenRegistrerOppgaveConsumer =
         KafkaConsumer(
@@ -174,7 +154,7 @@ fun setupAndRunAiven(
                     "${env.applicationName}-retry-producer",
                     keySerializer = StringSerializer::class,
                     valueSerializer = OppgaveKafkaSerializer::class,
-                ),
+                )
         )
     val aivenRetryPublisher = KafkaRetryPublisher(aivenRetryProducer, env.retryOppgaveAivenTopic)
 
@@ -185,7 +165,7 @@ fun setupAndRunAiven(
             aivenRegistrerOppgaveConsumer,
             oppgaveClient,
             aivenRetryPublisher,
-            env.cluster
+            env.cluster,
         )
     }
     createListener(applicationState) {
@@ -226,7 +206,7 @@ suspend fun blockingApplicationLogicAiven(
     kafkaConsumer: KafkaConsumer<String, RegistrerOppgaveKafkaMessage>,
     oppgaveClient: OppgaveClient,
     kafkaRetryPublisher: KafkaRetryPublisher,
-    cluster: String
+    cluster: String,
 ) {
     while (applicationState.ready) {
         kafkaConsumer.poll(Duration.ofSeconds(10)).forEach {
