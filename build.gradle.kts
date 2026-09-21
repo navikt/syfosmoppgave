@@ -10,17 +10,17 @@ val ktorVersion = "3.5.2"
 val logstashEncoderVersion = "9.0"
 val logbackVersion = "1.6.3"
 val prometheusVersion = "0.16.0"
-val kotestVersion = "5.9.1"
+val kotestVersion = "6.2.5"
 val testcontainerVersion = "2.0.5"
-val mockVersion = "1.13.17"
+val mockVersion = "1.14.11"
 val kotlinVersion = "2.4.10"
 val ktfmtVersion = "0.56"
 
 plugins {
     id("application")
-    id("com.diffplug.spotless") version "8.10.1"
-    kotlin("jvm") version "2.4.10"
-    id("com.gradleup.shadow") version "8.3.8"
+    id("com.diffplug.spotless") version "8.10.2"
+    kotlin("jvm") version "2.4.20"
+    id("com.gradleup.shadow") version "9.6.1"
 }
 
 application {
